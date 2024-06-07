@@ -5,3 +5,15 @@
 
 \section{Introduction}
 \label{sec:intro}
+
+
+One of distinguishable features of \miniKanren{} is the fact that it is a family of languages:
+many languages may host different \miniKanren{} implementations.
+For example, faster-\miniKanren{} for \Scheme{} and \Racket{}, \CoreLogic{} for \textsc{Closure}, \OCanren{} for \OCaml{}, \Klogic{} for \Kotlin{} and others.
+The users of these DSLs may want to compare expressive power of various flavor of miniKanren, specifics due to host language, and performance implications of choosing a different host language.
+
+
+The straightforward solution is to rewrite a number of significant benchmarks for many implementation, as it done for other languages\footnote{\url{https://benchmarksgame-team.pages.debian.net/benchmarksgame/index.html}}.
+Doing it manually is time consuming and error prone.
+Due to low-level nature of relational programs, it is easy to make spelling mistakes, for example accidentally write wrong identifier in unification arguments.
+(We did many of mistakes of this kind while porting programs from \OCanren{} to \Klogic{}.) Moreover, \miniKanren{} doesn't pardon relational programs that do the same thing: it was reported, that the order of conjuncts significantly affects performance even if the search does the same unifications~\cite{scheduling2022}.

@@ -1,0 +1,29 @@
+% !TEX TS-program = pdflatex
+% !TeX spellcheck = en_US
+% !TEX root = main.tex
+
+\section{Implementation}
+\label{sec:implementation}
+
+In this work we translate a subset of \OCanren{} (miniKanren in \OCaml{})  to \miniKanren in \Scheme{} and to \Klogic{} in \Kotlin{}.
+\OCanren{} was picked as input implementation for various reasons, and the main is that we are the most familiar with \OCaml{} language and ecosystem.
+Also we can observe an interest of porting \OCanren{} programs to JVM around us.
+If we would use \Scheme{} implementation for fast prototyping, we expect more issue with automated translation of \Scheme{} to \Kotlin{} because of absence of types in relational programs in \Scheme{}.
+There is an option to translate dynamically typed implementation to a weakly typed implementation in a typed language, but we believe that it is bad idea. (TODO Why?)
+
+The translator takes typed syntax tree of \OCaml{} file, detects relational code by checking the types of declared values, reconstructs a representation for relational parts and prints them to \Kotlin{} and \Scheme{}.
+All macro expansion are performed before typing phase.
+As a result, typed relational AST in \OCaml{} uses low-level constructs, like \verb=call/fresh= and binary conjunction \verb=&&&=.
+In this aspect, \OCanren{} implementation stands in between \Klogic{} and \miniKanren in \Scheme{}: the former doesn't use macro at all; the latter uses macro for everything: even \verb=conde= is expanded to \verb=mplus*=.
+The task of translator is to collect the enriched AST with high-level relational constructs, reverse applications of macros, and print back to \Klogic{} and \Scheme{} a readable relational code, ideally without changes to a search order.
+
+In some cases the typed representation of a relation is not enough, and we need to add user information that is skipped while type checking phase.
+This is implemented using \OCaml{}'s attributes, for example \verb=[@@@name <OCaml expression>]=, placed in the top level of OCaml's modules.
+
+\subsection{Kotlin-related features}
+
+Code in \Kotlin{} and \Java{} usually requires adding many names to the namespace, usually using the \verb=import= keyword.
+\Scheme{} is affected of this problem by a significantly lesser extent, because we can \verb=(include "filename")= to textually substitute relational implemenetation, where we require it.
+Because of that we have special attributes \verb=[@@@klogic.preamble ...]= and \verb=[@@@klogic.epilogue ...]= that contain string literal with \Kotlin{} code that should be placed in the begging and in the end of generated file.
+
+\subsection{Scheme-related features}

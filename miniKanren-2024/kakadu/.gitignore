@@ -2,4 +2,10 @@
 *.fmt
 *.synctex*
 server-flowchart-eps-converted-to.pdf
+package*.json
+bin
+lib
+lib64
+/node_modules
+/pyvenv.cfg
 

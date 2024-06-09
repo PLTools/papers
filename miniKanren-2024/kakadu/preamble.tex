@@ -2,12 +2,130 @@
 % !TeX spellcheck = en_US
 % !TEX root = main.tex
 
+% ======== Custom definitions =============
+\usepackage[british]{datetime2}
+\usepackage[normalem]{ulem} % \sout
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,backgrounds,fit,
+  %positioning-plus,
+  %node-families,
+  calc}
+\usepackage{xcolor}
+\usepackage{mathtools}
+%\usepackage[draft]{hyperref}
+\usepackage{marginnote}
+%\usepackage{verbatim}
+\usepackage{listings}
+%\usepackage{multirow}
+%\usepackage{array}
+\usepackage{url}
+%\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{xspace}
+\usepackage{flushend} % Equalizes columns on the last page
+\usepackage{placeins} % Defines a \FloatBarrier command, beyond which floats may not pass; useful, for example, to ensure all floats for a section appear before the next \section command.
+%\usepackage{verbatimbox}
+\usepackage[title]{appendix}
+
+\newcommand{\todo}[1]{{\bf\color{red}#1}}
+\renewcommand{\leq}{\ensuremath{\leqslant}}
+\renewcommand{\geq}{\ensuremath{\geqslant}}
+
 \newcommand{\miniKanren}{\textsc{miniKanren}}
 \newcommand{\OCanren}{\textsc{OCanren}}
 \newcommand{\OCaml}{\textsc{OCaml}}
 \newcommand{\Scheme}{\textsc{Scheme}}
 \newcommand{\Racket}{\textsc{Racket}}
+\newcommand{\Chez}{\textsc{Chez}}
 \newcommand{\Kotlin}{\textsc{Kotlin}}
 \newcommand{\Klogic}{\textsc{Klogic}}
 \newcommand{\Java}{\textsc{Java}}
 \newcommand{\CoreLogic}{\textsc{CoreLogic}}
+
+\def\HaskellTypeclassColor\PYG{k+kt}
+\def\HaskellCommentColor\PYG{c+c1}
+
+\lstdefinelanguage{Kotlin}{
+comment=[l]{//},
+basicstyle=\ttfamily,
+identifierstyle=\ttfamily,
+commentstyle=\HaskellCommentColor\itshape\HaskellCommentColor,
+%commentstyle={\color{gray}\ttfamily},
+emph={filter, first, firstOrNull, forEach, lazy, map, mapNotNull, println},
+emphstyle={\color{orange}},
+%identifierstyle=\color{black},
+keywords={!in, !is, abstract, actual, annotation, as, as?, break, by, catch, class, companion, const, constructor, context, continue, crossinline, data, delegate, do, dynamic, else, enum, expect, external, false, field, file, final, finally, for, fun, get, if, import, in, infix, init, inline, inner, interface, internal, is, lateinit, noinline, null, object, open, operator, out, override, package, param, private, property, protected, public, receiveris, reified, return, return@,sealed, set, setparam, super, suspend, tailrec, this, throw, true, try, typealias, typeof, val, var, vararg, when, where, while
+, value
+},
+keywordstyle={\color{blue}\bfseries},
+morecomment=[s]{/*}{*/},
+morestring=[b]",
+morestring=[s]{"""*}{*"""},
+ndkeywords={@Deprecated, @JvmField, @JvmName, @JvmOverloads, @JvmStatic, @JvmSynthetic, @JvmInline, Array, Byte, Double, Float, Int, Integer, Iterable, Long, Runnable, Short, String, Any, Unit, Nothing},
+ndkeywordstyle={\color{orange}\bfseries},
+sensitive=true,
+stringstyle={\color{ForestGreen}\ttfamily},
+}
+
+
+% TODO: https://tex.stackexchange.com/questions/4198/emphasize-word-beginning-with-uppercase-letters-in-code-with-lstlisting-package
+\lstdefinelanguage{ocaml}{
+%basicstyle=\large\ttfamily,   % Вот тут надо стиль ставить, а не у идентификаторов
+basicstyle=\ttfamily,
+identifierstyle=\ttfamily,
+commentstyle=\HaskellCommentColor\itshape\HaskellCommentColor,
+sensitive=true,
+%
+classoffset=0
+, keywords={type, rec, in, when, of, as, val, let, fun,
+module, sig, deriving, if, then, else, assert, true, false, end}
+, keywordstyle=\ttfamily\bfseries\color{blue} %\underbar
+, classoffset=1
+, morekeywords={pure,empty,select,branch,oneOf}
+, keywordstyle=\color{RawSienna},
+classoffset=2
+, morekeywords={Monad,Applicative,Selective,String,Either,Left,Right,Maybe,Some,None}
+%, keywordstyle=\PYG{k+kt}
+, keywordstyle={\color{blue}\bfseries}
+, classoffset=0,
+%keywordstyle=[2]{\color{orange}},
+otherkeywords={::,<$>, >?>},
+%identifierstyle=\fontfamily{cmtt}\selectfont\ttfamily,
+%basewidth={0.5em,0.5em},
+columns=fixed,
+%fontadjust=true,
+%literate={->}{{$\to$}}3 {===}{{$\equiv$}}1 {=/=}{{$\not\equiv$}}1 {|>}{{$\triangleright$}}3 {\\/}{{$\vee$}}2 {/\\}{{$\wedge$}}2 {>=}{{$\ge$}}1 {<=}{{$\le$}} 1,
+%morecomment=[s]{(*}{*)}
+%, literate={\$}{{\textcolor{blue}{\$}}}1
+%, literate={<\$>}{{\textcolor{RawSienna}{\ <\$>\ } }}1
+%           {>?>}{{\textcolor{RawSienna}{\ >?>\ } }}1
+}
+
+\lstdefinelanguage{miniKanren}{
+comment=[l]{//},
+basicstyle=\ttfamily,
+identifierstyle=\ttfamily,
+commentstyle=\HaskellCommentColor\itshape\HaskellCommentColor,
+%emph={filter, first, firstOrNull, forEach, lazy, map, mapNotNull, println},
+%emphstyle={\color{orange}},
+keywords={conde, defrel, fresh},
+keywordstyle={\color{blue}\bfseries},
+%morecomment=[s]{/*}{*/},
+%morestring=[b]",
+%morestring=[s]{"""*}{*"""},
+%ndkeywords={@Deprecated, @JvmField, @JvmName, @JvmOverloads, @JvmStatic, @JvmSynthetic, @JvmInline, Array, Byte, Double, Float, Int, Integer, Iterable, Long, Runnable, Short, String, Any, Unit, Nothing},
+ndkeywordstyle={\color{black}\bfseries\underbar},
+sensitive=true,
+}
+
+\lstset{
+mathescape=true,
+%basicstyle=\small,
+identifierstyle=\ttfamily,
+keywordstyle=\bfseries,
+commentstyle=\scriptsize\rmfamily,
+basewidth={0.5em,0.5em},
+fontadjust=true,
+language=ocaml
+}

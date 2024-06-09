@@ -218,7 +218,7 @@ title        = {MiniKanren, Live and Untagged: Quine Generation
 year         = {2012},
 publisher    = {Association for Computing Machinery},
 address      = {New York, NY, USA},
-pages        = {8–-29},
+pages        = {8--29},
 location     = {Copenhagen, Denmark},
 booktitle    = {Proceedings of the Annual Workshop on Scheme and
                 Functional Programming},
@@ -722,4 +722,76 @@ year         = {2024},
 title        = {Android \texttt{ConstraintLayout} widget},
 url          = {https://developer.android.com/reference/androidx/constraintlayout/widget/ConstraintLayout},
 lastaccessed = {May 20, 2024},
+}
+
+@inproceedings{JavaGenericsSolver2023,
+author = {Lozov, Peter and Kosarev, Dmitry and Ivanov, Dmitry and Boulytchev, Dmitry},
+title = {Relational Solver for Java Generics Type System},
+year = {2023},
+isbn = {978-3-031-45783-8},
+publisher = {Springer-Verlag},
+address = {Berlin, Heidelberg},
+url = {https://doi.org/10.1007/978-3-031-45784-5_8},
+doi = {10.1007/978-3-031-45784-5_8},
+abstract = {We present a solver for Java generics type system implemented using relational verifier-to-solver approach. The solver finds solutions for a system of subtyping inequations with free variables and thus can be used to determine a concrete type satisfying a set of constraints. The context of this work is symbolic execution for testing and verification of Java programs.},
+booktitle = {Logic-Based Program Synthesis and Transformation: 33rd International Symposium, LOPSTR 2023, Cascais, Portugal, October 23-24, 2023, Proceedings},
+pages = {118–128},
+numpages = {11},
+keywords = {Java generics, relational programming, relational solvers},
+location = {Cascais, Portugal}
+}
+
+@online{Klogic2023,
+author = {Kamenev, Yury and Kosarev, Dmitrii and Ivanov, Dmitry and Boulytchev, Dmitry},
+title = {klogic: miniKanren in Kotlin},
+year = {2023},
+1isbn = {978-3-031-45783-8},
+1publisher = {Springer-Verlag},
+1address = {Berlin, Heidelberg},
+1doi = {10.1007/978-3-031-45784-5_8},
+1abstract = {We present a solver for Java generics type system implemented using relational verifier-to-solver approach. The solver finds solutions for a system of subtyping inequations with free variables and thus can be used to determine a concrete type satisfying a set of constraints. The context of this work is symbolic execution for testing and verification of Java programs.},
+1booktitle = {Logic-Based Program Synthesis and Transformation: 33rd International Symposium, LOPSTR 2023, Cascais, Portugal, October 23-24, 2023, Proceedings},
+1pages = {118–128},
+1numpages = {11},
+1keywords = {Java generics, relational programming, relational solvers},
+1location = {Cascais, Portugal},
+url = {http://minikanren.org/workshop/2023/minikanren23-final4.pdf}
+}
+
+@online{Wildcards2023,
+author = {Kosarev, Dmitrii and  Berezun,  Daniil and Lozov, Petr},
+title = {Wildcard Logic Variables},
+year = {2023},
+url = {https://drive.google.com/file/d/1RdtwC2kmzHK7Sz3fO_Hq9AgMOxwr5m-2/view}
+}
+
+@InProceedings{Kiselyov2008PureDA,
+author="Kiselyov, Oleg
+and Byrd, William E.
+and Friedman, Daniel P.
+and Shan, Chung-chieh",
+editor="Garrigue, Jacques
+and Hermenegildo, Manuel V.",
+title="Pure, Declarative, and Constructive Arithmetic Relations (Declarative Pearl)",
+booktitle="Functional and Logic Programming",
+year="2008",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="64--80",
+abstract="We present decidable logic programs for addition, multiplication, division with remainder, exponentiation, and logarithm with remainder over the unbounded domain of natural numbers. Our predicates represent relations without mode restrictions or annotations. They are fully decidable under the common, DFS-like, SLD resolution strategy of Prolog or under an interleaving refinement of DFS . We prove that the evaluation of our arithmetic goals always terminates, given arguments that share no logic variables. Further, the (possibly infinite) set of solutions for a goal denotes exactly the corresponding mathematical relation. (For SLD without interleaving, and for some infinite solution sets, only half of the relation's domain may be covered.) We define predicates to handle unary (for illustration) and binary representations of naturalnumbers,and prove termination and completeness of these predicates. Our predicates are writtenin pure Prolog, without cut (!), var/1, or other non-logical operators. The purity and minimalism of our approach allows us to declare arithmetic in other logic systems, such as Haskell type classes.",
+isbn="978-3-540-78969-7"
+}
+
+@InProceedings{Relaxed2004,
+author="Garrigue, Jacques",
+editor="Kameyama, Yukiyoshi
+and Stuckey, Peter J.",
+title="Relaxing the Value Restriction",
+booktitle="Functional and Logic Programming",
+year="2004",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="196--213",
+abstract="Restricting polymorphism to values is now the standard way to obtain soundness in ML-like programming languages with imperative features. While this solution has undeniable advantages over previous approaches, it forbids polymorphism in many cases where it would be sound. We use a subtyping based approach to recover part of this lost polymorphism, without changing the type algebra itself, and this has significant applications.",
+isbn="978-3-540-24754-8"
 }

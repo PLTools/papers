@@ -2,8 +2,16 @@
 % !TeX spellcheck = en_US
 % !TEX root = main.tex
 \appendix
-\section{Raw data}
-\label{appendix:raw}
+\section{Relational Interpreter for Quines, Translated from OCanren}
+\label{appendix:synQuines}
 
+An implementation of relational interpreter, translated from \OCanren{}. Extra tagging is represented with \textbf{\underbar{underlined bold}} style.
+\todo{TODO Link}
 
-\lstinputlisting{interpreter_syn.scm}
+\lstinputlisting[language=miniKanren, numbers=left, ndkeywords={symb,seq,val}]{interpreter_syn.scm}
+
+\section{Default Quines Implementation}
+\label{appendix:defaultQuines}
+\todo{TODO Link}
+
+\lstinputlisting[language=miniKanren,numbers=left]{default_quines.scm}

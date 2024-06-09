@@ -22,8 +22,95 @@ This is implemented using \OCaml{}'s attributes, for example \verb=[@@@name <OCa
 
 \subsection{Kotlin-related features}
 
-Code in \Kotlin{} and \Java{} usually requires adding many names to the namespace, usually using the \verb=import= keyword.
-\Scheme{} is affected of this problem by a significantly lesser extent, because we can \verb=(include "filename")= to textually substitute relational implemenetation, where we require it.
-Because of that we have special attributes \verb=[@@@klogic.preamble ...]= and \verb=[@@@klogic.epilogue ...]= that contain string literal with \Kotlin{} code that should be placed in the begging and in the end of generated file.
+Code in \Kotlin{} and \Java{} usually requires importing many names to the global namespace using the \verb=import= keyword.
+\Scheme{} is affected of this problem by a significantly lesser extent, because we can \verb=(include "filename")= to textually substitute relational implementation, where we require it.
+Because of that we have special attributes \verb=[@@@klogic.preamble ...]= and \verb=[@@@klogic.epilogue ...]= that contain string literal with \Kotlin{} code that should be placed in the beginning and in the end of generated file.
+
+Translation from one typed language to another requires also generating types of values.
+In principle, we could engineer a general convention to mangle \OCaml{} types to \Kotlin{} ones, but ensuring that purely Kotlin developers will follow this convention is a huge task.
+Also, automatic straightforward mangling sometimes hit \Kotlin{}-specific keywords, which leads to non-compilable \Klogic{} code.
+At the moment we support only naive mangling where \OCaml{} developer specifies conversion from string representations of \OCaml{} types to string representation of \Klogic{} types.
+For our needs it is enough, the general solution is left for the future.
+The same approach is currently used for mangling \OCaml{}'s to \Kotlin{}'s functions' names.
+
+We have an initial support for modularity.
+On Fig.~\ref{fig:modularity} there is an example how OCaml's functors (functions from modules to modules) are translated to \Kotlin{} functions from objects to another object.
+This feature is a huge help for testing relational code, because it is essentially a static version of dependency injection\footnote{\url{https://martinfowler.com/articles/injection.html} (accessed: \DTMdate{2024-06-09})}.
+
+ \begin{figure}[ht]
+   \begin{subfigure}[t]{\textwidth}
+      \begin{lstlisting}[language=ocaml]
+module type VERIFIER = sig
+  val params : int ilogic -> int ilogic Jtype.injected Std.List.injected -> goal
+  ...
+end
+
+module Verifier (CT : CLASSTABLE) : VERIFIER = struct
+  let params : int ilogic -> int ilogic Jtype.injected Std.List.injected -> goal =
+    fun id p -> ...
+  ...
+end
+      \end{lstlisting}
+            \subcaption{\OCaml{}'s module types and functors (functions from modules to modules)...}
+   \end{subfigure}
+   \begin{subfigure}[t]{\textwidth}
+      \begin{lstlisting}[language=kotlin]
+interface VERIFIER {
+  context(RelationalContext)
+  fun params(v1: Term<LogicInt>, v2: Term<LogicList<Jtype<LogicInt>>>): Goal
+  ...
+}
+
+val Verifier : (CLASSTABLE) -> VERIFIER = { CT: CLASSTABLE ->
+object: VERIFIER {
+  context(RelationalContext)
+  override fun  params(id: Term<LogicInt>,
+      p: Term<LogicList<Jtype<LogicInt>>>): Goal = ...
+  ...
+}
+      \end{lstlisting}
+      \subcaption{...are being translated to \Klogic{} as interfaces, and functions that take \Kotlin{} objects and return other objects.}
+   \end{subfigure}
+   \caption{Modularity in \OCaml{} language supported.}
+   \label{fig:modularity}
+ \end{figure}
 
 \subsection{Scheme-related features}
+
+\Scheme{} is not a primary target for our translation.
+We added it to check applicability of our approach for one more implementation of \miniKanren{} and picking the default one\footnote{\url{https://github.com/michaelballantyne/faster-minikanren} (accessed: \DTMdate{2024-06-09})} looks like a decent idea.
+
+Translating to \Scheme{} comparatively to \Kotlin{} is easier and more complex at the same time.
+All types from \OCanren{} code are being erased, and do not appear in \Scheme{}.
+On the other hand, \OCanren{} and \Klogic{} use data representation that is distinct from \Scheme{}'s one.
+
+\OCanren{}~\cite{OCanren} relies on algebraic data types to represent terms for relational programming, because in statically typed functional language \OCaml{} they are prolific.
+User-defined values are tagged by a constructor and may contain arguments.
+Unification checks that constructors and its arity are the same, and unifies arguments recursively.
+All constructors are associated with a data types, and unification of values of different types is prohibited by \OCaml{}'s type system.
+The construction of values from relational domain is performed by adding a constructor and injection using predefined primitive \verb=!!=.
+The implementation is quite intricate: relational domain stands in between of domains of ground values and reified values.
+This approach reduces amount of tagging; without it terms would have extra constructors (representation in memory by pointers) that increase size of terms and slowdown unification.
+
+In \miniKanren{} we use lists as the basic data structures and put various symbols into this lists to distinguish values of one sort from another.
+For example, relational interpreters could evaluate into normal values or closures, where latter is represented using tag \verb=closure=, variable name, body and captured environment: \verb=`(closure ,x ,body ,env)=.
+
+In \Klogic{} and \OCanren{} terms are constructed either by explicit usage of constructor, or by using of smart construction functions.
+With  \miniKanren{} in \Scheme{} it is possible too, but most of the papers in the topic prefer quotation syntax.
+We currently support only this approach, because it allows to compare original and translated implementations purely by eyesight.
+
+\begin{figure}
+\begin{lstlisting}[language=ocaml]
+type ('a, 'l) list_like = Nil | Cons of 'a * 'l
+type 'a injected = ('a, 'a injected) list_like ilogic
+...
+let nil () : 'a injected = !!Nil
+let cons : 'a -> 'a injected -> 'a injected = fun x y -> !!(Cons (x, y))
+\end{lstlisting}
+\caption{Declaration of list-like algebraic data type and smart constructors.
+Type definition is written in open recursion style to allow a logic variable in tail position (not really relevant for this paper).
+Smart constructor functions are basically a composition of an injection \texttt{!!} after a constructor application.
+The function \texttt{nil} has an extra argument to avoid typing artifact called value restriction~\cite{Relaxed2004}.
+}
+\end{figure}
+

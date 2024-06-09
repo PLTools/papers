@@ -2,25 +2,20 @@
 % !TeX spellcheck = en_US
 % !TEX root = main.tex
 
-\section{Discussion and Future Work}
+\section{Conclusion and Future Work}
 
-We presented the results of our work on guideline-based synthesis of GUI layouts. The approach we take makes it possible to
-automatically build GUI layouts which by construction comply with a designer-specified set of rules. The prototype implementation
-we developed allows to synthesize the layouts for the real-word industrial GUI components w.r.t. the real-world guidelines in
-appropriate time.
+We described current features and approach for converting relational programs from \OCanren{} to \Klogic{} in \Kotlin{} and \miniKanren{} in \Scheme{}.
+At the moment it powerful enough to translate small benchmarks from one DSL to another.
+But large relational/functional programs will have  non relational parts, and any attempt to do automatic translation will be transformed to translation from \OCaml{} to \Scheme{}.
+At the moment developers should manually rewrite non-relational parts to the target host language, hoping that the translator will process relational parts successfully.
+At the same time, we want generated code to be readable and debuggable enough.
 
-One interesting question which may arise is if the application of relational programming is essential for this problem to be solved. Indeed, the set of guidelines
-describes a matching (or rewriting) system which, in principle, can be directly implemented without any use of relational techniques. We argue, however,
-that in this case a whole piece of work on justification of the correctness of the solution would have been repeated anew. In our
-case, the justification trivially follows from the completeness of the \textsc{miniKanren} search and refutational completeness of our solution. We also speculate
-that such a solution would require reinventing of some implementation techniques to support nondeterminism and backtracking, which are already native to relational
-programming. Finally, the duality between patterns over structure and relational goals (initially unexpected for us), to our opinion, witnesses, that relational
-programming is a truly relevant technique for this problem. %, and we are not stretching an owl over a globe.
+The support of nested function definitions (popular in \OCaml{} and \OCanren{}) is left for the future work.
+At the moment it is not obvious how to attack this problem.
+We could eliminate nested functions by closure conversion and lambda lifting, but it may change the interface and the generated code would be more distinct than the original.
+We could also add nested functions to internal representation of \OCanren{} programs, and complicate the translator, by changing the task to automatic translation from \OCaml{}. There are also less ambitious ways to improve the translator, for example, to support construction of term on \Scheme{} side both with quotations and user-defined smart constructors.
 
-%We can also consider the task of getting rid of extra solver (\textsc{Z3}) as relevant; this would not only simplify the infrastructure of the system, but also allow to
-%integrate the constraint resolution phase into the constraint synthesis, improving the performance of the whole system.
-%, and finally provide the completeness
-%of the synthesizer, which we strictly speaking do not yet have. To do this, we plan to develop a relational integer inequality solver with a binary representation
-%of fixed-size numbers. Note that for satisfactory performance it will also be necessary to extend \OCanren{} with inequality operations for such numbers in the
-%form of a new type of constraint.
-
+The reader enthusiastic only about \miniKanren{} in \Scheme{} may only be interested in another way to rewrite relational interpreter, and trading better performance for egregious readability.
+The proposed benchmarks still need further polishing to ensure the speedup.
+Current timing could be misleading, because the search order is not exactly the same.
+The translated implementation has more unification's in the source code, and it is not obvious for now how to repair that.

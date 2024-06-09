@@ -2,5 +2,50 @@
 % !TeX spellcheck = en_US
 % !TEX root = main.tex
 
-\section{Showcase: Relational interpreter}
+\section{Showcase: Relational Interpreter}
 \label{sec:interpreter}
+
+Current largest application of the translator is a solver for \Java{} subtyping problems~\cite{JavaGenericsSolver2023} which has both \OCaml{} and (partially synthesized, halfway hand-written) \Kotlin{} implementation.
+For \Scheme{} we tested relational arithmetic~\cite{Kiselyov2008PureDA} and interpreters~\cite{Untagged}.
+The synthesized code for the former is almost identical to hand-written one, due to special treatment of lists in the translator.
+On the contrary, relational interpreter is different in it's value representation.
+
+\OCanren{} representation use algebraic data types to describe terms and result of interpretation.
+This level of indirection (i.e. tagging) is necessary for \OCaml{}: you can't store either a closure with its contents or arbitrary value in a single data type.
+After translation this tags appear in the synthesized relational interpreter (appendix~\ref{appendix:synQuines}) and play the role of second layer tagging (if we consider built-in \Scheme{} lists as a first layer).
+And more tagging means higher unification cost and lower performance.
+
+On the other hand explicit tagging (\texttt{val\_} and \verb=closure= for interpretation results, \verb=seq= and \verb=symb= for sequences (lists) and symbols) allow to avoid \emph{absento} constraint.
+With tagging we always are able to distinguish closure returned from interpreter and application of function named ``closure'' to its arguments.
+This feature was previously reported~\cite{OCanren}, but as far as we know nobody tried to benchmark the default \Scheme{} implementation and rewritten in \OCanren{} like manner.
+It is difficult to say a priory which one performs better: the original has an extra constraint that does deep traversal of the values, the another one has more tagging.
+The results~\ref{fig:benchmarks} were collected  on the desktop machine Intel\copyright~Core\texttrademark~i7-4790K (16Gb RAM).
+\Racket{} 8.7 was taken from the official Ubuntu 23.04 repository (compiled to native code using \Chez{} backend).
+%\OCaml{} compiler 4.14.2+flambda was installed using \textsc{OPAM}\footnote{\url{https://opam.ocaml.org/}  (access date: \DTMdate{2024-06-02})} package manager.
+
+
+\begin{figure}
+\begin{tabular}{c|c|c|c }
+Name &     Min &    Mean &     Max \\\hline
+100 quines &   554&   577&   747\\
+15 twines5 &   403&   426&   566\\
+2 thrines &   723&   767&   939\\
+100 quines (translated) &   291&   325&   364\\
+15 twines (translated) &   267&   287&   330\\
+2 thrines (translated) &   489&   527&   679\\
+\end{tabular}
+\label{fig:benchmarks}
+\caption{Benchmarking relational original relational interpreter (with \emph{absento}) and the one translated from \OCanren{}.
+The table contains minimum, maximum and mean synthesis time (in ms, less is better).
+The numbers show that on these tests the implementation without absento is faster.}
+\end{figure}
+
+%
+%\begin{figure}
+%\begin{lstlisting}[language=ocaml]
+%fresh (t)
+%    (term === seq (symb !!"quote" % (t % nil ())))
+%    (r === val_ t)
+%    (not_in_envo2 !!"quote" env)
+%\end{lstlisting}
+%\end{figure}

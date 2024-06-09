@@ -5,11 +5,11 @@
 \section{Implementation}
 \label{sec:implementation}
 
-In this work we translate a subset of \OCanren{} (miniKanren in \OCaml{})  to \miniKanren in \Scheme{} and to \Klogic{} in \Kotlin{}.
+In this work we translate a subset of \OCanren{} (\miniKanren{} in \OCaml{})  to \miniKanren in \Scheme{} and to \Klogic{} in \Kotlin{}.
 \OCanren{} was picked as input implementation for various reasons, and the main is that we are the most familiar with \OCaml{} language and ecosystem.
 Also we can observe an interest of porting \OCanren{} programs to JVM around us.
 If we would use \Scheme{} implementation for fast prototyping, we expect more issue with automated translation of \Scheme{} to \Kotlin{} because of absence of types in relational programs in \Scheme{}.
-There is an option to translate dynamically typed implementation to a weakly typed implementation in a typed language, but we believe that it is bad idea. (TODO Why?)
+There is an option to translate dynamically typed implementation to a weakly typed implementation in a typed language, but we believe that it is bad idea. (Developers that favor programming with typed language will avoid weakly typed code.)
 
 The translator takes typed syntax tree of \OCaml{} file, detects relational code by checking the types of declared values, reconstructs a representation for relational parts and prints them to \Kotlin{} and \Scheme{}.
 All macro expansion are performed before typing phase.

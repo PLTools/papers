@@ -17,9 +17,9 @@ And more tagging means higher unification cost and lower performance.
 
 On the other hand explicit tagging (\texttt{val\_} and \verb=closure= for interpretation results, \verb=seq= and \verb=symb= for sequences (lists) and symbols) allow to avoid \emph{absento} constraint.
 With tagging we always are able to distinguish closure returned from interpreter and application of function named ``closure'' to its arguments.
-This feature was previously reported~\cite{OCanren}, but as far as we know nobody tried to benchmark the default \Scheme{} implementation and rewritten in \OCanren{} like manner.
+This feature was previously reported~\cite{OCanren}, but as far as we know nobody tried to benchmark\footnote{\url{https://github.com/fp2022-helper/miniKanren2024/blob/master/demo_scheme/bench/quines_bench.rkt}} the default \Scheme{} implementation and rewritten in \OCanren{} like manner.
 It is difficult to say a priory which one performs better: the original has an extra constraint that does deep traversal of the values, the another one has more tagging.
-The results~\ref{fig:benchmarks} were collected  on the desktop machine Intel\copyright~Core\texttrademark~i7-4790K (16Gb RAM).
+The results (Fig.~\ref{fig:benchmarking1}) were collected  on the desktop machine Intel\copyright~Core\texttrademark~i7-4790K (16Gb RAM).
 \Racket{} 8.7 was taken from the official Ubuntu 23.04 repository (compiled to native code using \Chez{} backend).
 %\OCaml{} compiler 4.14.2+flambda was installed using \textsc{OPAM}\footnote{\url{https://opam.ocaml.org/}  (access date: \DTMdate{2024-06-02})} package manager.
 
@@ -34,11 +34,13 @@ Name &     Min &    Mean &     Max \\\hline
 15 twines (translated) &   267&   287&   330\\
 2 thrines (translated) &   489&   527&   679\\
 \end{tabular}
-\label{fig:benchmarks}
+
 \caption{Benchmarking relational original relational interpreter (with \emph{absento}) and the one translated from \OCanren{}.
 The table contains minimum, maximum and mean synthesis time (in ms, less is better).
 The numbers show that on these tests the implementation without absento is faster.}
+\label{fig:benchmarking1}
 \end{figure}
+
 
 %
 %\begin{figure}

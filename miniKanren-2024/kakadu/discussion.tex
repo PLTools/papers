@@ -4,7 +4,7 @@
 
 \section{Conclusion and Future Work}
 
-We described current features and approach for converting relational programs from \OCanren{} to \Klogic{} in \Kotlin{} and \miniKanren{} in \Scheme{}.
+We described current features and approach\footnote{\url{https://github.com/fp2022-helper/miniKanren2024/}} for converting relational programs from \OCanren{} to \Klogic{} in \Kotlin{} and \miniKanren{} in \Scheme{}.
 At the moment it powerful enough to translate small benchmarks from one DSL to another.
 But large relational/functional programs will have  non relational parts, and any attempt to do automatic translation will be transformed to translation from \OCaml{} to \Scheme{}.
 At the moment developers should manually rewrite non-relational parts to the target host language, hoping that the translator will process relational parts successfully.

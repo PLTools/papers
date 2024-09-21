@@ -1,0 +1,119 @@
+\section{Java Generics}
+
+Here we briefly describe the relevant subpart of \textsc{Java} type system. All
+information in this section is directly derived from the Java Language Specification~\cite{JLS}.
+We also refrain from reiterating on the non-generic part of \textsc{Java} type system assuming the reader's familiarity
+with the concepts of reference types, arrays, classes, interfaces, and inheritance.
+
+The subsystem we are dealing with contains generic class/interface types $\grc{C}{\mathscr{T}^*}$, array types $\mathscr{T}\mbox{\java{[]}}$,
+type variables $\alpha^\mathscr{T}_\mathscr{T_\bot}$, intersection types $\bigcap\,\mathscr{T}$ and  $\primi{null}$ type.
+Here $\mathscr{T}$ denotes a type, $\mathscr{T}_\bot$~--- an optional type.
+Type variables are bounded in the sense that they always have a certain \emph{upper bound}. This upper
+bound can be either specified explicitly or assumed to be \java{java.lang.Object}. In addition
+to the upper bound a type variable can be equipped with a \emph{lower bound}. The lower bound can only
+be derived implicitly as a result of \emph{capture conversion} (see below). We denote the upper bound of a variable
+by  superscript and lower~--- by subscript.
+
+Generic class (or interface) is a class/interface which is equipped with a number of
+type parameters. In generic class declaration these parameters can only be type
+variables with specified upper bounds. Additionally a number of \emph{direct supertypes} (notation: ``$\prec$'')
+can be specified for a generic class/interface:
+
+\[
+\grc{C}{\alpha_1^{U_1}\dots \alpha_k^{U_k}}\prec\grc{S_1}{T^1_1\dots T^1_{n_1}}\dots\grc{S_m}{T^m_1\dots T^m_{n_m}}
+\]
+
+Here $C$ is the class/interface being declared, $\alpha_i^{U_i}$~--- its generic parameters with upper
+bounds, $S_i$~--- its direct supertypes, among which only one type can be a class type, $T^j_l$~--- type
+parameters for direct supertypes, which may contain the occurrences of $\alpha_i$; note: neither of $T^j_l$ can be
+an intersection type.
+
+Type variables in scopes of their declarations behave like regular types; the scope of a type variable is
+determined by the position of its introduction (either generic class/interface or generic method). It
+is unclear what is the scope of type variables introduced implicitly as a result of capture
+conversion, but this might be irrelevant to the problem we are dealing with.
+
+Intersection types can not be declared explicitly; the only positions in which they can be specified are
+upper bounds of type parameters in generic class/interface declarations. However intersection types can be derived
+as a result of capture conversion.
+
+Null type is an artificial transparent type with no explicit representation. It is assumed to be a subtype for
+every other reference type.
+
+Besides regular types generic classes can be applied to \emph{wildcard types}. A wildcard is an anonymous
+type variable (notation: ``\java{?}'') equipped, as a regular type variable, with upper bound and optional lower bound
+neither of which can be of intersection type. If no upper bound is specified explicitly then \java{java.lang.Object} is implicitly assumed.
+It is important that wildcards can not be used to parameterize direct supertypes in generic class/interface declarations.
+Array types can not be directly parameterized by wildcards.
+
+To establish the subtyping relation (denotation: ``$\precprec$'') between types parameterized by wildcards two additional
+notions are introduces.
+
+The first one is \emph{contains} relation ``$\supseteq$'':
+
+\[
+\begin{array}{rclcl}
+  \java{?}^T&\supseteq&\java{?}^S&,&T\precprec S \\[2mm]
+  \java{?}^T&\supseteq&\java{?}&& \\[2mm]
+  \java{?}_T&\supseteq&\java{?}_S&,&S\precprec T\\[2mm]
+  \java{?}_T&\supseteq&\java{?}&& \\[2mm]
+  \java{?}_T&\supseteq&\java{?}^\java{java.lang.Object}&& \\[2mm]
+  T&\supseteq& T&&\\[2mm]
+  T&\supseteq&\java{?}^T&&\\[2mm]
+  T&\supseteq&\java{?}_T&&
+\end{array}
+\]
+
+This relation in essence is a routine check that a collection of types designated by the ``right'' type is
+contained in a collection of types designated by the ``left'' one.
+
+The second is \emph{capture conversion}. Informally, capture conversion replaces a \emph{nameless} wildcard type
+argument by a freshly introduced \emph{named} type variable, thus ``capturing'' some concrete (but statically unknown)
+type in a certain context. The motivation for introducing capture conversion is as follows: let us have
+some value of a wildcard-parameterized type, say, some collection of type $\grc{Collection}{?}$. Without capture
+conversion we would be incapable of dealing with individual elements of this collection (since a wildcard is not a type,
+but rather a way to to describe a certain parameterization). From a type-theoretic standpoint wildcards introduce a
+certain form of \emph{existential} types with capture conversion serving as a limited form of opening construct~\cite{tapl}.
+The detailed theory and the discussion of properties for the wildcard-related fragment of Java Generics type system
+can be found in~\cite{wild}.
+
+Capture conversion is defined as follows. Let $\grc{C}{T_1\dots T_k}$ be a generic class/interface type where some of $T_i$ are wildcards. Let
+$\beta_i^{U_i}$ be the $i$-th type parameter of $C$'s declaration. Then capture conversion of
+$\grc{C}{T_1\dots T_K}$ is the type $\grc{C}{\cc{T_1}\dots \cc{T_k}}$ where the transformation
+``$\cc{\bullet}$'' is defined as follows:
+
+\[
+\cc{T_i}=\left\{
+\begin{array}{lll}  
+  \alpha^{U_i[\beta_j\gets \cc{T_j}]}_\primi{null}      &\mbox{if }        T_i=\java{?}  &\mbox{($\alpha$ is a fresh type variable)}\\[5mm]
+  \alpha^{B\cap U_i[\beta_j\gets \cc{T_j}]}_\primi{null} &\mbox{if }        T_i=\java{?}^B &\mbox{($\alpha$ is a fresh type variable)}\\[5mm]
+  \alpha^{U_i[\beta_j\gets \cc{T_j}]}_B               &\mbox{if }        T_i=\java{?}_B &\mbox{($\alpha$ is a fresh type variable)}\\[5mm]
+  T_i                                           &\mbox{otherwise}  & 
+\end{array}\right.
+\]
+
+Here ``$[\bullet\gets\bullet]$'' denotes a (simultaneous) substitution of type variables with some types. Note, in capture conversion
+type parameters of the class under conversion are substituted with the results of the conversion in all bounds.
+
+The subtyping relation ``$\precprec$'', which is the principle notion for the problem we are dealing with, is defined as a reflexive-transitive
+closure of the direct supertype relation ``$\prec$''. We already described one case of direct supertyping, the others are as follows:
+
+\[
+\begin{array}{rclcl}
+  I & \prec & \java{java.lang.Object} &,& \mbox{($I$ is an interface with no}\\
+    &       &                         & &\mbox{direct superinterface)}\\[2mm]
+  \grc{C}{T_1\dots T_k} & \prec & \grc{C}{S_1\dots S_k} &,& \forall i\, .\, S_i\supseteq T_i\\[2mm]
+  \grc{C}{T_1\dots T_k} & \prec & S &,& \grc{C}{\cc{T_1}\dots \cc{T_k}}\prec S\\[2mm]
+  \bigcap T_i & \prec & T_i && \\[2mm]
+  \alpha^{\bigcap T_i} & \prec & T_i &&\\[2mm]
+  T & \prec & \alpha_T && \\[2mm]
+  \primi{null} & \prec & T &&\\[2mm]
+  T\java{[]} & \prec & S\java{[]} &,& T\prec S\\[2mm]
+  \java{java.lang.Object[]} & \prec & \java{java.lang.Object} &&  \\[2mm]
+  \java{java.lang.Object[]} & \prec & \java{java.lang.Cloneabe} && \\[2mm]
+  \java{java.lang.Object[]} & \prec & \java{java.io.Serializable} &&
+\end{array}
+\]
+
+Note: the notions ``$\supseteq$'', ``$\prec$'', and ``$\precprec$'' are defined mutually recursive: ``$\precprec$'' is used
+to define ``$\supseteq$'', which is used to define ``$\prec$'', which, in turn, is the basic relation to define ``$\precprec$''.

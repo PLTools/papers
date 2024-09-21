@@ -1,0 +1,150 @@
+% This is samplepaper.tex, a sample chapter demonstrating the
+% LLNCS macro package for Springer Computer Science proceedings;
+% Version 2.21 of 2022/01/12
+%
+\documentclass[runningheads]{llncs}
+%
+\usepackage[T1]{fontenc}
+% T1 fonts will be used to generate the final print and online PDFs,
+% so please use T1 fonts in your manuscript whenever possible.
+% Other font encondings may result in incorrect characters.
+%
+\usepackage{graphicx}
+% Used for displaying a sample figure. If possible, figure files should
+% be included in EPS format.
+%
+% If you use the hyperref package, please uncomment the following two lines
+% to display URLs in blue roman font according to Springer's eBook style:
+%\usepackage{color}
+%\renewcommand\UrlFont{\color{blue}\rmfamily}
+%
+\usepackage{xcolor}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+\usepackage{hyperref}
+\usepackage{marginnote}
+\usepackage{verbatim}
+\usepackage{listings}
+\usepackage{amsmath,mathrsfs,amssymb}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{mathtools}
+\usepackage{lmodern}
+
+\newcommand{\term}[1]{\mbox{\texttt{\textbf{#1}}}}
+\newcommand{\run}[2]{\term{run}^{#1}\,\left[#2\right]}
+\newcommand{\todo}[1]{{\bf\color{red}#1}}
+\newcommand{\rel}[3]{{#1}\xrightarrow{#2}{#3}}
+\newcommand{\prg}[1]{\mbox{\lstinline|#1|}}
+\newcommand{\precprec}{\prec\mathrel{\mkern-5mu}\prec}
+
+\newcommand{\grc}[2]{{#1}\,\left<{#2}\right>}
+\newcommand{\java}[1]{\texttt{#1}}
+\newcommand{\primi}[1]{\mathbf{#1}}
+\newcommand{\cc}[1]{\lfloor{#1}\rfloor}
+\sloppy
+
+\lstdefinelanguage{ocanren}{
+keywords={run, conde, fresh, let, in, match, with, when, class, type,
+object, method, of, rec, repeat, until, while, not, do, done, as, val, inherit,
+new, module, sig, deriving, datatype, struct, if, then, else, open, private, virtual, include, success, failure, switch,
+true, false, ocanren},
+sensitive=true,
+commentstyle=\small\itshape\ttfamily,
+keywordstyle=\ttfamily\textbf,
+identifierstyle=\ttfamily,
+basewidth={0.5em,0.5em},
+columns=fixed,
+mathescape=true,
+fontadjust=true,
+literate={fun}{{$\lambda$}}1 {->}{{$\to$}}3 {===}{{$\equiv$}}1 {=/=}{{$\not\equiv$}}1 {|>}{{$\triangleright$}}3 {\\/}{{$\vee$}}2 {/\\}{{$\wedge$}}2 {^}{{$\uparrow$}}1
+%{[]}{{\texttt|[]|}}1
+,
+morecomment=[s]{(*}{*)}
+}
+
+\lstdefinelanguage{ocaml}{
+keywords={type, struct},
+sensitive=true,
+commentstyle=\small\itshape\ttfamily,
+keywordstyle=\ttfamily\textbf,
+%keywordstyle=\ttfamily\underbar,
+identifierstyle=\ttfamily,
+basewidth={0.5em,0.5em},
+columns=fixed,
+fontadjust=true,
+literate={->}{{$\to$}}3 {=>}{{$\Rightarrow$}}3,
+morecomment=[s]{(*}{*)}
+}
+
+\setlength{\belowcaptionskip}{-22pt}
+
+\usepackage[nodisplayskipstretch]{setspace}
+
+%\setlength{\abovedisplayskip}{-5pt}
+%\setlength{\belowdisplayskip}{-5pt}
+
+\renewcommand{\arraystretch}{0.3}
+
+\pagestyle{plain}
+%\usepackage{lineno}
+%\linenumbers
+
+\begin{document}
+%
+\title{Relational Solver for \textsc{Java} Generics Type System}
+%
+%\titlerunning{Abbreviated paper title}
+% If the paper title is too long for the running head, you can set
+% an abbreviated paper title here
+%
+\author{
+  Peter Lozov\inst{1}\orcidID{0000-0003-3563-2828} \and
+  Dmitry Kosarev\inst{1}\orcidID{0000-0002-6773-5322} \and
+  Dmitry Ivanov\inst{2}\and
+  Dmitry Boulytchev\inst{1}\orcidID{0000-0001-8363-7143}
+}
+%
+\authorrunning{Dmitry Kosarev et al.}
+% First names are abbreviated in the running head.
+% If there are more than two authors, 'et al.' is used.
+%
+\institute{
+Saint-Petersburg State University,\\
+Universitetskaya emb., 7-9, 199034, St.Petersburg, Russia\\
+\email{lozov.peter@gmail.com},\email{kakadu.hafanana@gmail.com},\email{dboulytchev@math.spbu.ru}\\
+Saint-Petersburg,\\
+\email{korifey@gmail.com}\\}
+%
+\maketitle              % typeset the header of the contribution
+%
+\begin{abstract}
+  We present a solver for Java generics type system implemented using relational verifier-to-solver
+  approach. The solver finds solutions for a system of subtyping inequations with free variables
+  and thus can be used to determine a concrete type satisfying a set of constraints. The
+  context of this work is symbolic execution for testing and verification of \textsc{Java} programs.
+\keywords{\textsc{Java} generics \and relational programming \and relational solvers.}
+\end{abstract}
+%
+%
+%
+\input{intro}
+\input{rel}
+\input{java}
+\input{solver}
+\input{eval}
+\input{conclusion}
+
+
+%
+% ---- Bibliography ----
+%
+% BibTeX users should specify bibliography style 'splncs04'.
+% References will then be sorted and formatted in the correct style.
+%
+\bibliographystyle{splncs04}
+\bibliography{main}
+%
+\end{document}

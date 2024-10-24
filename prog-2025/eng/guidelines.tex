@@ -1,0 +1,152 @@
+% !TEX TS-program = pdflatex
+% !TeX spellcheck = en_US
+% !TEX root = main.tex
+\section{Layout Synthesis as a Constraint Satisfaction Problem}
+\label{sec:guidelines}
+
+%As we said earlier we are interested in a fully automatic approach to lay out GUI controls in a way prescribed
+%by design guidelines. In this section we give a formal definition of what design guidelines are
+%and how they define layouts, and specify the concrete problem of finding layouts which
+%satisfy the constraints induced by both guidelines and the essence of layout primitives.
+
+In our model given in the previous section the logical structure of GUI is described by
+a number of relations between a certain set of controls. Let $\mathcal{C}$ be a set of
+controls and let a structure $\Sigma=\{r^{n_i}_i\, |\, r^{n_i}_i\subseteq\mathcal{C}^{n_i}\}$ be a set of
+relations, where $r^{n_i}_i$ is an \mbox{$n_i$-ary} relation on $\mathcal{C}$; without loss
+of generality we do not consider property-like relations like size, text contents, etc.
+
+A \emph{relational pattern} is a syntactic form $r^n\,(X_1,\dots,X_n)$, where $r^n$ is $n$-ary
+relation and $X_j$ are variables (not necessarily distinct).
+
+A \emph{layout template} is a syntactic form $l\,(X_1,\dots,X_n)$, where $l$ is a layout primitive and
+$X_i$~--- variables.
+
+%\footnote{In the previous section we only defined binary layout primitives; however
+%here we use a more general form to avoid making impression that the number of arguments is essential.}.
+
+We denote $s\,[X_i\gets c_i]$ the result of substitution of controls $c_i\in\mathcal{C}$
+for variables $X_i$ in a relational pattern or layout template $s$, $\mathcal{FV}\,(s)$~--- the set of all
+variables in a relational pattern or layout template $s$, and call \emph{layout instance} a layout
+template with no variables.
+
+Let $r^n\,(X_1,\dots,X_n)$ be a relational pattern. If for some controls $c_1,\dots,c_n\in\mathcal{C}$
+
+\[
+(c_1,\dots,c_n)\in r^n
+\]
+
+\noindent  then we say that the result of substitution
+
+\[
+r^n\,(X_1,\dots,X_n)\,[X_i\gets c_i]
+\]
+
+\noindent \emph{occurs} in the structure $\Sigma$ (we remind that $r^n$ is an $n$-ary relation on the set of controls).
+
+
+A \emph{guideline rule} is a syntactic form
+
+\[
+p_1,\dots,p_k\mapsto l_1,\dots,l_m
+\]
+
+
+\noindent  where $p_i$~--- relational patterns, $l_j$~--- layout templates. We stipulate that any variable in the right-hand side of a
+rule has an occurrence in its left-hand side; no other restrictions are assumed. Informally a guideline rule says that if
+some controls are related in a certain manner in the structure then a specific layout primitives for (some of) these
+controls can be used.
+
+%For example, a rule
+
+%\[
+%\term{describes}\,(X,\,Y)\mapsto\term{hor}\,(X,\,Y)
+%\]
+
+%says that if some controls $X$ and $Y$ are in a relation ``$\term{describes}$'' then $X$ and $Y$ can be placed horizontally one after another.
+
+
+Let us have a structure $\Sigma$ and a set $S$ of layout instances. We say that this set is \emph{confirmed} by a set of
+guideline rules \emph{R} iff for each control $l^*\in S$
+
+\begin{enumerate}
+\item there is a rule $p_1,\dots,p_n\mapsto l_1,\dots,l_i,\dots, l_m$ in $R$
+  such that $l^*=l_i\,[X_j\gets c_j]$  for
+  some $\{c_j\}\subseteq\mathcal{C}$, where $\mathcal{FV}\,(l_i)=\{X_j\}$;
+
+\item for all variables $\{Y_1,\dots,Y_t\}=\mathcal{FV}\,(p_1,\dots,p_n)\setminus\mathcal{FV}\,(l_i)$ there exist
+  controls $c^\prime_1,\dots,c^\prime_t\in\mathcal{C}$ such that \mbox{$p_j\,[X_r\gets c_r,\dots,Y_s\gets c^\prime_s]$}
+  for all $j$ occurs in the structure $\Sigma$;
+
+\item \mbox{$l_j\,[X_r\gets c_r,\dots,Y_s\gets c^\prime_s]\in S$} for all $j$.
+
+\end{enumerate}
+
+Informally speaking a set $S$ is confirmed by $R$ iff each its control $l^*$ can be properly
+derived according to $R$. This means that there should be some rule containing
+layout template $l_i$ which is turned into $l^*$ by some substitution of its
+variables $X_i$. However, in this rule there potentially can be other variables $Y_j$ besides $X_i$.
+If there exists a substitution for them which, together with the substitution for $X_i$, makes all
+relational patterns in the left-hand side to occur in $\Sigma$, then the rule can be
+applied and $l^*$ can be derived. Finally, as there can be other layout templates in the
+right-hand side of this rule, they will be derived as well, and thus corresponding
+layout instances have to be included in $S$.
+
+Confirmed sets represent all layouts which can be justified according to the guidelines in the sense that they
+do not contain ``extra'' layout instances appeared out of thin air. However being confirmed does not
+necessarily mean to be a ``good'' layout in the sense a regular designer would imply. Indeed, an
+empty set is always confirmed, but can hardly be considered as a valuable layout. Thus, we define
+another property: \emph{coverage}.
+
+We say that a set of layout instances $S$ \emph{covers} a structure $\Sigma$ iff for each control $c\in\mathcal{C}$
+there is a layout instance in $S$ which binds $c$ (i.e. contains $c$ as a parameter). Coverage
+informally means that no control of a structure is left ``unaddressed'' by given layout.
+
+Confirmed sets in some sense correspond to \emph{sound} layouts w.r.t. to guidelines while covering~--- to
+\emph{complete}; however we refrain from calling them such since we reserve more conventional meanings of these terms.
+
+The next requirement comes from an observation that guideline rules are expected to be applied, not ignored. We
+call a confirmed and covering set of layout instances $S$ \emph{maximal} iff there is no
+confirmed and covering set $S^\prime$ such that $S\subset S^\prime$.
+
+Finally, layouts can contain conflicts. For example, if a layout says that a control $A$ has to be put on
+the top of control $B$ and visa versa then, obviously, it is unusable since these two primitives introduce
+incompatible constraints. Among the conflicts we can identify the following:
+
+\begin{itemize}
+\item There should be no loops or branching comprised of layout primitives for vertical and horizontal composition. This
+  requirement originates from the observation that the relations introduced by these
+  primitives have to be unions of linear orders.
+\item If two compositional virtual controls are laid out horizontally then there should not be
+  controls within both of them which are laid out vertically; symmetrically for vertically
+  laid out virtual controls.
+\item No two controls can be laid out vertically and horizontally at the same time.
+\end{itemize}
+
+These conflicts originate from the fact that we actually place the controls on a two-dimensional plane.
+There are actually other cases which we omit here for space considerations. We call a set of
+instances \emph{compatible} iff it does not contain conflicts.
+
+To summarize, we are interested in confirmed, covering, maximal and compatible layouts w.r.t. a given
+set of guideline rules. We call such layouts \emph{sound}.
+
+It is worth mentioning the worst-case complexity of the problem in question. First, it is rather
+easy to see that finding if there exists a sound layout is $NP$-complete in general case.
+Indeed, given an undirected graph we can construct a structure where controls correspond to its nodes
+and some binary relation (call it ``$E$'') corresponds to edges. Then we take the following guideline:
+
+\[
+\begin{array}{rcl}
+  E\,(x,\, y) & \mapsto & \mbox{hor}\,(x,\, y)\\
+  E\,(x,\, y) & \mapsto & \mbox{hor}\,(y,\, x)
+\end{array}
+\]
+
+Any sound layout w.r.t. this guideline by definition contains all controls (i.e. nodes of the graph) and
+only layout primitives ``\texttt{hor}'', each of which corresponds to exactly one edge of the graph. Since
+``\texttt{hor}'' can not branch or loop, these edges form a Hamiltonian path.
+
+On the other hand, it is rather easy to see that the number of all sound layouts can be worst-case
+exponential on the size of a structure. As we are aimed at enumerating them all the solvers for
+the problem would inevitably run in worst-case exponential time.
+
+

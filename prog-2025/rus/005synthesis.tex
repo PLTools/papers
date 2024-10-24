@@ -1,0 +1,771 @@
+% !TeX spellcheck = ru_RU
+% !TEX root = mainrus.tex
+
+\section{Синтез расположения GUI}
+\label{sec:synthesizing}
+
+В данном разделе мы сконструируем синтезатор расположений на основе гайдлайна.
+Сделаем это за несколько шагов: начнём с простого функционального верификатора, сконвертируем его в реляционную форму,
+запустим в обратном направлении, проанализируем результат и применим некоторые оптимизации.
+%In this section we describe the construction of guideline-driven layout synthesizer. We do it in several steps starting
+%from the implementation of the simple functional verifier, then converting in into relational form, running it ``backwards'',
+%analyzing the outcome and performing various refinements and optimizations.
+
+
+\subsection{Функциональный верификатор}
+
+Устройство начального функционального верификатора на \textsc{OCaml} довольно прямолинейно.
+Воспользуется обычными для функционального программирования списками и алгебраическими типами данных, чтобы описать структуру и примитивы расположения.
+По правилам гайдлайна мы \emph{синтезируем}\footnoteRED{Может всё-таки строим динамически?} верификатор, который в качестве аргументов принимает структуру и экземпляры расположения, и проводит
+прямолинейную проверку покрытия, совместности и подтверждения свойств, согласно определениям из раздела~\ref{sec:guidelines}.
+
+%The construction of initial functional verifier in \textsc{OCaml} is rather straightforward. We use conventional functional
+%data structures like lists and algebraic data types to encode structures and layout primitives. Given guideline rules we
+%\emph{generate} a verifier which takes as arguments a structure and a set of layout instances and performs a routine check of
+%the coverage, compatibility and confirmation properties following the definitions given in Section~\ref{sec:guidelines}.
+
+Покрытие можно легко получить, обойдя все примитивы расположения, собирая все невиртуальные элементы управления в множество, и
+проверяя, что оно соответствует множеству всех невиртуальных в структуре. Совместность проверяется аналогично, по определению.
+
+%The coverage can be easily assessed by traversing all layout primitives, collecting all non-virtual controls and
+%checking that the set of all collected controls coincides with the set of all non-virtual controls in the structure.
+%Similarly, the compatibility is checked according to the definition.
+
+Для подтверждения нам нужно обойти все примитивы расположения и подтвердить каждый их них. Это требует обращения правила гайдлайна.
+Например, рассмотрим следующее правило:
+%The confirmation procedure traverses all layout primitives and tries to confirm each of them. This requires each
+%rule of the guidelines to be \emph{inverted}. For example, consider the following guideline rule:
+
+\begin{lstlisting}[language=ocanren,basicstyle=\small]
+   $\term{describes}\,(X,\,Y)\,\mapsto\,\term{vert}\,(X,\,Y),\,\term{halign}\,(X,\,Y)$
+\end{lstlisting}
+
+Оно определяет следующие случаи для процедуры подтверждения структуры $\Sigma$ и набора экземпляров расположения  $S$:
+%It determines the following (sub)cases for the confirmation check procedure for a structure $\Sigma$ and a set of layout instances $S$:
+
+\begin{lstlisting}[language=ocanren,basicstyle=\small]
+   if $\term{vert}\,(X,\,Y)\in S$
+   then $\term{describes}\,(X,\,Y)\in\Sigma$ /\ $\,\term{halign}\,(X,\,Y)\in S$
+   else if $\term{halign}\,(X,\,Y)\in S$
+   then $\term{describes}\,(X,\,Y)\in\Sigma$ /\ $\,\term{vert}\,(X,\,Y)\in S$
+\end{lstlisting}
+
+Мы \emph{не проверяем максимальность} на данном шаге. Причина этому в особенности функционально-реляционного программирования.
+Чтобы проверить максимальность, нам нужно найти все остальные совместные экземпляры, которые и подтверждены, и покрыты.
+Но именно этой задачи мы хотим \emph{избежать}, написав функциональный верификатор.
+Поэтому, реализация этого на функциональном языке подрывает всю идею использования реляционного программирования.
+Подчеркиваем, что это довольно частый случай для нашего подхода: для удобства программирования нам необходимо аккуратно провести границу между функциональным и реляционным кодом, чтобы не делать то, что мы получим позже за просто так.
+
+
+%Note, we do not perform \emph{maximality} check here.
+%The reason is specific to our approach of using functional-relational programming.
+%Indeed, to perform maximality check we would need to
+%find other compatible sets of instances which are confirmed and covering. But this is exactly the
+%task which we are trying \emph{avoid} to perform by writing functional verifier.
+%Thus, implementing it in a functional language would compromise the whole idea of using relational
+%programming. We emphasize that this is rather a common case for the approach we advocate: in order
+%to be efficient we need to carefully set the border between functional and relational programming
+%in order to avoid doing explicitly what we intend to have later for free.
+
+Максимальность проверяется другим образом. Мы применяем реляционное преобразование для функионального верификатора, и запускаемся на конкретной структуре и
+на \emph{свободной переменной} на месте конкретных экземпляров расположения. За счет полноты поиска \textsc{miniKanren} выдаст нам все множества, одновременно  совместные, покрытые и подтверждённые. Затем мы просто отфильтруем не максимальные.
+
+%The maximality problem is solved in another manner. We apply relational conversion for the
+%functional verifier and run it for a given concrete structure and a \emph{free variable} in
+%the position of the set of layout instances. By the completeness of \textsc{miniKanren}
+%search procedure this gives us all sets which are compatible, covering and confirmed at
+%the same time. Then, having them at our hands already, we filter non-maximal ones out.
+
+На этом первый шаг закончен, и мы получили полный неэффективный синтезатор. У наивной реализации присутствуют следующие недостатки:
+%The first step gave us a complete, but not efficient synthesizer to play with. We identified
+%the following problems with this na\"ive implementation:
+\begin{itemize}
+\item Синтезатор выдает (экспоненциально) большое количество эквивалентных ответов. Мы использовали списки для представления множеств, и синтезатор выдал нам все перестановки как уникальные ответы.
+%The synthesizer produced an (exponentially) large collection of equivalent answers. Indeed, as
+%  we initially used list representation for sets of layout instances, the synthesizer
+%  considered all permutations of lists comprised of the same controls as different answers.
+\item Мы узнали, что представление структуры с помощью типов данных чрезмерно, и мы можем напрямую строить реляции \textsc{miniKanren} по структуре.
+%We realized that encoding of structures using functional data structures was
+%  excessive as they could be directly generated as \textsc{miniKanren} relations.
+\item Синтезатор выдает много частичных (не максимальных) ответов, что замедляет синтез и делает его непрактичным.
+\end{itemize}
+%\begin{itemize}
+%\item The synthesizer produced an (exponentially) large collection of equivalent answers. Indeed, as
+%  we initially used list representation for sets of layout instances, the synthesizer
+%  considered all permutations of lists comprised of the same controls as different answers.
+%\item We realized that encoding of structures using functional data structures was
+%  excessive as they could be directly generated as \textsc{miniKanren} relations.
+%\item The synthesizer generated a lot of partial (non-maximal) layouts which slowed
+%  done the synthesis and made it impractical.
+%\end{itemize}
+
+\noindent В следующих подразделах мы решим эти проблемы.
+
+\subsection{Представление с помощью бинарных гиперкубов}
+
+Для первой проблемы мы применили специальное представление расположения (\emph{бинарный гиперкуб}), в котором любое расположение представляется однозначно.
+В сущности это побитовое представление множеств и отношений, которое по-разному определяется для каждой структуры.
+Например, пусть у нас два элемента управления \lstinline|a| и \lstinline|b|, и, для простоты, два примитива расположения $\term{vert}$ и $\term{hor}$.
+Следующие объявления типов на языке  \textsc{OCaml} определяют представление расположений:
+
+%For the first problem we devised a specific representation for the layouts (\emph{binary hypercube}) in which any layout can be
+%represented uniquely. This representation in essence is a bitscale representation of sets and relations, and it has to
+%be specifically defined for each structure. For example, let us have two GUI controls \lstinline|a| and \lstinline|b| and, for
+%simplicity, only two layout primitives $\term{vert}$ and $\term{hor}$. Then the following \textsc{OCaml} definitions introduce
+%the representation for layouts:
+
+\begin{lstlisting}[basicstyle=\small,language=ocaml,escapeinside={/*}{*/} ]
+   type rels = {vert : bool; hor : bool}
+   type /*$\alpha$*/ roles = {a : /*$\alpha$*/; b : /*$\alpha$*/ }
+   type layout  = rels roles roles
+\end{lstlisting}
+
+Этот подход нивелирует накладные расходы на поиск эквивалентных ответов с разными представлениями.
+Однако он требует специализации функционального верификатора под конкретную структуру.
+Это не такое уж и большое неудобство, к тому же, улучшения из следующего подраздела, потребуют сходной специализации.
+
+%This approach eliminates an extra overhead of the search for equivalent answers with different representations. However,
+%it requires the specialization of functional verifier for a concrete structure. This is not a great price; in addition, the
+%technique described in the next subsection requires similar specialization to be performed.
+
+\subsection{Представление структуры как набора реляционных отношений}
+
+Как уже известно, структура --- это набор отношений над элементами управления. В реляционном языке мы можем представлять отношения непосредственно как отношения.
+Предположим, мы работаем с фрагментом структуры с рис.~\ref{rel_rel}\subref{rel_abs}. В оригинальном изложении она представлялась бы как данные,
+используя соответствующие типы для элементов управления и отношений. Однако, те же самые части структуры можно закодировать непосредственно в
+\textsc{OCanren} (рис.~\ref{rel_rel}\subref{rel_con}).
+
+%As we know, a structure is just a set of relations over the set of controls. In a relational language we can directly
+%represent relations as relations. Assume we have a (fragment) of structure shown in Fig.~\ref{rel_rel}\subref{rel_abs}.
+%In original implementation it was represented as a data structure using dedicated types for representing
+%controls and relations. However, the same elements of the structure can be directly encoded in
+%\textsc{OCanren} as it shown in Fig.~\ref{rel_rel}\subref{rel_con} (the ellipses indicate that there can be other
+%parts of these definitions corresponding to other controls bound with said relations).
+
+\begin{figure}[t]
+  \begin{subfigure}[t]{0.5\textwidth}
+    \begin{lstlisting}[basicstyle=\small,language=ocanren]
+  $\term{type}\,(A,\, \term{checkbox})$
+  $\term{type}\,(B,\, \term{label})$
+  $\term{describes}\,(B,\, A)$
+    \end{lstlisting}
+    %\vskip16mm
+    \caption{Отношения в абстрактной записи}
+    \label{rel_abs}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.5\textwidth}
+    \begin{lstlisting}[basicstyle=\small,language=ocanren]
+  let $\mbox{\texttt{type}}^o$ x y = ocanren {
+    y === Checkbox /\ x === A \/
+    y === Label    /\ x === B \/ ...
+  }
+  let $\mbox{\texttt{describes}}^o$ x y = ocanren {
+    x === B /\ y === A \/ ...
+  }
+    \end{lstlisting}
+    \caption{Кодирование в \textsc{OCanren}. Многоточия обозначают другие части структуры, находящиеся в том же отношении.}
+    \label{rel_con}
+  \end{subfigure}
+  \caption{Реляционное преставление структуры как набора отношений}
+  \label{rel_rel}
+\end{figure}
+
+После реляционного преобразования, шаблоны над структурой будут преобразованы в обычную реляционную форму. Это преобразование
+полностью убирает накладные расходы на интерпретацию для сопоставления структуры. Недостатком является то, что нам необходимо
+порождать эту часть системы для каждого изменения в структуре. Это естественный компромисс для подходов на основе специализации.
+
+%After the conversion, a pattern to match over a structure can be turned into a conventional relational goal. This conversion
+%completely eliminates the interpretation overhead for matching over structures. The drawback is that we need to regenerate a
+%part of the system for each change of the structure; this is rather a natural trade-off when specialization techniques are used.
+
+\subsection{Жадный алгоритм разрешения конфликтов }
+
+Изначальная реализация порождала все возможные совместные множества экземпляров расположения.
+Но их число огромно, даже если мы рассматриваем только подтверждённые и покрытые.
+Чтобы сделать синтезатор применимым, нужно устранить эту неэффективность. Воспользуемся жадным подходом:
+вместо порождения всех подходящих и последующей фильтрации, построим максимальное несовместное расположение, а затем найдем
+все конфликты и устраним их путём \emph{недетерминированной} отмены минимального набора правил, которые образуют конфликты.
+Такой подход даст нам множество всех максимальных совместных расположений.
+Каждый шаг   нами реализован как отдельная реляционная компонента.
+%
+%Our initial solution generate all compatible sets of instances. However their number can be huge even if
+%only confirmed and covered sets are considered. In order to make our synthesizer applicable we have to eliminate
+%this overhead. We do this using greedy approach: instead of enumerating all compatible layouts and
+%filtering out non-maximal ones we first build one maximal but not compatible layout, then identify all conflicts and,
+%finally, eliminate the conflicts by \emph{nondeterministically} canceling minimal numbers of rules
+%which introduce these conflicts. This approach gives us a set of all maximal compatible layouts.
+%Each of these steps is implemented as an independent relational component.
+
+На первом шаге мы недетерминировано применяем все правила гайдлана, чтобы получить максимальное (возможно, несовместное)  множество экземпляров расположения, представленное гиперкубом.
+
+%On the first step we non-deterministically apply all guideline rules and combine them into the maximal
+%(but probably non-compatible) set of layout instances represented as a hypercube.
+
+На втором шаге воспользуемся особым реляционным верификатором, чтобы найти все конфликты. Для каждого вида конфликта применим
+специальный верификатор, который по гиперкубу и набору экземпляров расположения, проверяет, что
+
+
+%For the second step we use a specific relational verifier to find all conflicts. For each kind of conflict we implement
+%a dedicated verifier which, given a hypercube and a set of layout instances, checks that
+
+\begin{itemize}
+\item множество содержится в гиперкубе;
+\item оно действительно содержит искомый конфликт.
+\end{itemize}
+
+Запустившись в обратном направлении на конкретном гиперкубе верификатор вернёт множество экземпляров расположения, которое образует конфликт соответствующего вида. Запуск в обратном направлении дизъюнкции верификаторов даст нам все конфликтующие экземпляры.
+
+%Being run in the reverse direction for a ground hypercube and free variable this verifier returns all
+%sets of layout instances which occur in the hypercube and constitute a conflict of given kind. Running a disjunction
+%of all such verifiers in the reverse direction gives us the set of all sets of conflicting layout instances.
+
+На третьем шаге мы для каждого конфликтующего расположения разрешаем конфликты, что даст нам (для каждого набора) множество максимальных совместных расположений.
+Сделаем это следующим образом. Обозначим множество конфликтующих экземпляров как   $S$.
+Каждый найденный конфликт можно разрешить убрав только один примитив расположения. Поэтому, будем по-одному выкидывать экземпляры из  $S$ и смотреть какие конфликты разрешились. Заметим,что выкидывание одного примитива может разрешить сразу несколько конфликтов\footnoteRED{выкинуть нафиг?}.
+Когда не останется ни одного конфликта, мы вернём максимальное совместное расположение. Однако, тут есть одна тонкость, осложняющая реализацию.
+Удаляя экземпляры мы можем получить расположение, которые более не подтверждается гайдлайном, так как некоторые части расположения могут появляться и исчезать только одновременно. Поэтому, надо аккуратно реализовывать процедуру отмены правил. Весь шаг реализован реляционно, из-за многочисленного использования недетерминизма.
+
+%On the third step we take each set of conflicting layout instances and resolve all conflicts which gives us (for each set)
+%the set of maximal compatible layouts. We do this in the following manner. Let $S$ be a set of conflicting
+%instances. The property of all identifiable conflicts is that each of them can be resolved by removing just
+%one layout instance. So, we nondeterministically one-by-one remove layout instances from $S$ and see what conflicts disappear
+%due to this removal. Note, the removal of just one instance can resolve multiple conflicts. When no conflicts remain we return
+%the set as a maximal compatible layout. There is, however, a subtlety which makes the implementation trickier. By simply removing
+%layout instances we may arrive at a layout which is not confirmed by a guideline since some layout instances can appear (and,
+%conversely, disappear) only simultaneously. So we need to implement a certain ``canceling'' procedure to correctly
+%undo guideline rules application. The whole step is, again, implemented relationally due to extensive use of
+%nondeterminism.
+
+Обращаем внимание, что решение задействует три реляционные программы, которые передают результаты друг в друга. Эти программы нельзя объединить в одну, так как запуск следующей требует нахождения всех результатов предыдущей программы.
+
+%Note that this solution uses three independent relational programs which thread the answers from one to another.
+%Moreover, it is impossible to combine them into a single relational program since each step requires all the answers
+%of the previous one to be found.
+
+\subsection{Вычисление абсолютных координат}
+
+Чтобы привести расположение к окончательному виду, необходимо посчитать координаты всех элементов управления.
+Для корректного множества экземпляров расположения эта задача сводится к решению задачи в \emph{целочисленных линейных ограничениях}.
+Каждый примитив расположения добавляет некоторые неравенства в систему неравенств. Например, примитив $\term{hor}\,(C_1,\,C_2)$~---
+горизонтальное расположение элементов управления $C_1$ и $C_2$ друг за другом~--- порождает следующие ограничения:
+%In order to give a layout its final form all coordinates have to be calculated for all controls. When a sound set of
+%layout instances is calculated this task reduces to solving a system of \emph{integer linear constraints}. Each
+%layout primitive contributes a few inequalities to this system. For example, a primitive $\term{hor}\,(C_1,\,C_2)$ (horizontal
+%placement of controls $C_1$ and $C_2$ next to each other) contributes the following constraints
+\begin{gather*}
+  C_2\prg{.x} - C_1\prg{.x} \leq i_H + C_1\prg{.width}\\
+  C_2\prg{.y} - C_1\prg{.y} = a_V,
+\end{gather*}
+\noindent где \emph{переменные} $C_i\prg{.x}$ и $C_i\prg{.y}$ обозначают координаты $x$ и $y$ соответствующего элемента управления, целочисленные
+\emph{константы} $C_k\prg{.width}$~--- ширину $C_k$, $i_H$~--- горизонтальный отступ, $a_V$~--- отступ для вертикального выравнивания.
+
+Также, для каждого виртуального элемента управления $C$, содержащего $C_1, \ldots, C_n$, нужно добавить следующие ограничения на координаты, ширину и высоту:
+%Also, for each virtual GUI control $C$ containing GUI controls $C_1, \ldots, C_n$ the following constraints are needed that define
+%its actual coordinates, width and height:
+  \begin{gather*}
+    C\prg{.x} = \min\,\{C_1\prg{.x}, \ldots, C_n\prg{.x}\}\\
+    C\prg{.y} = \min\,\{C_1\prg{.y}, \ldots, C_n\prg{.y}\}\\
+    C\prg{.x} + C\prg{.width} = \max\,\{C_i\prg{.x} + C_i\prg{.width}\}_{i=1}^n\\
+    C\prg{.y} + C\prg{.height} = \max\,\{C_i\prg{.y} + C_i\prg{.height}\}_{i=1}^n
+  \end{gather*}
+%\vspace{-1em}
+Дополнительно, нужно добавить неравенства, которые ограничивают максимальные значения переменных на основе размера холста, где мы располагаем элементы управления.
+
+%Additionally, a number of inequality constraints is added which restrict the maximal possible values for
+%coordinates taking into account the size of enclosing panel.
+
+%For each GUI control $C$ we introduce the following constraints:
+%  \begin{gather*}
+%    C\prg{.x} \geq 0\\
+%    C\prg{.y} \geq 0\\
+%    C\prg{.x} + C\prg{.width} \leq W\\
+%    C\prg{.y} + C\prg{.height} \leq H\\
+%  \end{gather*}
+%\vspace{-2em}
+
+
+Существует множество способов разрешать линейные целочисленные неравенства, применение SMT решателя для теории линейной арифметики --- один из них.
+Но заманчиво применить реляционный верификатор ещё раз. Этот решатель   мог бы быть бесшовно интегрирован в существующую процедуру синтеза, что
+позволило бы проверять некоторые ограничения на более ранних фазах поиска.
+
+%There exists a number of ways to solve the set of integer linear inequalities (for example, using SMT solvers over the linear
+%integer arithmetic theory). It is, however, very appealing to try to employ relational verifiers yet again. This relational
+%solver would have the following benefit: it could be seamlessly integrated into the layout synthesis procedure, thus allowing some
+%constraint selection to be rejected at earlier stages.
+
+Однако, текущий реляционный решатель показывает низкую производительность в присутствии виртуальных элементов управления.
+Как было упомянуто выше, размеры виртуальных элементов --- не константы, что существенно увеличивает пространство поиска.
+Поэтому, на данный момент, мы используем \textsc{Z3}~\cite{Zthree}, чтобы определять абсолютные координаты элементов управления,
+а также размеры виртуальных.
+
+%However, the current relational implementation of this solver is underperforming in the presence of virtual GUI controls.
+%As mentioned above, the width and height of virtual GUI controls are not constants, which greatly increases the
+%search space. So, for the time being, we, indeed, use \textsc{Z3} theorem prover~\cite{Zthree} to determine the
+%absolute coordinates of the GUI controls (as well as the width and height of all virtual GUI controls).
+
+Однако, данный подход может повредить полноте решателя.
+Определение конфликтов, а также процедура их устранения из предыдущего раздела, никак не учитывают размеры виртуальных элементов, которые зависят только от размеров входящих в них элементов, и размеры холста.
+Но при отмене правил  гайдлайна мы также можем отменять и целочисленное ограничение, тем самым восстанавливая корректность системы.
+Другими словами, игнорируя ограничения на размер, мы можем пропустить потенциальные ответы.
+Заметим, что вся идея поиска конфликтов основана на предположении, что мы знаем заранее, что некоторые экземпляры расположения рано или поздно создадут несовместные ограничения на координаты. Но на стадии поиска и устранения конфликтов у нас недостаточно информации, чтобы решить эту задачу достаточно точно.
+\textcolor{red}{Перечитать абзац}
+
+%This approach, however, can potentially compromise the completeness of the overall solver. Indeed, the conflict
+%detection and elimination procedures described in the previous section do not take into account the size of the
+%enclosing panel and the sizes of virtual controls (which solely depends on the manner their nested controls are
+%layed out). Thus, the system of integer inequalities can be inconsistent even for sound layouts. However,
+%by cancelling application of some guideline rules some of the integer constraints can be removed thus restoring
+%the consistency of the system. In other words, by ignoring size constraints we can ponentially overlook some
+%proper layouts.
+%Note, the whole idea of conflict identification comes from the observation that we know
+%in advance that some sets of layout instances will inevitably introduce inconsistend constrainst on
+%some controls' coordinates; however at the conflict identification and elimination stage we do not have
+%enough information to do this job in utterly precise manner.
+
+\begin{figure*}
+\begin{lstlisting}[language=algo,mathescape=true,basicstyle=\ttfamily]
+  solve (lay_part, size_part) {
+    // Try to solve the full system
+    if (Z3.solve (lay_part $\cup$ size_part)) {
+        // Return a model
+        return [ Z3.model ]
+    }
+
+    // If unsat we need to find and solve layout conflict
+    // MUC is one of conflicts
+    muc = Z3.minimal_unsat_core
+    // A list of refined models
+    answers = []
+
+    for (muc_element $\in$ muc) {
+        // To solve the conflict we need to remove any layout
+        // element of MUC from the system
+        if (muc_element $\in$ lay_part) {
+            reduced_lay_part = lay_part $\setminus$ {muc_element}
+            answers ++= solve (reduced_lay_part, size_part)
+        }
+    }
+
+    return answers
+  }
+\end{lstlisting}
+\caption{Алгоритм решения конфликтов координат}
+\label{Z3op}
+\end{figure*}
+
+Восстановление полноты требует аккуратного взаимодействия с \textsc{Z3}.
+В случае невыполнимости системы $S$ мы получаем \emph{минимальное ядро невыполнимости}~\cite{minUnsatCore} (англ. unsatisfiable core).
+Это такое несовместное подмножество  $UC\subseteq S$, что удаление одного ограничения из ядра делает систему выполнимой.
+На первый взгляд, достаточно недетерминированно удалять по одному ограничению из $UC$, и смотреть из каких частей расположения это ограничение появилось.
+Отменяя правило гайдлайна, которое внесло это ограничение, мы сделаем систему выполнимой.
+К сожалению, не со всеми ограничениями можно так обойтись.
+Разделим $UC$ на \emph{ограничения расположения } $L$ (порождённые экземплярами), и \emph{ограничения на размер} $Z$: появившиеся из-за размера холста и размеров виртуальных элементов. Мы можем непосредственно отменять ограничения из $L$, но если не только они образуют ядро невыполнимости, то необходимо действовать более тонко.
+
+
+%Restoring the completeness requires more accurate interoperation with \textsc{Z3}. When the inconsistency of the system
+%$S$ is discovered, a \emph{minimal unsatisfiable core}~\cite{minUnsatCore} is returned.
+%Minimal unsatisfiable core is an inconsistent subset $UC\subseteq S$ such that removing any constraint from $UC$
+%makes the remaining set consistent. The first idea would be to take one constraint from $UC$ (nondeterministically) and
+%see what layout instance contributed it. By cancelling guideline rule application which introduced this
+%layout instance we remove this constraint thus making the whole system consistent. Alas, not all constraints can
+%be treated this way. We split all the constraints of $UC$ into \emph{layout} constraints $L$ (those
+%introduced by layout instances) and \emph{size}-constraints $Z$ (the inequalities for the sizes of virtual controls and
+%inequalities for control coordinates introduced to respect the size of the enclosing pane). As we noticed earlier,
+%all constrains in $Z$ are determined by layout instances which contributed to $L$. We can explicitly cancel only
+%constraints from $L$; alas, they alone do not constitute minimal unsatisfiable core, so we have to act more accurately.
+
+Построим множество $M$, выбирая по одному ограничения  $c$ из $L$ и запрашивая у  \textsc{Z3} решение системы $S\setminus\{c\}$  на каждом шаге.
+В итоге может получиться два результата:
+%We build an auxiliary set $M$ by taking the constraints $c$ from $L$ one by one and asking \textsc{Z3} to solve the system $S\setminus\{c\}$ on each step.
+%There can be two outcomes:
+
+\begin{enumerate}
+\item Множество $S\setminus\{c\}$ остается невыполнимым. Это означает, что $c$ не влияет на невыполнимость и поиск продолжается.
+\item Множество $S\setminus\{c\}$ стало выполнимым. Значит $c$ в конфликте с каким-то другим ограничением. Добавляем $c$ в $M$ и продолжаем дальше.
+\end{enumerate}
+
+После окончания выполнения процедуры множество $M$ будет содержать по построению все ограничения, такие что удаление одного из них восстанавливает выполнимость.
+Каждое из них появилось из-за какого-то экземпляра расположения. Будем недетерминированно отменять применение правил гайдлайна, которые создали эти экземпляры.
+Из $S$ мы получим $n$ подсистем, где $n=\ \mid\!\!\!M\!\!\!\mid$. Затем попробуем решить эти системы с помощью \textsc{Z3} и для каждой повторим процедуру.
+В конце концов мы либо отменим достаточно правил, чтобы получить все корректные расположения, либо придём к состоянию, где система невыполнима, а ядро содержит только ограничения на размер, что означает, что элементы не помещаются на наш холст как   их не раскладывай. Это обосновывает полноту алгоритма синтеза.
+Псевдокод процедуры представлен на рис.~\ref{Z3op}.
+
+%By the end of this procedure $M$ will by construction contain all constraints such that removing any of them potentially
+%restores the consistency. Each of them was contributed by some layout instances. We nondeterministically
+%cancel the application of guideline rules which introduced these instances which gives us $n$ subsystems of $S$ where $n=|M|$.
+%Now we try to solve these subsystems with \textsc{Z3} and for each inconsistent one repeat the whole procedure. In the
+%end we either cancel enough rules to enumerate all sound layouts or arrive at the state when the system of
+%constraints remain inconsistent with the minimal unsatisfiable core containing only size constraints, which means that
+%there are some controls which do not fit into the enclosing pane regardless their layout. This justifies the completeness
+%of our synthesis algorithm. The pseudocode for the whole procedure is shown in Fig.~\ref{Z3op}.
+
+% Всё, что ниже не попало в PPDP2024
+
+\begin{comment}
+Как было сказано в секции \ref{sec:synthesizing:conflicts} до вычисления фактических размеров и координат контролов, обнаружить и решить все конфликты невозможно.
+Поэтому Z3 солвер, может как решить данную ему систему (если эта система не содержит конфликтов), так и определить, что данная система несовместна.
+Для гарантии полноты в этом случае нам необходимо выявить и разрешить кофликты, содержащиеся в системе.
+
+В случае несовместной системы кофликтом является подсистема, содержащая минимальное количество констрейнтов, полученных из примитивов лайаута.
+Действительно, из такой подсистемы мы можем однозначно восстановить конфликт --- минимальный набор несовместных примитивов лайаута.
+
+Таким образом, исходную систему можно разделить на две части: \textbf{layout constraints} --- констрейнты, полученные из примитивов лайаута, и \textbf{size constraints} --- констрейнты размеры контролов.
+Нам необходимо минимизировать количество layout constraints в контексте всех size constraints.
+
+Стандартные методы Z3 солвера по получению UNSAT ядра (несовместной подсистемы исходной системы) и минимального UNSAT ядра~\cite{minUnsatCore} (несовместной подсистемы, любая подсистема которой является совместной) не позволяют выявить кофликт, так как минимизация происходит по всей системе, а не по нужной нам части системы.
+
+На основе алгоритма минимизации UNSAT ядра мы разработали алгоритм минимизации одной части системы в контексте другой части.
+\begin{lstlisting}[basicstyle=\small]
+minimize(lay_part, size_part) {
+    i = 0
+    while (i < length(lay_part)) {
+        subsystem = concat(
+          lay_part[0 .. i],
+          lay_part[i + 1 .. length(lay_part)])
+        to_test = concat(subsystem, size_part)
+
+        if Z3.solve(to_test) then
+            i = i + 1
+        else
+            lay_part = to_test
+    }
+
+    return lay_part
+}
+\end{lstlisting}
+
+Данный алгоритм за линейное количество запросов к Z3 солверу позволяет минимизировать layout constraints.
+Далее для каждого констрейнта $C$ из layout constraints мы создаем новый лайаут, в котором отменяем все инстансы, подтверждающие констрейнт $C$. Для каждого из лайаутов мы снова пытаемся вычислить размеры и координаты.
+
+Так исходный лайаут мог содержать несколько конфликтов, данная процедура повторяется, пока мы не вычислим кофликты. Ситуация, в которой мы удалили все layout constraints, но система по-прежнему несовместна, возможно только в случае, когда какой-либо контрол не помещается на enclosing
+panel. Следовательно, разместить контролы исходного лайаута на enclosing
+panel невозможно.
+\end{comment}
+
+\begin{comment}
+%=========
+\subsection{Completeness}
+\label{sec:synthesizing:completeness}
+Completeness of a synthesizer (the capability of producing all sound sets of layout instances) is a very desirable property from
+practical standpoint since it allows to explicitly enumerate all possible layouts to choose from.
+
+%=========
+
+\subsection{Completeness}
+
+Completeness of a synthesizer (the capability of producing all sound sets of layout instances) is a very desirable property from
+practical standpoint since it allows to explicitly enumerate all possible layouts to choose from. Unfortunately, generally
+speaking out current synthesizer is not complete: there are some rare cases when integer linear constraints for
+compatible layouts can not be solved (for example, when the layout does not fit into the pane). This alone would not compromise
+the completeness. What is worse, sometimes such layouts can be reduced even more to provide a solvable set of integer linear constraints.
+This is the single case when we can miss a layout.
+\end{comment}
+
+\begin{comment}
+The synthesizer we described is complete under assumption that
+
+This solution turns out to be many times efficient that the previous ones. However, it is still incomplete because there are conflicts that cannot
+be found before the coordinates are computed. In particular, the set of primitives
+
+\[
+\term{hor}\,(X,\,Y_1), \term{vert}\,(Y_1,\,Z), \term{vert}\,(X,\,Y_2), \,  \term{hor}\,(Y_2,\,Z)
+\]
+
+requires the knowledge of the actual sizes of the GUI controls to determine if there is a conflict. In this case, the sizes of virtual GUI controls
+are not known in advance. At the moment, we have developed a rich enough conflict verifier to calculate conflict-free layouts using practical
+examples, but this task is still being worked on.
+
+To summarize, we implement the layout synthesizer in the following way:
+
+\begin{itemize}
+\item the synthesizer is specialized for a given set of guidelines and a given structure;
+\item the structure is converted into a set of relational definitions;
+\item a corresponding ``binary hypercube'' definition for layout representation is
+  generated for the structure;
+\item instead of searching for all layouts, our solution first builds one maximum conflict layout, and then finds conflicts and solves them non-deterministically;
+\item the set of guideline rules is ``inverted'', and all matching on the
+  structure is turned into appropriate goals using the definitions
+  generated for this structure.
+\end{itemize}
+
+This, coupled with the usual coverage check, delivers us the layout synthesizer.
+\end{comment}
+
+
+\begin{comment}
+The first task in guideline-based layout synthesis is generation of layout primitives for a given structure which respect
+the guidelines in question. Note, for given guidelines and structure there can be potentially multiple
+admissible layouts. We solve this problem by utilizing \emph{relational verifier}.
+
+A verifier is a procedure which for a given guidelines $\mathcal G$, GUI structure $\mathcal S$ and a set of layout primitives $\mathcal L$
+checks if this layout for this structure is admissible w.r.t. these guidelines:
+
+\[
+\term{verify}\,(\mathcal{G},\,\mathcal{S},\,\mathcal{L})=\left\{\begin{array}{rcl}
+                                                                  \term{true}&,&\mbox{$\mathcal L$ respects $\mathcal G$}\\
+                                                                  \term{false}&,&\mbox{otherwise}
+                                                                \end{array}
+                                                         \right.
+\]
+
+
+\noindent This verifier, being converted into a relational form $\term{verify}^o$, can be used as a layout \emph{synthesizer}~\cite{lozov2019relational}:
+
+\[
+\term{synth}\,(\mathcal{G},\,\mathcal{S})=\run{\alpha}{\term{verify}^o\,(\mathcal{G},\,\mathcal{S},\,\alpha,\,\term{true})}
+\]
+
+Here $\run{\alpha}{g}$ is a conventional \textsc{miniKanren} primitive for searching for all values of a variable $\alpha$ which
+make the goal $g$ to succeed; it returns a (potentially infinite) stream of these values. Thus, the problem of layout constraints
+synthesis can be reduced to the problem of (relational) verifier construction.
+
+In our approach we provide a specialized version $\term{verify}^o_{\mathcal G}$ for every set of guidelines of interest. The motivation
+is very simple: first, as a rule the main use case for us is the synthesis of layouts for \emph{multiple} structures with regard to a \emph{single}
+fixed set of guidelines. Then, as we will see in a little while, providing a specialized version is simpler, than the generic one, and
+this version runs faster.
+
+First we describe the construction of a non-relational, \emph{functional} verifier. The guidelines description system matches the controls of the
+structure to a set of layout primitives. Thus, in order to verify that some layout respects the guidelines we have to \emph{justify} each
+control of the layout by some guideline rules. More concretely, we identify two important notions:
+
+\begin{itemize}
+\item \emph{Coverage}. We say, that layout \emph{covers} a system if for any non-virtual control there is a layout primitive
+  addressing this control. Coverage informally witnesses that no ``real'' control of the structure is left out
+  unattended by the layout. The lack of coverage means that there are some controls in the structure for
+  which no placement constraints were derived according to the guidelines. We consider such layouts ill-formed.
+
+\item \emph{Confirmation}. We say that a layout primitive occurrence $p$ is \emph{confirmed} by guidelines, if,
+  first, there is an applicable rule in the guidelines which derives $p$ and, second, all other layout
+  primitives, derived by this rule, occur in the layout.
+\end{itemize}
+
+The coverage can be easily assessed by traversing all layout primitives, collecting all non-virtual controls and
+checking that set of all collected controls coincides with the set of all non-virtual controls in the structure.
+
+The confirmation procedure traverses all layout primitives and tries to confirm each of them. This requires each
+rule of the guidelines to be \emph{inverted}. For example, consider the following rule from JetBrains guidelines set:
+
+\begin{lstlisting}[basicstyle=\small]
+  $\rel{X}{descr}{Y}$, type ($Y$, $T$) [width ($Y$) > $K\,\wedge$
+                           $T\ne$ checkbox]
+     => vert ($X$, $Y$), halign ($X$, $Y$);
+\end{lstlisting}
+
+\noindent  It determines the following (sub)cases for the confirmation procedure \lstinline|confirm$_\mathcal G$|:
+
+\begin{lstlisting}
+  confirm$_\mathcal{G}$ ($\mathcal S$, $\mathcal L$) =
+    vert   ($X$, $Y$) $\in\mathcal L$ ->
+      ...
+      $\rel{X}{descr}{Y}\in\mathcal{S}\;\wedge$
+      type ($Y$, $T$)$\in\mathcal S\;\wedge$
+      width ($Y$) > $K\;\wedge$
+      $T\ne$ checkbox$\;\wedge$
+      halign ($X$, $Y$)$\,\in\mathcal L$
+      ...
+    halign ($X$, $Y$) $\,\in\mathcal L$ ->
+      ...
+      $\rel{X}{descr}{Y}\in\mathcal{S}\;\wedge$
+      type ($Y$, $T$)$\in\mathcal S\;\wedge$
+      width ($Y$) > $K\;\wedge$
+      $T\ne$ checkbox$\;\wedge$
+      vert ($X$, $Y$)$\,\in\mathcal L$
+      ...
+\end{lstlisting}
+
+Thus, building functional verifier is rather a simple routine procedure.
+
+There are multiple ways to convert this verifier into relational form. One way is to use a relational interpreter
+for the functional language the verifier is implemented in~\cite{Untagged}; another
+one is to apply \emph{relational conversion}~\cite{lozov2017typed} which syntactically
+transforms functional programs into relational ones.
+
+We tried the latter and, indeed, acquired a relational layout synthesizer with a reasonable behavior. There were, however,
+three problems:
+
+\begin{enumerate}
+\item Functional verifier used lists of layout primitives to represent layouts. Thus, there were multiple answers which, in
+  fact, represented the same layouts due to permutations or repetitions of the controls of lists.
+\item Incomplete answers: it turned our that often even a small number of layout primitives is enough to cover the structure and
+  be confirmed by the guidelines. While according to our criteria this is not an invalid answer, it somewhat contradicts the
+  informal semantics of the guidelines as it is expected that, on the contrary, as much rules as possible have to be used.
+  On the other hand, too rich layouts can contain conflicting primitives, making it impossible to determine the coordinates of GUI controls.
+\item Performance: even for a simple problem the synthesis took tens of seconds to complete.
+\end{enumerate}
+
+For the first problem we devised a specific representation for the layouts (``binary hypercube'') in which any layout can be
+represented uniquely. This representation in essence is a bitscale representation of sets and relations, and it has to
+be specifically defined for each structure. For example, let us have two GUI controls \lstinline|a| and \lstinline|b| and, for
+simplicity, only two layout primitives \lstinline|vert| and \lstinline|hor|. Then the following definitions introduce
+the representation for layouts:\footnote{\textcolor{red}{NOTE(Kakadu):} let's remove \textbf{struct} keyword to make the code be real OCaml}
+
+\begin{lstlisting}[basicstyle=\small,language=ocaml]
+  type rels    = struct { vert : bool; hor : bool}
+  type $\alpha$ roles = struct { a : $\alpha$; b : $\alpha$}
+  type layout  = rels roles roles
+\end{lstlisting}
+
+This approach eliminates the extra overhead of the search for equivalent answers with different representations.
+
+The last two problems actually closely related. The relational verifier allows us to find all possible combinations of the guideline rules
+applications, among which there are both incomplete (we can apply more rules while maintaining the correctness of the layout) and redundant
+(some application of the rules introduce conflicting primitives).
+
+The problem of incomplete answers can be solved using the following simple observation: as each guideline rule can only
+\emph{add} some layout primitives, it is sufficient to filter out the answers which are \emph{subsumed} by other answers.
+Thus, first we call the synthesizer for all answers (this is feasible as, due to the finiteness of the search space, the
+synthesis is refutationally complete), and then in a post-processing throw away all incomplete answers.
+
+However, firstly, this will not improve performance, and secondly, this way we can lose correct layouts subsumed in redundant ones.
+
+Therefore, instead of such a solution, we divided the search for layouts into several steps.
+\begin{itemize}
+    \item Finding a single maximum layout containing all applications of the guideline rules.
+    \item Detects all conflicts in a this layout.
+    \item Non-deterministic solving of these conflicts to obtain all maximum non-conflict layouts.
+\end{itemize}
+Each of these steps is an independent relational solution.
+In the first step, we non-deterministically get all applications of the guideline rules, which we then combine into the maximum
+(may be conflicted) layout. In the second step, we use a relational verifier to find all conflicts. We have implemented a verifier
+of various types of conflicts, which, when executed in the opposite direction, allows us to find all these conflicts in the layout.
+
+For example, consider the conflict of cyclic primitives. If the layout contains a set of primitives of the form
+
+\[
+\term{prim}\,(X,\, X_1), \, \term{prim}\,(X_1,\, X_2), \, \ldots, \, \term{prim}\,(X_n,\, X),
+\]
+
+where $\term{prim}$ is any kind of layout primitives except horizontal alignment.
+
+This set of primitives does not allow us to determine the coordinates of the control X, since all primitives require that the right
+control is to the right and/or below the left. Thus control $X$ must be to the right and/or below itself.
+
+This (and other) conflict can be solved quite simply: it is enough to remove any primitive from this set. And, if it is non-deterministic
+to remove any of the primitives, we will get all the maximum layouts in which the this conflict is solved.
+
+This is exactly what the third step is responsible for, which sequentially solves each of the conflicts, thereby obtaining all the
+maximum non-conflict layouts.
+
+Note that this solution uses three independent relational programs, the answers of each of which are combined into the input data for
+the next one. Moreover, it is impossible to combine them into a single relational program, since each step requires all the answers
+of the previous one.
+
+This solution turns out to be many times higher performance. However, it is still incomplete because there are conflicts that cannot
+be found before the coordinates are computed. In particular, the set of primitives
+
+\[
+\term{hor}\,(X,\,Y_1), \term{vert}\,(Y_1,\,Z), \term{vert}\,(X,\,Y_2), \,  \term{hor}\,(Y_2,\,Z)
+\]
+
+requires knowledge of the actual sizes of the GUI controls to determine if there is a conflict. In this case, the sizes of virtual UI controls
+are not known in advance. At the moment, we have developed a rich enough conflict verifier to calculate conflict-free layouts using practical
+examples, but this task is still being worked on.
+
+To summarize, we implement the layout synthesizer in the following way:
+
+\begin{itemize}
+\item the synthesizer is specialized for a given set of guidelines and a given structure;
+\item the structure is converted into a set of relational definitions;
+\item a corresponding ``binary hypercube'' definition for layout representation is
+  generated for the structure;
+\item instead of searching for all layouts, our solution first builds one maximum conflict layout, and then finds conflicts and solves them non-deterministically;
+\item the set of guideline rules is ``inverted'', and all matching on the
+  structure is turned into appropriate goals using the definitions
+  generated for this structure.
+\end{itemize}
+
+This, coupled with the usual coverage check, delivers us the layout synthesizer.
+
+\section{Solving Layout Constraints}
+
+Layout synthesizer for a given structure produces a set of layout primitives. This set in fact specifies a number of
+\emph{integer linear constraints} which have to be solved in order to obtain the final, absolute coordinates of the
+controls. Indeed, let us introduce the notations for integer constants and \emph{variables} which values have to be defined as
+  a result of constraint solving:
+
+\begin{itemize}
+\item $C\prg{.width}$,  $C\prg{.height}$~--- the width and height of UI control $C$ (integer constant for real UI controls and a \emph{variable} for virtual UI controls);
+
+%\item $C\prg{.width}$, ~--- the width of UI control $C$ (integer constant for real UI controls and a \emph{variable} for virtual UI controls);
+%\item $C\prg{.height}$~--- the height of UI control $C$ (integer constant for real UI controls and a \emph{variable} for virtual UI controls);
+\item $C\prg{.x}$,  $C\prg{.y}$~--- the $X$- and $Y$-coordinates of UI control $C$ (a \emph{variable} for each UI control);
+%\item $C\prg{.x}$~--- the $X$-coordinate of UI control $C$ (a \emph{variable} for each UI control);
+%\item $C\prg{.y}$~--- the $Y$-coordinate of UI control $C$ (a \emph{variable} for each UI control);
+\item $a_H$, $a_V$~--- the horizontal/vertical alignments between two UI controls (integer constant);
+\item $i_H$, $i_V$~--- the vertical/horizontal insets between two UI controls (integer constants);
+\item $ind$~--- indent between two UI controls (integer constant);
+\item $W$, $H$~--- the width and the height of enclosing panel (integer constants);
+%\item $W$~--- the width of enclosing panel (integer constant);
+%\item $H$~--- the height of enclosing panel (integer constant).
+\end{itemize}
+
+The set of layout primitives defines a set of integer constraints as follows.
+
+\begin{itemize}
+\item A primitive $\term{hor}\,(C_1,\,C_2)$ introduces constraints
+
+\vspace{-1em}
+  \begin{gather*}
+    C_2\prg{.x} - C_1\prg{.x} \leq i_H + C_1{.width}\\
+    C_2\prg{.y} - C_1\prg{.y} = a_V
+  \end{gather*}
+
+\item A primitive $\term{vert}\,(C_1,\,C_2)$ introduces constraints
+
+\vspace{-1em}
+  \begin{gather*}
+    C_2\prg{.x} - C_1\prg{.x} = a_H\\
+    C_2\prg{.y} - C_1\prg{.y} \leq i_V + C_1\prg{.height}
+  \end{gather*}
+
+\item A primitive $\term{halign}\,(C_1,\,C_2)$ introduces constraint
+  \[
+  C_1\prg{.x} - C_2\prg{.x} = a_H
+  \]
+
+\item A primitive  $\term{valign}\,(C_1,\,C_2)$ introduces constraint
+  \[
+  C_1\prg{.y} - C_2\prg{.y} = a_V
+  \]
+
+\item A primitive $\term{indent}\,(C_1,\,C_2)$ introduces constraints
+  \begin{gather*}
+    C_1\prg{.x} - C_2\prg{.x} = ind\\
+    C_1\prg{.y} - C_2\prg{.y} \leq i_V + C_1\prg{.height}
+  \end{gather*}
+\end{itemize}
+
+%Note, the last two layout primitives $\term{valign}$ and $\term{indent}$ are not used in the current implementation, but we provide constraints they introduce for completeness.
+
+Also, for each virtual UI control $C$ containing UI controls $C_1, \ldots, C_n$ the following constraints are needed that define
+its actual coordinates, width and height:
+  \begin{gather*}
+    C\prg{.x} = \min\,\{C_1\prg{.x}, \ldots, C_n\prg{.x}\}\\
+    C\prg{.y} = \min\,\{C_1\prg{.y}, \ldots, C_n\prg{.y}\}\\
+    C\prg{.x} + C\prg{.width} = \max\,\{C_i\prg{.x} + C_i\prg{.width}\}_{i=1}^n\\
+    C\prg{.y} + C\prg{.height} = \max\,\{C_i\prg{.y} + C_i\prg{.height}\}_{i=1}^n\\
+  \end{gather*}
+
+Additionally, a number of inequality constraints is added which restrict the maximal possible values for
+coordinates taking into account the size of enclosing panel. For each UI control $C$ we introduce the following constraints:
+
+  \begin{gather*}
+    C\prg{.x} \geq 0\\
+    C\prg{.y} \geq 0\\
+    C\prg{.x} + C\prg{.width} \leq W\\
+    C\prg{.y} + C\prg{.height} \leq H\\
+  \end{gather*}
+\vspace{-2em}
+
+There exists a number of ways to solve the set of integer linear inequalities (for example, using SMT solvers over the linear
+integer arithmetic theory). It is, however, very appealing to try to employ relational verifiers yet again. This relational
+solver would have the following benefit: it could be seamlessly integrated into the layout synthesis procedure, thus allowing some
+constraint selection to be rejected at earlier stages.
+
+However, the current relational implementation of this solver is underperforming in the presence of virtual UI controls.
+As mentioned above, the width and height of virtual UI controls are not constants, which greatly increases the
+search space. So, for the time being, we, indeed, used Z3 Theorem Prover~\cite{Zthree} to determine the absolute coordinates of the UI
+controls (as well as the width and height of all virtual UI controls).
+
+
+\end{comment}

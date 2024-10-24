@@ -1,0 +1,39 @@
+% !TEX TS-program = pdflatex
+% !TeX spellcheck = en_US
+% !TEX root = main.tex
+
+
+\He{Introduction}
+\label{sec:intro}
+
+Graphical user interface (GUI) is by far the most common device people use to interact with software. Be it desktop
+or laptop computer, mobile device, ATM, game console, etc., an end-user will probably find a certain set
+of graphical controls with intuitively clear meanings. This low entry threshold, however, comes at some
+price~--- GUI is rather a subtle thing to design~\cite{UI1,UI12}.
+
+Regular people rarely ponder what makes GUI so good-looking and easy to use. In order to make it such a lot of
+aesthetic, ergonomic, and psychological aspects have to be taken into account which require an expertise
+regular software developers can hardly possess. This led to the establishing the roles of not only UI, but also UX
+(user experience) designers~\cite{UI5}, who devise the \emph{guidelines} which developers have to
+follow when implementing interfaces. These guidelines, however, are often incomplete, ambiguous and informal, and understanding
+and following them require intuition the developers do not always have.  The communication between these two
+sides~--- developers and designers~---  often constitutes an important issue due to the difference in
+expertise, approaches, and mindsets~\cite{UI6}. Moreover, the guidelines as a rule
+do not simply scale between various devices or even screen resolutions, so in order to support all desirable
+platforms a developer might have to follow different guidelines separately.
+
+In this paper we present a framework for synthesizing the layouts for GUI controls with respect to design guidelines. We give a model for GUI
+which separates its logical structure (the part software developers understand well) from layout, i.e. concrete placement
+of GUI controls with insets, alignments and indentation (the part the designers are responsible for). We devise a completely automatic approach
+which for a given logical structure (provided by a software developer) and a set of guideline rules (provided by a UI/UX designer) synthesizes
+concrete layouts admissible w.r.t. these rules. In general the guidelines are ambiguous, so multiple concrete layouts can
+comply with them. We consider layout synthesis as a constraint satisfaction problem and use relational programming~\cite{TRS}
+and the verifier-to-solver~\cite{searchproblems} approach to construct a solver which synthesizes layouts in terms of layout primitives. In its
+vanilla form the solver turned out to be inefficient so we applied a number of refinements, including specialization; in effect our
+final solver is a mixture of functional and relational code. The set of synthesized layout primitives, in turn, is reified into linear
+integer constraints which are then solved using \textsc{Z3} solver~\cite{Zthree} providing absolute coordinates for all GUI controls.
+Our approach delivers a \emph{sound} and \emph{complete} solver~--- for a given logical GUI structure it synthesizes a set of all layouts each of which is
+admissible w.r.t. given guidelines.
+
+The solver is also efficient and can be run on a regular laptop.
+

@@ -1,0 +1,21 @@
+% !TEX TS-program = pdflatex
+% !TeX spellcheck = en_US
+% !TEX root = main.tex
+
+\section{Discussion and Future Work}
+
+We presented the results of our work on guideline-based synthesis of GUI layouts. The approach we take makes it possible to
+automatically build GUI layouts which by construction comply with a designer-specified set of rules. The prototype implementation
+we developed allows to synthesize the layouts for the real-word industrial GUI components w.r.t. the real-world guidelines in
+appropriate time.
+
+One interesting question which may arise is if the application of relational programming is essential for this problem to be solved. Indeed, the set of guidelines
+describes a matching (or rewriting) system which, in principle, can be directly implemented without any use of relational techniques. We argue, however,
+that in this case a whole piece of work on justification of the correctness of the solution would have been repeated anew. In our
+case, the justification trivially follows from the completeness of the \textsc{miniKanren} search and refutational completeness of our solution. We also speculate
+that such a solution would require reinventing of some implementation techniques to support nondeterminism and backtracking, which are already native to relational
+programming. Finally, the duality between patterns over structure and relational goals (initially unexpected for us), to our opinion, witnesses, that relational
+programming is a truly relevant technique for this problem.
+
+
+

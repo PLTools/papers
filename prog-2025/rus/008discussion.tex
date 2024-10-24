@@ -1,0 +1,31 @@
+% !TeX spellcheck = ru_RU
+% !TEX root = mainrus.tex
+
+\section{Discussion and Future Work}
+
+Данная работа посвящена синтезу  GUI на основе гайдлайна.
+Наш подход позволяет автоматически располагать элементы управления GUI так, что результат по построению соответствует набору правил, сформулированных дизайнером.
+Прототип реализации позволяет синтезировать реалистичные примеры промышленных интерфейсов, с учетом промышленных гайдлайнов за разумное время.
+
+%We presented the results of our work on guideline-based synthesis of GUI layouts. The approach we take makes it possible to
+%automatically build GUI layouts which by construction comply with a designer-specified set of rules. The prototype implementation
+%we developed allows to synthesize the layouts for the real-word industrial GUI components w.r.t. the real-world guidelines in
+%appropriate time.
+
+Одним из интересных вопросов, является необходимость использования реляционного программирования для решения нашей задачи.
+Да, набор правил, регламентирующих систему переписывания, в принципе, может быть реализован без использования реляционного подхода.
+Однако мы считаем, что в этом случае большая часть работы по обоснованию корректности решения должна быть повторена заново.
+В нашем же случае обоснование тривиально следует из полноты поиска \textsc{miniKanren} и полноты по опровержению (англ. refutational completeness) нашего решения.
+Мы также предсказываем, что решение потребует изобретения заново недетерминизма и поиска с возвратами, которые уже есть в реляционном программировании.
+Также дуальность между экземплярами в структуре и реляционными отношениями, изначально не ожидаемая нами, по нашему мнению, демонстрирует, что реляционное программирование --- это подходящий подход для решения поставленной задачи.
+
+%One interesting question which may arise is if the application of relational programming is essential for this problem to be solved. Indeed, the set of guidelines
+%describes a matching (or rewriting) system which, in principle, can be directly implemented without any use of relational techniques. We argue, however,
+%that in this case a whole piece of work on justification of the correctness of the solution would have been repeated anew. In our
+%case, the justification trivially follows from the completeness of the \textsc{miniKanren} search and refutational completeness of our solution. We also speculate
+%that such a solution would require reinventing of some implementation techniques to support nondeterminism and backtracking, which are already native to relational
+%programming. Finally, the duality between patterns over structure and relational goals (initially unexpected for us), to our opinion, witnesses, that relational
+%programming is a truly relevant technique for this problem.
+%
+%
+%

@@ -1,7 +1,7 @@
 .PHONY: 
 .SUFFIXES: .fmt .pdf
 ENGINE ?= pdflatex
-MAIN = report_19_09
+MAIN = mainrus
 
 
 all: $(MAIN).pdf

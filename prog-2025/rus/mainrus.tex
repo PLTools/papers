@@ -1,193 +1,250 @@
 % !TEX TS-program = pdflatex
 % !TeX spellcheck = cp1251
-% !TEX root = main.tex
+% !TEX root = report_19_09.tex
+
 \documentclass[a4paper,twoside,11pt]{article}
 \usepackage[cp1251]{inputenc}
 \usepackage[english,russian]{babel}
-
 \usepackage{fancyhdr}
 \usepackage{../eng/newprog1e}
 \usepackage{amsfonts,amsmath,amssymb,amsthm}
 \usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage[autostyle=true]{csquotes}
+\usepackage{listings}
+\usepackage{url}
+\usepackage{verbatim}
+%\usepackage{biblatex}
 
+\usepackage[ru-RU]{datetime2}
+\DTMsetup{useregional=numeric}
+\DTMtryregional{ru}{RU}
+
+
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,backgrounds,fit,calc}
 
 \tolerance=1000
 
+%\lstdefinelanguage{guideline}{
+%	keywords={},
+%	sensitive=true,
+%	commentstyle=\small\itshape\ttfamily,
+%	keywordstyle=\ttfamily\underbar,
+%	identifierstyle=\ttfamily,
+%	basewidth={0.5em,0.5em},
+%	columns=fixed,
+%	fontadjust=true,
+%	literate={->}{{$\to$}}3 {=>}{{$\Rightarrow$}}3,
+%	morecomment=[s]{(*}{*)}
+%}
+
+\lstdefinelanguage{ocanren}{
+	keywords={run, conde, fresh, let, in, match, with, when, class, type,
+		object, method, of, rec, repeat, until, while, not, do, done, as, val, inherit,
+		new, module, sig, deriving, datatype, struct, if, then, else, open, private, virtual, include, success, failure, switch,
+		true, false, ocanren},
+	sensitive=true,
+	commentstyle=\small\itshape\ttfamily,
+	keywordstyle=\ttfamily\textbf,
+	identifierstyle=\ttfamily,
+	basewidth={0.5em,0.5em},
+	columns=fixed,
+	mathescape=true,
+	fontadjust=true,
+	literate={fun}{{$\lambda$}}1 {->}{{$\to$}}3 {===}{{$\equiv$}}1 {=/=}{{$\not\equiv$}}1 {|>}{{$\triangleright$}}3 {\\/}{{$\vee$}}2 {/\\}{{$\wedge$}}2 {^}{{$\uparrow$}}1
+	%{[]}{{\texttt|[]|}}1
+	,
+	morecomment=[s]{(*}{*)}
+}
+
+\lstdefinelanguage{ocaml}{
+	keywords={type, struct},
+	sensitive=true,
+	commentstyle=\small\itshape\ttfamily,
+	keywordstyle=\ttfamily\textbf,
+	%keywordstyle=\ttfamily\underbar,
+	identifierstyle=\ttfamily,
+	basewidth={0.5em,0.5em},
+	columns=fixed,
+	fontadjust=true,
+	literate={->}{{$\to$}}3 {=>}{{$\Rightarrow$}}3,
+	morecomment=[s]{(*}{*)}
+}
+
+\lstdefinelanguage{algo}{
+	basicstyle=\small\ttfamily,
+	keywords={if, for, return},
+	sensitive=true,
+	commentstyle=\small\itshape\rmfamily,
+	keywordstyle=\rmfamily\textbf,
+	%keywordstyle=\ttfamily\underbar,
+	identifierstyle=\rmfamily,
+	basewidth={0.5em,0.5em},
+	columns=fixed,
+	fontadjust=true,
+	literate={->}{{$\to$}}3 {=>}{{$\Rightarrow$}}3,
+	morecomment=[l]{//},
+	morecomment=[s]{(*}{*)}
+}
+
 \newcommand{\defi}{\stackrel{\mathrm{def}}{=}}
+\newcommand{\term}[1]{\mbox{\texttt{\textbf{#1}}}}
+\newcommand{\prg}[1]{\mbox{\lstinline|#1|}}
+\newcommand{\run}[2]{\term{run}^{#1}\,\left[#2\right]}
 
 \numberwithin{equation}{section}
-\newtheorem{theorem}{пїЅпїЅпїЅпїЅпїЅпїЅпїЅ}
+\newtheorem{theorem}{Теорема}
 
 \newtheorem{definition}{Definition}
-\newtheorem{theorem_ru}{пїЅпїЅпїЅпїЅпїЅпїЅпїЅ}
+\newtheorem{theorem_ru}{Теорема}
 
 
 \journalnumber{2}
-\curyear{2024}
-\authorlist{Lozov et al.}
-\titlehead{Declarative GUI Layout Synthesis
-  with Relational Constraint Solvers \small{(system description)}}
+\curyear{2013}
+\authorlist{АБРАМОВ И ДР.}
+\titlehead{СЕМИНАР ПО КОМПЬЮТЕРНОЙ АЛГЕБРЕ В 2011-2012 гг.}
 \headerdef
 
 \udk{004.421.6}
 %92+004.94}
-%\rubrika{пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ}
-\rubrika{Software engineering, testing and verification}
-%\rubrika{пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.}
-\dateinput{??.07.2024}
+\rubrika{КОМПЬЮТЕРНАЯ АЛГЕБРА}
+\dateinput{10.07.2012}
 
-\rusabstr{We describe a system which, given a set of designer-specified layout constraints (\emph{guidelines})
-and a description of graphic user interface (GUI) logical structure generates a set of concrete layouts,
-each of which complies with these guidelines by construction. We give a formal treatment of the task as a
-constraint satisfiability problem and describe the construction of a sound and complete solver
-based on the utilization of \emph{relational verifier-to-solver} approach. We also describe a number
-of refinements which make the solver more efficient and applicable.
+\rusabstr{
+\include{000abstract.tex}
 }
 
 \author{
-{\bfseries Peter Lozov*, Denis Fokin**,}
-\\ {\bfseries Dmitrii Kosarev*, Dmitry Boulytchev*}
-\\ {\itshape *St.~Petersburg State University}
-\\ {\slshape 199034} {\slshape 7-9} {\itshape  Universitetskaya Embankment, St Petersburg, Russia}
-\\ {\itshape **No affiliation}
-\\ {\itshape E-mail: lozov.peter@gmail.com, denis.fokin@gmail.com, Dmitrii.Kosarev@pm.me, dboulytchev@math.spbu.ru }}
-\title{Declarative GUI Layout Synthesis   with Relational Constraint Solvers \small{(system description)}}
+{\bfseries С.~А.~Абрамов*, А.~А.~Боголюбская**,}
+\\ {\bfseries В.~А.~Ростовцев**}
+\\ {\itshape *Вычислительный центр им. А. А. Дородницына Федерального исследовательского центра «Информатика и управление» РАН}
+\\ {\slshape 119333} {\itshape Москва, ул. Вавилова, д.} {\slshape 40}
+\\ {\itshape *Московский государственный университет им. М. В. Ломоносова}
+\\ {\slshape 1199991} {\itshape Москва, ГСП-1, Ленинские горы, д.} {\slshape 1}
+\\ {\itshape **Объединенный институт ядерных исследований}
+\\ {\slshape 141980} {\itshape Дубна Московской области}
+\\ {\itshape E-mail: sergeyabramov@mail.ru, abogol@jinr.ru,  rost@jinr.ru }}
+\title{СЕМИНАР ПО КОМПЬЮТЕРНОЙ АЛГЕБРЕ В 2011--2012 гг.}
 %\thanks{~}
 
 \date{}
 
-
-\input{preamble}
-
-%\usepackage[citestyle=ext-authoryear,
-%            bibstyle=ext-authortitle,
-%            introcite=plain,articlein=false,sorting=nyt]{biblatex}
-%\DeclareOuterCiteDelims{parencite}{\bibopenbracket}{\bibclosebracket}
-%\DeclareDelimFormat{nameyeardelim}{\addcomma\space}
-%\DeclareFieldFormat{bbx@introcite}{\mkbibbold{\mkbibbrackets{#1}}}
-%\DeclareFieldFormat{issuedate}{#1}
-%\renewcommand*{\introcitepunct}{\par}
-%\renewcommand*{\volnumdatedelim}{\addcomma\addspace}
-%\setlength{\bibhang}{0pt}
-%
-%\addbibresource{main.bib}
-
-
 \begin{document}
 
-%\maketitle
+\maketitle
 \setcounter{page}{3}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\He{пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\He{Введение}
+\label{sec:intro}
+\input{001intro}
 
-%\input{001intro}
-\input{001.8859}
+\He{Модель GUI}
+\label{sec:scene}
+\input{002model}
 
-%\input{model}
-%\input{guidelines}
-%\input{rel}
-%\input{synthesis}
-%\input{impl}
-%\input{related}
-%\input{discussion}
+\He{Синтез расположения как задача удовлетворения ограничений}
+\label{sec:guidelines}
+\input{003guidelines.tex}
 
-%\bibliographystyle{ACM-Reference-Format}
-\bibliographystyle{ugost2008ls}
-\bibliography{../main.bib}
+\He{Реляционное программирование, верификаторы и решатели}
+\label{sec:rel}
+\input{004rel.tex}
 
-%\label{lastpage}
+\He{Синтез расположения GUI}
+\label{sec:synthesizing}
+\input{005synthesis.tex}
 
-%\autocite{bertram} % \parencite also works here
-%\printbibliography
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
+%
 %\begin{thebibliography}{99}
 %
 %\small
 %\bibitem{AZ97}
-%{\em пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ.пїЅ., пїЅпїЅпїЅпїЅ пїЅ.пїЅ.} пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ
-%пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅ 1995--1996 пїЅ.
-%// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, 1997,
-%No 1. пїЅ. 75--77.
+%{\em Абрамов С.А., Зима Е.В.} Семинар по компьютерной алгебре на
+%факультете вычислительной математики и кибернетики МГУ в 1995--1996 г.
+%// Программирование, 1997,
+%No 1. С. 75--77.
 %
 %\bibitem{AZ98}
-%{\em пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ.пїЅ., пїЅпїЅпїЅпїЅ пїЅ.пїЅ.} пїЅпїЅпїЅпїЅпїЅпїЅ-пїЅпїЅ\-пїЅпїЅпїЅ\-пїЅпїЅ\-пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
-%``пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ'' пїЅ 1996--1997 пїЅ.
-%// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, 1998,
-%No 1. пїЅ. 69--72.
+%{\em Абрамов С.А., Зима Е.В.} Научно-ис\-сле\-до\-вательский семинар
+%``Компьютерная алгебра'' в 1996--1997 г.
+%// Программирование, 1998,
+%No 1. С. 69--72.
 %
 %\bibitem{AR99}
-%{\em пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ.пїЅ.} пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ
-%1997--1998 пїЅ.  // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, 1998, No 6. пїЅ. 3--7.
+%{\em Абрамов С.А., Ростовцев В.А.} Семинар по компьютерной алгебре в
+%1997--1998 г.  // Программирование, 1998, No 6. С. 3--7.
 %
 %\bibitem{AKR00}
-%{\em пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ.пїЅ.} пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
-%пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ
-%1998--1999 пїЅ.  // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, 2000, No 1. пїЅ. 8--12.
+%{\em Абрамов С.А., Крюков А.П., Ростовцев В.А.} Семинар по компьютерной
+%алгебре в
+%1998--1999 г.  // Программирование, 2000, No 1. С. 8--12.
 %
 %\bibitem{AKR01}
-%{\em пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ.пїЅ.} пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
-%пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
-%пїЅ 1999--2000 пїЅ.  // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, 2001, No 1. пїЅ. 3--7.
+%{\em Абрамов С.А., Крюков А.П., Ростовцев В.А.} Семинар по компьютерной
+%алгебре
+%в 1999--2000 г.  // Программирование, 2001, No 1. С. 3--7.
 %
 %\bibitem{AKR02}
-%{\em пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ.пїЅ.} пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
-%пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ 2000--2001 пїЅ.  // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, 2002, No 2. пїЅ. 6--9.
+%{\em Абрамов С.А., Крюков А.П., Ростовцев В.А.} Семинар по компьютерной
+%алгебре в 2000--2001 г.  // Программирование, 2002, No 2. С. 6--9.
 %
 %\bibitem{AKR03}
-%{\em пїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ.} пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
-%пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ 2001--2002 пїЅ. // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, 2003, No 2. пїЅ. 3--7.
+%{\em Абрамов~С.А., Крюков~А.П., Ростовцев~В.А.} Семинар по компьютерной
+%алгебре в 2001--2002 г. // Программирование, 2003, No 2. С. 3--7.
 %\bibitem{AER04}
-%{\em пїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ.} пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ
-%пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ 2002--2003~пїЅ.  // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, 2004, No 2.
-%пїЅ. 3--7.
+%{\em Абрамов~С.А., Еднерал~В.Ф., Ростовцев~В.А.} Семинар по
+%компьютерной алгебре в 2002--2003~г.  // Программирование, 2004, No 2.
+%С. 3--7.
 %\bibitem{ABRE05}
-%{\em пїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ.} пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ
-%пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ 2003--2004 пїЅ.  // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, 2005, No 2.
-%пїЅ. 3--9.
+%{\em Абрамов~С.А., Боголюбская~А.А., Ростовцев~В.А., Еднерал~В.Ф.} Семинар по
+%компьютерной алгебре в 2003--2004 г.  // Программирование, 2005, No 2.
+%С. 3--9.
 %\bibitem{ABRE06}
-%{\em пїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ.} пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ
-%пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ 2004--2005 пїЅ.  // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, 2006, No 2.
-%пїЅ. 3--7.
+%{\em Абрамов~С.А., Боголюбская~А.А., Ростовцев~В.А., Еднерал~В.Ф.} Семинар по
+%компьютерной алгебре в 2004--2005 г.  // Программирование, 2006, No 2.
+%С. 3--7.
 %\bibitem{ABRE07}
-%{\em пїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ.} пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ
-%пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ 2005--2006 пїЅ.  // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, 2007, No 2.
-%пїЅ. 3--8.
+%{\em Абрамов~С.А., Боголюбская~А.А., Ростовцев~В.А., Еднерал~В.Ф.} Семинар по
+%компьютерной алгебре в 2005--2006 г.  // Программирование, 2007, No 2.
+%С. 3--8.
 %\bibitem{ABRE08}
-%{\em пїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ.} пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ
-%пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ 2006--2007 пїЅ.  // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, 2008, No 2.
-%пїЅ. 3--8.
+%{\em Абрамов~С.А., Боголюбская~А.А., Ростовцев~В.А., Еднерал~В.Ф.} Семинар по
+%компьютерной алгебре в 2006--2007 г.  // Программирование, 2008, No 2.
+%С. 3--8.
 %\bibitem{ABRE09}
-%{\em пїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ.} пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ
-%пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ 2007--2008 пїЅ.  // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, 2009, No 2.
-%пїЅ. 3--9.
+%{\em Абрамов~С.А., Боголюбская~А.А., Ростовцев~В.А., Еднерал~В.Ф.} Семинар по
+%компьютерной алгебре в 2007--2008 г.  // Программирование, 2009, No 2.
+%С. 3--9.
 %\newpage
 %\bibitem{mmcp09}
 %``Mathematical Modeling and Computational Physics (CAAP'2009)''. Book of abstracts of the internationl conference. Dubna, July 7-11, 2009.
 %Dubna, 2009.
 %\bibitem{ABRE10}
-%{\em пїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ.} пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ
-%пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ 2008-2009 пїЅ.  // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, 2010, No 2. пїЅ. 3--8.
+%{\em Абрамов~С.А., Боголюбская~А.А., Ростовцев~В.А., Еднерал~В.Ф.} Семинар по
+%компьютерной алгебре в 2008-2009 г.  // Программирование, 2010, No 2. С. 3--8.
 %\bibitem{ABER11}
-%{\em пїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ.} пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ
-%пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ 2009-2010 пїЅ. // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, 2011, No 2. пїЅ. 3--8.
+%{\em Абрамов~С.А., Боголюбская~А.А., Еднерал~В.Ф., Ростовцев~В.А.} Семинар по
+%компьютерной алгебре в 2009-2010 г. // Программирование, 2011, No 2. С. 3--8.
 %\bibitem{ABR12}
-%{\em пїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ., пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ.,  пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ~пїЅ.пїЅ.} пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ
-%пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ 2010-2011 пїЅ.  // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, 2012, No 2. пїЅ. 3--10.
+%{\em Абрамов~С.А., Боголюбская~А.А.,  Ростовцев~В.А.} Семинар по
+%компьютерной алгебре в 2010-2011 г.  // Программирование, 2012, No 2. С. 3--10.
 %
 %%
 %
 %\end{thebibliography}
 
-%\label{lastpage}
+%\bibliographystyle{ugost2008ls}
+%\bibliography{report_19_09.bib}
+
+\label{lastpage}
 \end{document}
 
 
 
-%ORDERING OF REFERENCES (if non-author/year and non-alph)
-%(*) Alphabetical by all authors
-%(c) Citation order (unsorted, like unsrt.bst)
-%(d) Year ordered and then by authors
-%(r) Reverse year ordered and then by authors
-%Select:
+
+
+

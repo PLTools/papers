@@ -1,7 +1,6 @@
+% !TeX encoding = windows-1251
 % !TeX spellcheck = ru_RU
 % !TEX root = mainrus.tex
-
-\section{Р РµР°Р»РёР·Р°С†РёСЏ Рё СЌРєСЃРїРµСЂРёРјРµРЅС‚С‹}
 
 \begin{figure*}[t]
 \begin{verbnobox}[\fontsize{10pt}{10pt}\selectfont]
@@ -36,7 +35,7 @@ ordered main_group (
 Button "Search" approves^ main_group
 Button "Reset" cancels^ main_group
 \end{verbnobox}
-\caption{РћРїРёСЃР°РЅРёРµ СЃС‚СЂСѓРєС‚СѓСЂР° РґРёР°Р»РѕРіР° РїРѕРёСЃРєР° РёР· СЃРµСЂРІРёСЃР° Google Drive}
+\caption{Описание структура диалога поиска из сервиса Google Drive}
 \label{gd_structure}
 \end{figure*}
 
@@ -44,25 +43,25 @@ Button "Reset" cancels^ main_group
     \begin{subfigure}[t]{.45\textwidth}
         \vspace{-15em}
         \begin{minipage}{4cm}
-        \includegraphics[scale=0.5]{../google-drive-search-setting-output2.png}
+        \includegraphics[scale=0.5]{../eng/google-drive-search-setting-output2.png}
         \end{minipage}
-        \caption{Р•СЃР»Рё РјРµС‚РєР° РѕРїРёСЃС‹РІР°РµС‚ \enquote{СЃР»РёС€РєРѕРј РґР»РёРЅРЅС‹Р№} СЌР»РµРјРµРЅС‚ СѓРїСЂР°РІР»РµРЅРёСЏ, С‚Рѕ СЂР°СЃРїРѕР»Р°РіР°С‚СЊ РёС… РІРµСЂС‚РёРєР°Р»СЊРЅРѕ}
+        \caption{Если метка описывает \enquote{слишком длинный} элемент управления, то располагать их вертикально}
     \end{subfigure}\hspace{1cm}
     \begin{subfigure}[t]{.45\textwidth}
-      \includegraphics[scale=0.5]{../google-drive-search-setting-output3.png}
+      \includegraphics[scale=0.5]{../eng/google-drive-search-setting-output3.png}
       %\vskip17.5mm
-      \caption{РўРѕ Р¶Рµ СЃР°РјРѕРµ, РЅРѕ РєРѕРЅСЃС‚Р°РЅС‚Р° РґР»СЏ СЃРІРѕР№СЃС‚РІР°  \enquote{СЃР»РёС€РєРѕРј РґР»РёРЅРЅС‹Р№} СѓРјРµРЅСЊС€РµРЅР°}
+      \caption{То же самое, но константа для свойства  \enquote{слишком длинный} уменьшена}
     \end{subfigure}
-    \caption{РЎРёРЅС‚РµР·РёСЂРѕРІР°РЅРЅС‹Рµ СЂР°СЃРїРѕР»РѕР¶РµРЅРёСЏ СЌР»РµРјРµРЅС‚РѕРІ РґР»СЏ РґРёР°Р»РѕРіР° РёР· Google Drive}
+    \caption{Синтезированные расположения элементов для диалога из Google Drive}
     \label{fig:QMLtwoGuidelines}
 \end{figure*}
 
 
 
-РџСЂРѕС‚РѕС‚РёРї СЃРёРЅС‚РµР·Р°С‚РѕСЂР° СЂРµР°Р»РёР·РѕРІР°РЅ РєР°Рє РєР»РёРµРЅС‚-СЃРµСЂРІРµСЂРЅРѕРµ РїСЂРёР»РѕР¶РµРЅРёРµ\footnote{РџСЂРѕС‚РѕС‚РёРї РґРѕСЃС‚СѓРїРµРЅ РїРѕ СЃСЃС‹Р»РєРµ:
-\url{https://se.math.spbu.ru/projects/genui} (РїСЂРѕРІРµСЂРµРЅРѕ: \DTMDate{2024-08-26})}.
-РЎРѕ СЃС‚РѕСЂРѕРЅС‹ РєР»РёРµРЅС‚Р° РјС‹ РёСЃРїРѕР»СЊР·СѓРµРј \textsc{HTML5} Рё \JavaScript{} РґР»СЏ РІР·Р°РёРјРѕРґРµР№СЃС‚РІРёСЏ СЃ СЃРµСЂРІРµСЂРѕРј\footnote{\textcolor{red}{Р РµР°Р»РёР·Р°С†РёСЏ РѕС‚ Р”РµРЅРёСЃР° СЃРµР№С‡Р°СЃ РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚ \JSOO.} Р’РµСЂРЅСѓС‚СЊСЃСЏ Рє СЌС‚РѕРјСѓ }.
-РќР° СЃРµСЂРІРµСЂРµ РёСЃРїРѕР»РЅСЏРµС‚СЃСЏ \OCaml РїСЂРёР»РѕР¶РµРЅРёРµ, РѕСЃРЅР°С‰С‘РЅРЅРѕРµ \OCanren{} Рё \Zthree{}.
+Прототип синтезатора реализован как клиент-серверное приложение\footnote{Прототип доступен по ссылке:
+\url{https://se.math.spbu.ru/projects/genui} (проверено: \DTMDate{2024-08-26})}.
+Со стороны клиента мы используем \textsc{HTML5} и \JavaScript для взаимодействия с сервером.
+На сервере исполняется \OCaml приложение, оснащённое \OCanren и \Zthree.
 
 %The prototype of our synthesizer is developed as a \mbox{client}/server application using web technologies\footnote{The implementation is available online
 %for review: \url{https://genui.utbot.org}, username: ``public-user'', password: ``1jWMz2oWWmQW40hHSPZb'', no quotes.
@@ -71,11 +70,11 @@ Button "Reset" cancels^ main_group
 %On the client side we use \textsc{HTML5} for rendering and \OCaml
 %compiled to \textsc{JavaScript} via \JSOO~\cite{JSOO} for a client-server interaction. The server side is a native \OCaml application equipped with \OCanren and \Zthree.
 
-Р§С‚РѕР±С‹ РѕР±Р»РµРіС‡РёС‚СЊ РїРѕР»СЊР·РѕРІР°С‚РµР»СЋ РїСЂРµРґСЃС‚Р°РІР»РµРЅРёРµ СЃС‚СЂСѓРєС‚СѓСЂС‹ GUI Рё РіР°Р№РґР»Р°Р№РЅР°, РјС‹ СЂР°Р·СЂР°Р±РѕС‚Р°Р»Рё РґРІР° С‚РµРєСЃС‚РѕРІС‹С… РїСЂРµРґРјРµС‚РЅРѕ-РѕСЂРёРµРЅС‚РёСЂРѕРІР°РЅРЅС‹С… СЏР·С‹РєР°.
-Р’ СЂРµР°Р»РёР·Р°С†РёРё РІС‹СЂР°Р·РёС‚РµР»СЊРЅРѕСЃС‚СЊ СЏР·С‹РєР° РіР°Р№РґР»Р°Р№РЅРѕРІ   СЂР°СЃС€РёСЂРµРЅР°: РјС‹ СЂР°Р·СЂРµС€Р°РµРј РІ РїСЂР°РІРёР»Р°С… РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРёРµ РѕРіСЂР°РЅРёС‡РµРЅРёСЏ, РїСЂРёСЃСѓС‚СЃС‚РІСѓСЋС‚ РєРѕРЅСЃС‚СЂСѓРєС†РёРё РґР»СЏ Р·Р°РґР°РЅРёСЏ С‚Р°Р±Р»РёС‡РЅС‹С… СЂР°СЃРїРѕР»РѕР¶РµРЅРёР№, Рё С‚.Рї. РќРё РѕРґРЅРѕ РёР· СЂР°СЃС€РёСЂРµРЅРёР№ СЃСѓС‰РµСЃС‚РІРµРЅРЅРѕ РЅРµ РёР·РјРµРЅСЏРµС‚ РїРѕРґС…РѕРґ, РѕРїРёСЃР°РЅРЅС‹Р№ РІ РїСЂРµРґС‹РґСѓС‰РёС… РіР»Р°РІР°С…, Рё РІСЃРµ СЂР°СЃС€РёСЂРµРЅРёСЏ РјРѕРіСѓС‚ Р±С‹С‚СЊ СѓС‡С‚РµРЅС‹.
-РњС‹ С‚Р°РєР¶Рµ РїР°СЂР°РјРµС‚СЂРёР·СѓРµРј СЃРёСЃС‚РµРјСѓ РЅР°Р±РѕСЂРѕРј РєРѕРЅСЃС‚Р°РЅС‚, РєРѕС‚РѕСЂС‹Рµ РѕРїСЂРµРґРµР»СЏСЋС‚ СЃРІРѕР№СЃС‚РІР° РѕРєСЂСѓР¶РµРЅРёСЏ (РЅР°РїСЂРёРјРµСЂ, СЂР°Р·РјРµСЂ С…РѕР»СЃС‚Р°, РіРґРµ РјС‹ СЂР°СЃРїРѕР»Р°РіР°РµРј СЌР»РµРјРµРЅС‚С‹ СѓРїСЂР°РІР»РµРЅРёСЏ).
-РџСЂРёРјРµСЂ РѕРїРёСЃР°РЅРёСЏ СЃС‚СЂСѓРєС‚СѓСЂС‹ РґР»СЏ РґРёР°Р»РѕРіРѕРІРѕРіРѕ РѕРєРЅР° РЅР°СЃС‚СЂРѕРµРє РїРѕРёСЃРєР° СЃРµСЂРІРёСЃР° Google Drive РїСЂРµРґСЃС‚Р°РІР»РµРЅР° РЅР° СЂРёСЃ.~\ref{gd_structure}.
-РўРµРєСЃС‚РѕРІРѕРµ РѕРїРёСЃР°РЅРёРµ РіР°Р№РґР»Р°Р№РЅР° СЃР»РёС€РєРѕРј РґР»РёРЅРЅРѕРµ, С‡С‚РѕР±С‹ РїСЂРµРґСЃС‚Р°РІРёС‚СЊ РµРіРѕ Р·РґРµСЃСЊ.
+Чтобы облегчить пользователю представление структуры GUI и предписания, мы разработали два текстовых предметно-ориентированных языка.
+В реализации выразительность языка предписаний расширена: мы разрешаем в правилах использовать пользовательские ограничения, присутствуют конструкции для задания табличных расположений, и т.п. Ни одно из расширений существенно не изменяет подход, описанный в предыдущих главах, и все расширения могут быть учтены.
+Мы также параметризуем систему набором констант, которые определяют свойства окружения (например, размер холста, где мы располагаем элементы управления).
+Пример описания структуры для диалогового окна настроек поиска сервиса Google Drive представлена на рис.~\ref{gd_structure}.
+Текстовое описание предписания слишком длинное, чтобы представить его здесь.
 
 %In order to provide end-users a way to represent GUI structures and guidelines we developed two textual DSLs. In addition in our implementation
 %the expressivity of guidelines description was a little bit extended~--- for example, we actually allow the rules to be equipped with custom constraints, there are
@@ -85,107 +84,6 @@ Button "Reset" cancels^ main_group
 %An example of structure description for Google Drive search settings dialog is shown in Fig.~\ref{gd_structure}.
 %The textual representation of guidelines, however, is too lengthy to show.
 
-
-\begin{comment}
-The flowchart of server-side application architecture is shown in Fig.~\ref{server-flowchart}. Dotted blocks denote the input data (structure,
-guideline and environment descriptions), blocks with solid thin borders~--- \OCaml non-relational components, blocks with solid thick borders~---
-relational components written in \OCanren. Thin arrows show the data transfer between components, and the thick one~--- the execution
-of generated from inputs relational program. By ``run$^*$'' we denote the execution of relational components which return all the answers for the problem
-they solve. The last two steps (integer linear inequations generation and \Zthree execution) are performed for each synthesized hypercube.
-
-\begin{figure}[h]
-%  \centering
-  \includegraphics[scale=0.5]{server-flowchart.eps}   % if it fails to compile install 'texlive-font-utils'
-  \caption{The architecture of server-side application}
-  \label{server-flowchart}
-\end{figure}
-\end{comment}
-
-\begin{comment}
-\begin{figure*}
-  \begin{tabular}{m{7.5cm}|m{10.5cm}}
-    \begin{lstlisting}[basicstyle=\small]
-| Descr (l, cb), Type (cb, CheckBox)
-  => Hor (cb, l)
-
-| Ord (x, y) => Vert (x, y), Halign (x, y)
-
-| Sub (x, y) => Vert (x, y), Indent (x, y)
-
-\end{lstlisting} & \multirow{3}{*}{
-\begin{tabular}{c}
-	\parbox{9cm}{There are no such explicit rules in the guideline, but these basic cases implicitly follow from the others.}
-\end{tabular}}\\
-\hline
-\begin{lstlisting}[basicstyle=\small]
-| Descr (X, Y), not (Type (Y, Checkbox)),
-  width (Y) <= K
-  => Hor (X, Y)
-\end{lstlisting} & \multirow{2}{*}{
-\begin{tabular}{c}
-	{ \parbox{9.5cm}{
-					\vspace{-1em}
-If an input box is long, and the horizontal space is limited, place the label above the box. Otherwise, always put the label and the box on the same line.
-	}}\\
-  \includegraphics[scale=0.3]{jbg-08.png} \\
-%  \includegraphics[scale=0.3]{jbg-08-new.png} \\
-  {\parbox{9.5cm}{\textit{By the second rule variable $X$ is a label with text ``Condition'' and variable $Y$ is a drop-down list.}}}
-\end{tabular}}\\
-\begin{lstlisting}[basicstyle=\small]
-| Descr (X, Y), not (Type (Y, Checkbox)),
-  width (Y) > K
-  => Vert (X, Y), Halign (X, Y)
-\end{lstlisting} & \\ \\
-\hline
-\begin{lstlisting}[basicstyle=\small]
-| Ord (v1, v2),
-  Comp (v1, c1), not (Type (c1, CheckBox)),
-  Comp (v2, c2), not (Type (c2, CheckBox)),
-  Descr (l1, c1), Descr (l2, c2),
-  width c1 $\leqslant\!$ 100, width c2 $\leqslant\!$ 100
-  => (
-  | width l1 $\!\geqslant\!$ width l2, width l1 $\leqslant\!$ width l2 $\cdot$ 2
-  | width l1 $\!<\!$ width l2, width l2 $\leqslant\!$ width l1 $\cdot$ 2
-    => Halign (c1, c2))
-\end{lstlisting} &
-\begin{tabular}{c}
-{\parbox{9.5cm}{
-%		\vspace{-4em}
-	By default, put input controls with labels of similar length on different lines and align their input boxes on the left side.
-}}\\
-\includegraphics[scale=0.3]{jbg-05.png} \\
-%\includegraphics[scale=0.2]{jbg-05-new.png} \\
-{\parbox{9.5cm}{\textit{The rule applied twice. In the first case virtual control $C$ contains the top textbox $Y$ and virtual control $C^\prime$ contains the middle textbox $Y^\prime$. The textbox $Y$ is described by the top label $X$ and the textbox $Y^\prime$ is described by the middle label $X^\prime$. The second case is similar for middle and bottom controls.}}}
-\end{tabular}
-\\
-\\
-\hline
-\begin{lstlisting}[basicstyle=\small]
-| Ord (v1, mid),
-  Ord (mid, v2),
-  Comp (v1, c1), not (Type (c1, CheckBox)),
-  Comp (v2, c2), not (Type (c2, CheckBox)),
-  Descr (l1, c1), Descr (l2, c2),
-  width c1 $\leqslant\!$ 100, width c2 $\leqslant\!$ 100
-  => (
-  | width l1 $\!\geqslant\!$ width l2, width l1 $\leqslant\!$ width l2 $\cdot$ 2
-  | width l1 $\!<\!$ width l2, width l2 $\leqslant\!$ width l1 $\cdot$ 2
-    => Halign (c1, c2))
-\end{lstlisting} &
-\begin{tabular}{c}
-{\parbox{9.5cm}{
-%		\vspace{-4em}
-	If there are two input controls with labels of similar length that are separated from each other by a single control, align their input boxes on the left side.
-}}\\
-\includegraphics[scale=0.3]{jbg-09.png} \\
-%\includegraphics[scale=0.4]{jbg-09-new.png} \\
-{\parbox{9.5cm}{\textit{By the rule virtual control $C$ contains the top textbox $Y$ and virtual control $C^{\prime}$ contains the bottom textbox $Y^\prime$. There is a virtual control $Y^{\prime\prime}$ containing the checkbox between them. Labels $X$ and $X^\prime$ describe textboxes $Y$ and $Y^\prime$.}}}
-\end{tabular}
-  \end{tabular}
-  \caption{Examples of GUI guidelines specification (based on informal JetBrains guidelines rules 05, 08 and 09)}
-  \label{guidelines-example}
-\end{figure*}
-\end{comment}
 
 %\subsection{Client Side}
 %A web page is essentially a text area for the user input of structure information in the syntax similar to that in Fig.~\ref{fig:evaluation},
@@ -212,17 +110,17 @@ If an input box is long, and the horizontal space is limited, place the label ab
 %The second part of server implementation is the calculation of absolute coordinates with assistance from \Zthree. This stage filters out problematical layouts and performs much
 %faster than our relational synthesis. But we linked \OCaml and \Zthree to a single executable anyway  to avoid paying any costs  for inter process communication.
 
-Р”Р»СЏ РѕС†РµРЅРєРё РЅР°С€РµРіРѕ РїСЂРѕС‚РѕС‚РёРїР° РЅР° РїСЂРѕРјС‹С€Р»РµРЅРЅС‹С… РїСЂРёРјРµСЂР°С… РјС‹ С‚Р°РєР¶Рµ СЂРµР°Р»РёР·РѕРІР°Р»Рё РѕС‚РѕР±СЂР°Р¶РµРЅРёРµ СЌР»РµРјРµРЅС‚РѕРІ СѓРїСЂР°РІР»РµРЅРёСЏ СЃ РїРѕРјРѕС‰СЊСЋ Qt/QML.
-РќР° СЂРёСЃ.~\ref{fig:QMLtwoGuidelines} РјРѕР¶РЅРѕ СѓРІРёРґРµС‚СЊ РґРІР° СЂР°СЃРїРѕР»РѕР¶РµРЅРёСЏ СЃС‚СЂСѓРєС‚СѓСЂС‹ РґРёР°Р»РѕРіРѕРІРѕРіРѕ РѕРєРЅР° Google Drive, СЃРёРЅС‚РµР·РёСЂРѕРІР°РЅРЅРѕРіРѕ
-СЃ СѓС‡РµС‚РѕРј РґРІСѓС… РЅРµРјРЅРѕРіРѕ СЂР°Р·Р»РёС‡РЅС‹С… РІРµСЂСЃРёР№ РіР°Р№РґР»Р°Р№РЅР° РѕС‚ JetBrains~\cite{JBG}, РЅР°СЂРёСЃРѕРІР°РЅРЅС‹Рµ СЃ РїРѕРјРѕС‰СЊСЋ  QtQuick Controls\footnote{\url{https://doc.qt.io/qt-5/qtquick-controls2-qmlmodule.html}} Рё С‚РµРјС‹ РѕС„РѕСЂРјР»РµРЅРёСЏ Material Design.
-Р“Р°Р№РґР»Р°Р№РЅ СЂРµРіР»Р°РјРµРЅС‚РёСЂСѓРµС‚, С‡С‚Рѕ \enquote{СЃР»РёС€РєРѕРј РґР»РёРЅРЅС‹Р№} С‚РµРєСЃС‚ РґРѕР»Р¶РµРЅ СЂР°СЃРїРѕР»Р°РіР°С‚СЊСЃСЏ РїРѕРґ РјРµС‚РєРѕР№.
-РќР° РїСЂР°РІРѕРј СЂР°СЃРїРѕР»РѕР¶РµРЅРёРё РєРѕРЅСЃС‚Р°РЅС‚Р°, СЂРµРіР»Р°РјРµРЅС‚РёСЂСѓСЋС‰Р°СЏ СЃРІРѕР№СЃС‚РІРѕ \enquote{СЃР»РёС€РєРѕРј РґР»РёРЅРЅС‹Р№} Р±С‹Р»Р° СѓРјРµРЅСЊС€РµРЅР°. РЎРёРЅС‚РµР· Р·Р°РЅСЏР» РїСЂРёРјРµСЂРЅРѕ 5 СЃРµРєСѓРЅРґ.
+Для оценки нашего прототипа на промышленных примерах мы также реализовали отображение элементов управления с помощью Qt/QML.
+На рис.~\ref{fig:QMLtwoGuidelines} можно увидеть два расположения структуры диалогового окна Google Drive, синтезированного
+с учетом двух немного различных версий предписания, основанного на правилах проектирования интерфейсов от JetBrains~\cite{JBG}, нарисованные с помощью  QtQuick Controls\footnote{\url{https://doc.qt.io/qt-5/qtquick-controls2-qmlmodule.html}} и темы оформления Material Design.
+Предписаник регламентирует, что \enquote{слишком длинный} текст должен располагаться под меткой.
+На правом расположении константа, регламентирующая свойство \enquote{слишком длинный} была уменьшена. Синтез занял примерно 5 секунд.
 
 %The guideline says that if a text edit is ``too long'', one has to put it below the label.
 %On the bottom layout the
 %factor describing the informal notion of ``being too long'' was increased. The synthesis of each layout took 5 seconds.
 
-РќРµРєРѕС‚РѕСЂС‹Рµ РґСЂСѓРіРёРµ РїСЂРёРјРµСЂС‹ РјРѕР¶РЅРѕ РЅР°Р№С‚Рё РЅР° СЂРёСЃ.~\ref{fig:evaluation}.
+Некоторые другие примеры можно найти на рис.~\ref{fig:evaluation}.
 
 
 %To evaluate our prototype in the context of the real world GUI framework we implemented a renderer based on Qt/QML. On Fig.~\ref{fig:QMLtwoGuidelines} you can see two layouts of the
@@ -244,7 +142,7 @@ If an input box is long, and the horizontal space is limited, place the label ab
        describes TextEdit "Text 2"
   )
       \end{lstlisting} &
-      \includegraphics[scale=0.5]{../Example1-Qt-QML.png} \\
+      \includegraphics[scale=0.5]{../eng/Example1-Qt-QML.png} \\
       \hline\\
       \begin{lstlisting}[basicstyle=\small]
   ordered (
@@ -256,7 +154,7 @@ If an input box is long, and the horizontal space is limited, place the label ab
         describes TextEdit "Text 3"
   )
       \end{lstlisting} &
-      \includegraphics[scale=0.5]{../Example2-Qt-QML.png} \\
+      \includegraphics[scale=0.5]{../eng/Example2-Qt-QML.png} \\
       \hline
       \begin{lstlisting}[basicstyle=\small]
   ordered (
@@ -268,7 +166,7 @@ If an input box is long, and the horizontal space is limited, place the label ab
         describes TextEdit "Text 2"
   )
       \end{lstlisting} &
-      \vspace{1em}\includegraphics[scale=0.5]{../Example4-Qt-QML.png} \\
+      \vspace{1em}\includegraphics[scale=0.5]{../eng/Example4-Qt-QML.png} \\
       \hline\\
       \begin{lstlisting}[basicstyle=\small]
   ordered (
@@ -280,9 +178,8 @@ If an input box is long, and the horizontal space is limited, place the label ab
     Label "Lab 6"   describes CheckBox _
   )
       \end{lstlisting} &
-      \includegraphics[scale=0.5]{../Example5-Qt-QML.png} \\
+      \includegraphics[scale=0.5]{../eng/Example5-Qt-QML.png} \\
     \end{tabular}
-    \caption{РџСЂРёРјРµСЂС‹ СЃС‚СЂСѓРєС‚СѓСЂ (СЃР»РµРІР°) Рё СЃРёРЅС‚РµР·РёСЂРѕРІР°РЅРЅС‹С… СЂР°СЃРїРѕР»РѕР¶РµРЅРёР№ (СЃРїСЂР°РІР°)\\
-      СЃ СѓС‡С‘С‚РѕРј РіР°Р№РґР»Р°Р№РЅР° РѕС‚  JetBrains}
+    \caption{Примеры структур (слева) и синтезированных расположений (справа) с учётом предписания от JetBrains}
     \label{fig:evaluation}
   \end{figure*}

@@ -9,10 +9,10 @@
 
 Реляционное программирование~\cite{TRS} --- это подход, основанный на идее описания программ как отношений.
 Его можно рассматривать как вид логического программирования, в котором порицается использование всех не реляционных конструкций (эффекты, не логические конструкции).
-В узком смысле реляционное программирование --- это написание программ на \textsc{miniKanren}~--- специально сконструированном для этих целей, встраиваемом предметно-ориентированном языке. В оригинале он разрабатывался для \textsc{Scheme}/\textsc{Racket}, позже \textsc{miniKanren} был портирован на другие языки\footnote{\url{http://minikanren.org/#implementations} (проверено: \DTMDate{2024-08-26})}.
-Мы используем строго статически типизированную реализацию \textsc{miniKanren}, встроенную в \textsc{OCaml}, которая называется \textsc{OCanren}~\cite{OCanren}.
-В \textsc{miniKanren} используется та же теория дизъюнктов Хорна как и в \textsc{Prolog}, но с другим синтаксисом: явные унификации и дизъюнкции, конъюнкции, явное создание свежих (англ. fresh) переменных, а также  используется стратегия \emph{поиска с чередованием} (англ. interleaving search)~\cite{interleaving}, которая полна~\cite{certified}.
-Кроме унификации с проверкой цикличности вхождений (англ. occurs-check) по-умолчанию, \textsc{miniKanren} можно оснастить другими ограничениями, например: неравенства~\cite{disuni}, конечные домены~\cite{cKanren} или конструкции из номинальной логики~\cite{aKanren}.
+В узком смысле реляционное программирование --- это написание программ на \miniKanren~--- специально сконструированном для этих целей, встраиваемом предметно-ориентированном языке. В оригинале он разрабатывался для \textsc{Scheme}/\textsc{Racket}, позже \textsc{miniKanren} был портирован на другие языки\footnote{\url{http://minikanren.org/#implementations} (проверено: \DTMDate{2024-08-26})}.
+Мы используем строго статически типизированную реализацию \miniKanren, встроенную в \OCaml, которая называется \OCanren~\cite{OCanren}.
+В \miniKanren используется та же теория дизъюнктов Хорна как и в \textsc{Prolog}, но с другим синтаксисом: явные унификации и дизъюнкции, конъюнкции, явное создание свежих (англ. fresh) переменных, а также  используется стратегия \emph{поиска с чередованием} (англ. interleaving search)~\cite{interleaving}, которая полна~\cite{certified}.
+Кроме унификации с проверкой цикличности вхождений (англ. occurs-check) по-умолчанию, \miniKanren можно оснастить другими ограничениями, например: неравенства~\cite{disuni}, конечные домены~\cite{cKanren} или конструкции из номинальной логики~\cite{aKanren}.
 
 
 %Relational programming~\cite{TRS} is an approach based on the idea of describing programs as
@@ -30,10 +30,10 @@
 %basic constraints like disequality constraint~\cite{disuni}, finite-domain constraints~\cite{cKanren}, or
 %constructs of nominal logic~\cite{aKanren}.
 
-В контексте нашей работы, самым важным свойством \textsc{miniKanren} является возможность выражения \emph{обратимых вычислений}.
+В контексте нашей работы, самым важным свойством \miniKanren является возможность выражения \emph{обратимых вычислений}.
 Известно~\cite{SemanticsModifiers,SemanticsModifiers1}, что некоторые сложные программы могут быть построены как результат обращения некоторых других более простых программ. В частности, \emph{решатель} задачи поиска можно рассматривать как обращение программы, которая проверяет корректность ответа (англ. \emph{verifier}).
 Широко известно, что задача проверки корректности решения, как правило, гораздо проще задачи поиска корректного решения.
-Реляционная природа \textsc{miniKanren} позволяет осуществлять обратимые вычисления очень просто, что помогает в задачах синтеза программ~\cite{Untagged,WBirdSeven,PatternMatching}.
+Реляционная природа \miniKanren позволяет осуществлять обратимые вычисления очень просто, что помогает в задачах синтеза программ~\cite{Untagged,WBirdSeven,PatternMatching}.
 
 %In the context of our work the most valuable property of \textsc{miniKanren} is its capability of expressing \emph{reverse computations}.
 %It is well-known~\cite{SemanticsModifiers,SemanticsModifiers1} that some complicated programs can be constructed as
@@ -45,7 +45,7 @@
 
 Другим компонентом нашего подхода является \emph{реляционное преобразование} (англ. \emph{relational conversion}).
 Во многих случаях (но не всегда) проще получить реляционную спецификацию из кода на функциональном языке, чем написать спецификацию вручную.
-Мы используем инструмент \textsc{noCanren}, который преобразует программы, написанные на подмножестве \textsc{OCaml}, в  \textsc{OCanren}-спецификации, корректные по построению.
+Мы используем инструмент \noCanren, который преобразует программы, написанные на подмножестве \OCaml, в  \OCanren-спецификации, корректные по построению.
 
 %Another component of our approach is \emph{relational conversion}. In many cases (but not always!) it is easier to obtain a relational specification
 %from functional program than writing the one by hands. We use a tool, called \textsc{noCanren}, which converts programs written is a reasonable
@@ -57,7 +57,7 @@
 В отличие от функциональной реализации, у реляционной три аргумента (\lstinline[language=ocanren,basicstyle=\small]|x|, \lstinline[language=ocanren,basicstyle=\small]|y|,
 и \lstinline[language=ocanren,basicstyle=\small]|z|), каждый из которых может содержать  свежие переменные.
 Вычисление конструкции  \lstinline[language=ocanren,basicstyle=\small]|run$^*$ {add$^o$ x y z}| возвращает \emph{ленивый поток ответов}, который содержит все подстановки этих трёх переменных, такие, что отношение $\{(x,y,z)\in\mathbb{N}^3 \mid x+y=z\}$ верно.
-Этот поток можно исследовать в OCaml, чтобы получать ответы по-одному. Одна и та же спецификация может использоваться и для сложения, и для вычитания, и для разбиения числа на два слагаемых.
+Этот поток можно исследовать в \OCaml, чтобы получать ответы по-одному. Одна и та же спецификация может использоваться и для сложения, и для вычитания, и для разбиения числа на два слагаемых.
 
 %We demonstrate the roadmap of our approach by the following observable example. Let us have a program
 %shown in Fig.~\ref{fun_vs_rel}\subref{funadd} which adds two natural numbers in Peano form. Its relational counterpart,

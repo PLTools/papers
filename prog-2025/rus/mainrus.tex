@@ -1,6 +1,6 @@
 % !TEX TS-program = pdflatex
-% !TeX spellcheck = cp1251
-% !TEX root = report_19_09.tex
+% !TeX spellcheck = ru_RU
+% !TEX root = mainrus.tex
 
 \documentclass[a4paper,twoside,11pt]{article}
 \usepackage[cp1251]{inputenc}
@@ -14,6 +14,9 @@
 \usepackage{listings}
 \usepackage{url}
 \usepackage{verbatim}
+\usepackage{verbatimbox}
+\usepackage{xspace}
+\usepackage{array}
 %\usepackage{biblatex}
 
 \usepackage[ru-RU]{datetime2}
@@ -88,10 +91,20 @@
 	morecomment=[s]{(*}{*)}
 }
 
-\newcommand{\defi}{\stackrel{\mathrm{def}}{=}}
+
 \newcommand{\term}[1]{\mbox{\texttt{\textbf{#1}}}}
 \newcommand{\prg}[1]{\mbox{\lstinline|#1|}}
 \newcommand{\run}[2]{\term{run}^{#1}\,\left[#2\right]}
+\newcommand{\OCaml}{\textsc{OCaml}\xspace}
+\newcommand{\OCanren}{\textsc{OCanren}\xspace}
+\newcommand{\miniKanren}{\textsc{miniKanren}\xspace}
+\newcommand{\JavaScript}{\textsc{JavaScript}\xspace}
+\newcommand{\JSOO}{\textsc{Js\_of\_ocaml}\xspace}
+\newcommand{\Zthree}{\textsc{Z3}\xspace}
+\newcommand{\noCanren}{\textsc{noCanren}\xspace}
+
+\renewcommand{\leq}{\ensuremath{\leqslant}}
+\renewcommand{\geq}{\ensuremath{\geqslant}}
 
 \numberwithin{equation}{section}
 \newtheorem{theorem}{Теорема}
@@ -154,6 +167,17 @@
 \He{Синтез расположения GUI}
 \label{sec:synthesizing}
 \input{005synthesis.tex}
+
+\He{Реализация и эксперименты}
+\label{sec:impl}
+\input{006impl.tex}
+
+\He{Обзор}
+\label{sec:related}
+\input{007related.tex}
+
+\He{Заключение}
+\input{008discussion.tex}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

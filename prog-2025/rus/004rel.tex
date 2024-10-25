@@ -46,6 +46,7 @@
 Другим компонентом нашего подхода является \emph{реляционное преобразование} (англ. \emph{relational conversion}).
 Во многих случаях (но не всегда) проще получить реляционную спецификацию из кода на функциональном языке, чем написать спецификацию вручную.
 Мы используем инструмент \noCanren, который преобразует программы, написанные на подмножестве \OCaml, в  \OCanren-спецификации, корректные по построению.
+\textcolor{red}{noCanren не упоминать}
 
 %Another component of our approach is \emph{relational conversion}. In many cases (but not always!) it is easier to obtain a relational specification
 %from functional program than writing the one by hands. We use a tool, called \textsc{noCanren}, which converts programs written is a reasonable
@@ -53,7 +54,7 @@
 
 Продемонстрируем наш подход на следующем обозримом примере. Рассмотрим программу на рис.~\ref{fun_vs_rel}\subref{funadd}, которая складывает два натуральных числа в форме Пеано. Её реляционный образ, полученный с помощью реляционного преобразования (не буквально, но в эквивалентной записи)~--- на рис. ~\ref{fun_vs_rel}\subref{reladd}.
 Сравнивая их, можно обратить внимание, что сопоставление с образцом было заменено на дизъюнкцию (\lstinline[language=ocanren,basicstyle=\small]|\/|)
-и унификацию  (\lstinline[language=ocanren,basicstyle=\small]|===|); модификации потока данных --- на конъюнкцию (\lstinline[language=ocanren,basicstyle=\small]|/\|); свежие переменные были добавлены, где это необходимо; а постфиксная нотация ``$^o$'' традиционно используется для обозначения определения реляций (вычислимых отношений).
+и унификацию  (\lstinline[language=ocanren,basicstyle=\small]|===|); модификации потока данных --- на конъюнкцию (\lstinline[language=ocanren,basicstyle=\small]|/\|); свежие переменные были добавлены, где это необходимо; а постфиксная нотация ``$^o$'' (\textcolor{red}{Нотация с кружочком идет нафиг}) традиционно используется для обозначения определения реляций (вычислимых отношений).
 В отличие от функциональной реализации, у реляционной три аргумента (\lstinline[language=ocanren,basicstyle=\small]|x|, \lstinline[language=ocanren,basicstyle=\small]|y|,
 и \lstinline[language=ocanren,basicstyle=\small]|z|), каждый из которых может содержать  свежие переменные.
 Вычисление конструкции  \lstinline[language=ocanren,basicstyle=\small]|run$^*$ {add$^o$ x y z}| возвращает \emph{ленивый поток ответов}, который содержит все подстановки этих трёх переменных, такие, что отношение $\{(x,y,z)\in\mathbb{N}^3 \mid x+y=z\}$ верно.
@@ -94,9 +95,9 @@
       add$^o$ xp y zp
   }
     \end{lstlisting}
-    \caption{Реляционное сложение}
+    \caption{Реляционное сложение \textcolor{red}{Можно переписать без булычевского расширения}}
     \label{reladd}
   \end{subfigure}
-  \caption{Функциональное и реляционное сложение чисел Пеано }
+  \caption{Функциональное и реляционное сложение чисел Пеано (\textcolor{red}{Сделать пример про списки})}
   \label{fun_vs_rel}
 \end{figure}

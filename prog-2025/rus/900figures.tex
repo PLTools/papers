@@ -1,0 +1,158 @@
+% !TeX encoding = windows-1251
+% !TeX spellcheck = ru_RU
+% !TEX root = mainrus.tex
+
+\begin{figure}[t]
+	\centering
+	\subfloat[Пример интерфейса GUI\label{form1}]{
+		\centering
+		\includegraphics[scale=0.5]{../eng/form1.png}
+	}
+	\vskip5mm
+	\subfloat[Пример структуры GUI\label{form1-structure}]{
+		\scalebox{0.5}{
+			\begin{tikzpicture}
+				\node[rectangle,draw] (check) at (12, 3) {\includegraphics{../eng/check.png}};
+				\node[rectangle,draw] (label) at (9, 0)  {\includegraphics{../eng/label.png}};
+				\node[rectangle,draw] (combo) at (15, 0) {\includegraphics{../eng/combo.png}};
+				\begin{scope}
+					\node[rectangle,dashed,draw,fit=(label)(combo),minimum height=2cm,minimum width=12cm] (composite) (0, 0) {};
+				\end{scope}
+				\path[draw,->] (label.east) -- node[above] {\emph{descr}} (combo.west);
+				\path[draw,->] (check.south) -- node[right] {\emph{order}} (12,1);
+	\end{tikzpicture}}}
+	\vskip5mm
+	\subfloat[Пример реального расположения элементов управления\label{form1-layout}]{
+		\scalebox{0.5}{
+			\begin{tikzpicture}
+				\node (label) at (7.8, 2.5) {\emph{justify}};
+				\node[rectangle,draw] (check) at (9.47, 1.6) {\includegraphics{../eng/check.png}};
+				\node[rectangle,draw] (label) at (9.01, 0  ) {\includegraphics{../eng/label.png}};
+				\node[rectangle,draw] (combo) at (14  , 0  ) {\includegraphics{../eng/combo.png}};
+				\begin{scope}
+					\node[rectangle,dashed,draw,fit=(label)(combo)] (composite) (0, 0) {};
+				\end{scope}
+				\path[draw,<->] (label.east) -- node[above] {\emph{inset}} (combo.west);
+				\path[draw,<->] (check.south) -- node[right] {\emph{inset}} (9.47,0.65);
+				\path[draw,-] (7.21,2.7) -- (7.21,0);
+	\end{tikzpicture}}}
+	\vskip5mm
+	\subfloat[Пример правила предписания\label{gdrule}]{
+		\includegraphics[scale=0.35]{../eng/jbg-09.png}
+	}
+
+	\caption{Пример пользовательского интерфейса: структура, расположение и правило предписания}
+	\label{form1-structure-layout}
+\end{figure}
+
+
+
+\begin{figure*}[t]
+\begin{verbnobox}[\fontsize{10pt}{10pt}\selectfont]
+ordered main_group (
+  Label "Type" describes TextEdit "Any" {width=200}
+  Label "Owner" describes TextEdit "Anyone" {width=200}
+  Label "Has the words" describes TextEdit "Enter words found in the file" {
+   width = 400
+  }
+  Label "Item name" describes
+    TextEdit "Enter a term that matches part of the file name" {
+      width = 400
+    }
+  (Label "Location" describes
+    (TextEdit "Anywhere" { width = 200 }) dominates
+    ordered location_checkboxes (
+      Label "In trash"  describes CheckBox in_trash_checkbox
+      Label "Starred"   describes CheckBox starred_checkbox
+      Label "Encrypted" describes CheckBox encrypted
+    )
+  )
+  Label "Date modified" describes  TextEdit "Any time" {width=200}
+  Label "Approvals" describes
+    ordered approvals_checkboxes (
+      Label "Awaiting my approval" describes CheckBox awaiting_checkbox
+      Label "Requested by me" describes CheckBox requestred_checkbox
+  )
+  Label "Shared to" describes
+    TextEdit "Enter a name or email address..." {width=400}
+  Label "Follow-ups" describes TextEdit "---" {width=200, height=35}
+)
+Button "Search" approves^ main_group
+Button "Reset" cancels^ main_group
+\end{verbnobox}
+\caption{Описание структура диалога поиска из сервиса Google Drive}
+\label{gd_structure}
+\end{figure*}
+
+\begin{figure*}[t]
+    \begin{subfigure}[t]{.45\textwidth}
+        \vspace{-15em}
+        \begin{minipage}{4cm}
+        \includegraphics[scale=0.5]{../eng/google-drive-search-setting-output2.png}
+        \end{minipage}
+        \caption{Если метка описывает \enquote{слишком длинный} элемент управления, то располагать их вертикально}
+    \end{subfigure}\hspace{1cm}
+    \begin{subfigure}[t]{.45\textwidth}
+      \includegraphics[scale=0.5]{../eng/google-drive-search-setting-output3.png}
+      %\vskip17.5mm
+      \caption{То же самое, но константа для свойства  \enquote{слишком длинный} уменьшена}
+    \end{subfigure}
+    \caption{Синтезированные расположения элементов для диалога из Google Drive}
+    \label{fig:QMLtwoGuidelines}
+\end{figure*}
+
+
+
+
+
+\begin{figure*}
+    \begin{tabular}{m{95mm}m{5cm}}
+      \begin{lstlisting}[basicstyle=\small]
+  ordered (
+    Label "Short label"
+       describes TextEdit "Text 1"
+    Label "Loooooong label"
+       describes TextEdit "Text 2"
+  )
+      \end{lstlisting} &
+      \includegraphics[scale=0.5]{../eng/Example1-Qt-QML.png} \\
+      \hline\\
+      \begin{lstlisting}[basicstyle=\small]
+  ordered (
+    Label "Looooong label"
+        describes TextEdit "Text 1"
+    Label "Medium label"
+        describes TextEdit "Text 2"
+    Label "Short"
+        describes TextEdit "Text 3"
+  )
+      \end{lstlisting} &
+      \includegraphics[scale=0.5]{../eng/Example2-Qt-QML.png} \\
+      \hline
+      \begin{lstlisting}[basicstyle=\small]
+  ordered (
+    Label "Short label"
+        describes TextEdit "Text 1"
+    Label "Check box label"
+        describes CheckBox _
+    Label "Looooong label"
+        describes TextEdit "Text 2"
+  )
+      \end{lstlisting} &
+      \vspace{1em}\includegraphics[scale=0.5]{../eng/Example4-Qt-QML.png} \\
+      \hline\\
+      \begin{lstlisting}[basicstyle=\small]
+  ordered (
+    Label "L 1"     describes CheckBox _
+    Label "Lab 2"   describes CheckBox _
+    Label "Label 3" describes CheckBox _
+    Label "Label 4" describes CheckBox _
+    Label "L 5"     describes CheckBox _
+    Label "Lab 6"   describes CheckBox _
+  )
+      \end{lstlisting} &
+      \includegraphics[scale=0.5]{../eng/Example5-Qt-QML.png} \\
+    \end{tabular}
+    \caption{Примеры структур (слева) и синтезированных расположений (справа) с учётом предписания от JetBrains}
+    \label{fig:evaluation}
+  \end{figure*}

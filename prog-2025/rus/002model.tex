@@ -5,49 +5,6 @@
 
 В данном разделе мы изложим модель пользовательского интерфейса, которая учитывает все важные особенности предметной области. Для реального использования модель должна быть немного расширена, но это не предоставит сложности, так как расширения не вносят серьёзных изменений в алгоритм синтеза.
 
-\begin{figure}[t]
-	\centering
-	\subfloat[Пример интерфейса GUI\label{form1}]{
-		\centering
-		\includegraphics[scale=0.5]{../eng/form1.png}
-	}
-	\vskip5mm
-	\subfloat[Пример структуры GUI\label{form1-structure}]{
-		\scalebox{0.5}{
-			\begin{tikzpicture}
-				\node[rectangle,draw] (check) at (12, 3) {\includegraphics{../eng/check.png}};
-				\node[rectangle,draw] (label) at (9, 0)  {\includegraphics{../eng/label.png}};
-				\node[rectangle,draw] (combo) at (15, 0) {\includegraphics{../eng/combo.png}};
-				\begin{scope}
-					\node[rectangle,dashed,draw,fit=(label)(combo),minimum height=2cm,minimum width=12cm] (composite) (0, 0) {};
-				\end{scope}
-				\path[draw,->] (label.east) -- node[above] {\emph{descr}} (combo.west);
-				\path[draw,->] (check.south) -- node[right] {\emph{order}} (12,1);
-	\end{tikzpicture}}}
-	\vskip5mm
-	\subfloat[Пример реального расположения элементов управления\label{form1-layout}]{
-		\scalebox{0.5}{
-			\begin{tikzpicture}
-				\node (label) at (7.8, 2.5) {\emph{justify}};
-				\node[rectangle,draw] (check) at (9.47, 1.6) {\includegraphics{../eng/check.png}};
-				\node[rectangle,draw] (label) at (9.01, 0  ) {\includegraphics{../eng/label.png}};
-				\node[rectangle,draw] (combo) at (14  , 0  ) {\includegraphics{../eng/combo.png}};
-				\begin{scope}
-					\node[rectangle,dashed,draw,fit=(label)(combo)] (composite) (0, 0) {};
-				\end{scope}
-				\path[draw,<->] (label.east) -- node[above] {\emph{inset}} (combo.west);
-				\path[draw,<->] (check.south) -- node[right] {\emph{inset}} (9.47,0.65);
-				\path[draw,-] (7.21,2.7) -- (7.21,0);
-	\end{tikzpicture}}}
-	\vskip5mm
-	\subfloat[Пример правила предписания\label{gdrule}]{
-		\includegraphics[scale=0.35]{../eng/jbg-09.png}
-	}
-
-	\caption{Пример пользовательского интерфейса: структура, расположение и правило предписания}
-	\label{form1-structure-layout}
-\end{figure}
-
 Мы можем выделить три важных понятия, связанных с интерфейсами пользователя: \emph{структура}, \emph{расположение} (англ. layout) и набор правил проектирования интерфейсов (англ. guideline), который для краткости далее будем называть \emph{предписанием}. Структура описывает набор элементов управления и связи между ними, расположение уточняет их визуальные позиции друг к другу. Такое разделение согласуется с распространенной практикой отделения бизнес-логики от визуального представления~\cite{UI3}. Наконец, предписание отображает определенные структуры в конкретные примитивы расположения.
 
 Продемонстрируем эти понятия на примере. Рассмотрим интерфейс с рис.~\ref{form1} и опишем структуру следующим образом.

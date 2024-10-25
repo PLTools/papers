@@ -12,6 +12,7 @@
 
 \he{Функциональный верификатор}
 
+\textcolor{red}{Кусок про noCanren нафиг}
 Устройство начального функционального верификатора на \textsc{OCaml} довольно прямолинейно.
 Воспользуется обычными для функционального программирования списками и алгебраическими типами данных, чтобы описать структуру и примитивы расположения.
 По правилам предписания мы \emph{синтезируем} верификатор, который в качестве аргументов принимает структуру и экземпляры расположения, и проводит
@@ -113,8 +114,8 @@
 %the representation for layouts:
 
 \begin{lstlisting}[basicstyle=\small,language=ocaml,escapeinside={/*}{*/} ]
-   type rels = {vert : bool; hor : bool}
-   type /*$\alpha$*/ roles = {a : /*$\alpha$*/; b : /*$\alpha$*/ }
+   type rels = { vert : bool; hor : bool}
+   type /*$\alpha$*/ roles = { a : /*$\alpha$*/; b : /*$\alpha$*/ }
    type layout  = rels roles roles
 \end{lstlisting}
 
@@ -325,22 +326,22 @@
     }
 
     // If unsat we need to find and solve
-    // layout conflict MUC is one 
+    // layout conflict MUC is one
     // of conflicts
     muc = Z3.minimalUnsatCore
     // A list of refined models
     answers = []
 
     for (mucElement $\in$ muc) {
-        // To solve the conflict we need 
-        // to remove any layout element
-        // of MUC from the system
-        if (mucElement $\in$ layPart) {
-            reducedLayPart =
-              layPart $\setminus$ {mucElement}
-            answers ++= solve(
-                reducedLayPart, sizePart)
-        }
+      // To solve the conflict we need
+      // to remove any layout element
+      // of MUC from the system
+      if (mucElement $\in$ layPart) {
+        reducedLayPart =
+          layPart $\setminus$ {mucElement}
+        answers ++= solve(
+            reducedLayPart, sizePart)
+      }
     }
 
     return answers

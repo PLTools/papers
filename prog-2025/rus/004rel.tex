@@ -55,7 +55,10 @@
 Продемонстрируем наш подход на следующем обозримом примере.
 Рассмотрим программу на рис.~\ref{fun_vs_rel}\subref{funadd}, которая конкатенирует два списка, и её реляционный эквивалент на рис. ~\ref{fun_vs_rel}\subref{reladd}.
 Сравнивая их, можно обратить внимание, что сопоставление с образцом было заменено на дизъюнкцию (\lstinline[language=ocanren,basicstyle=\small]|conde|)
-и унификацию  (\lstinline[language=ocanren,basicstyle=\small]|===|); модификации потока данных --- на конъюнкцию (\lstinline[language=ocanren,basicstyle=\small]|&&&|); свежие переменные были добавлены, где это необходимо; а постфиксная нотация \enquote{o}) традиционно используется для обозначения определения реляций (вычислимых отношений).
+и унификацию  (\lstinline[language=ocanren,basicstyle=\small]|===|);
+модификации потока данных --- на конъюнкцию (\lstinline[language=ocanren,basicstyle=\small]|&&&|);
+свежие переменные были добавлены, где это необходимо;
+а постфиксная нотация \enquote{o} традиционно используется для обозначения определения вычислимых отношений.
 В отличие от функциональной реализации, у реляционной три аргумента (\lstinline[language=ocanren,basicstyle=\small]|xs|, \lstinline[language=ocanren,basicstyle=\small]|ys|,
 и \lstinline[language=ocanren,basicstyle=\small]|zs|), каждый из которых может содержать  свежие переменные.
 Вычисление конструкции  \lstinline[language=ocanren,basicstyle=\small]|run$^*$ {appendo$^o$ x y z}| возвращает \emph{ленивый поток ответов}, который содержит все подстановки этих трёх переменных, такие, что отношение $\{(x,y,z)\in\mathbb{N}^3 \mid x +\kern-1.3ex+\kern0.8ex y=z\}$ верно.
@@ -83,7 +86,7 @@
      | []    -> ys
      | x::xs -> x :: append xs ys
   \end{lstlisting}
-  \caption{Реализация на функциональном языке}
+  \caption{Реализация на \OCaml{}}
   \label{funadd}
   \end{subfigure}
   \begin{subfigure}[t]{0.5\textwidth}
@@ -97,7 +100,8 @@
           (zs === List.cons h tmp)
       ]
     \end{lstlisting}
-    \caption{Реляционное слияние списков. Использует конъюнкция \texttt{\&\&\&}, дизъюнкция \texttt{conde} и квантор существования (\texttt{fresh}), совмещенный с конъюнкцией}
+    \caption{Реляционное слияние списков.
+    Используется конъюнкция \texttt{\&\&\&}, дизъюнкция \texttt{conde} и квантор существования (\texttt{fresh}), совмещенный с конъюнкцией}
     \label{reladd}
   \end{subfigure}
   \caption{Функциональное и реляционное слияние списков}

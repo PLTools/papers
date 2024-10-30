@@ -2,92 +2,53 @@
 % !TeX spellcheck = ru_RU
 % !TEX root = mainrus.tex
 
-В данном разделе мы сконструируем синтезатор расположений на основе предписания.
-Сделаем это за несколько шагов: начнём с простого функционального верификатора, сконвертируем его в реляционную форму,
-запустим в обратном направлении, проанализируем результат и применим некоторые оптимизации.
-%In this section we describe the construction of guideline-driven layout synthesizer. We do it in several steps starting
-%from the implementation of the simple functional verifier, then converting in into relational form, running it ``backwards'',
-%analyzing the outcome and performing various refinements and optimizations.
+В данном разделе мы кратко опишем верификатор расположений на основе предписаний (англ. guideline), который получается
+путём написания наивного верификатора и добавлением некоторых оптимизаций.
 
-
-\he{Функциональный верификатор}
-
-\textcolor{red}{Кусок про noCanren нафиг}
-Устройство начального функционального верификатора на \textsc{OCaml} довольно прямолинейно.
-Воспользуется обычными для функционального программирования списками и алгебраическими типами данных, чтобы описать структуру и примитивы расположения.
-По правилам предписания мы \emph{синтезируем} верификатор, который в качестве аргументов принимает структуру и экземпляры расположения, и проводит
-прямолинейную проверку покрытия, совместности и подтверждения свойств, согласно определениям из раздела~\ref{sec:guidelines}.
-
-%The construction of initial functional verifier in \textsc{OCaml} is rather straightforward. We use conventional functional
-%data structures like lists and algebraic data types to encode structures and layout primitives. Given guideline rules we
-%\emph{generate} a verifier which takes as arguments a structure and a set of layout instances and performs a routine check of
-%the coverage, compatibility and confirmation properties following the definitions given in Section~\ref{sec:guidelines}.
-
-Покрытие можно легко получить, обойдя все примитивы расположения, собирая все невиртуальные элементы управления в множество, и
+Изначальный наивный верификатор получается если прямолинейную проверку покрытия, совместности и подтверждения свойств из раздела~\ref{sec:guidelines}
+закодировать в виде отношения, которое связывает структуру и экземпляры расположения.
+Покрытие можно получить, обойдя все примитивы расположения, собирая все невиртуальные элементы управления в множество, и
 проверяя, что оно соответствует множеству всех невиртуальных в структуре. Совместность проверяется аналогично, по определению.
 
-%The coverage can be easily assessed by traversing all layout primitives, collecting all non-virtual controls and
-%checking that the set of all collected controls coincides with the set of all non-virtual controls in the structure.
-%Similarly, the compatibility is checked according to the definition.
-
-Для подтверждения нам нужно обойти все примитивы расположения и подтвердить каждый их них. Это требует обращения правила предписания.
-Например, рассмотрим следующее правило:
-%The confirmation procedure traverses all layout primitives and tries to confirm each of them. This requires each
-%rule of the guidelines to be \emph{inverted}. For example, consider the following guideline rule:
-
-\begin{lstlisting}[language=ocanren,basicstyle=\small]
-   $\term{describes}\,(X,\,Y)\,\mapsto\,\term{vert}\,(X,\,Y),\,\term{halign}\,(X,\,Y)$
-\end{lstlisting}
+Для подтверждения нам нужно обойти все примитивы расположения и подтвердить каждый их них.
+Это требует обращения правила предписания.
+Например, рассмотрим следующее правило:\footnote{\textcolor{red}{Может для этой статьи выбрать другое правило?}}
+\[
+\term{describes}\,(X,\,Y)\,\mapsto\,\term{vert}\,(X,\,Y),\,\term{halign}\,(X,\,Y)
+\]
 
 Оно определяет следующие случаи для процедуры подтверждения структуры $\Sigma$ и набора экземпляров расположения  $S$:
 %It determines the following (sub)cases for the confirmation check procedure for a structure $\Sigma$ and a set of layout instances $S$:
 
 \begin{lstlisting}[language=ocanren,basicstyle=\small]
-   if $\term{vert}\,(X,\,Y)\in S$
-   then $\term{describes}\,(X,\,Y)\in\Sigma$ /\ $\,\term{halign}\,(X,\,Y)\in S$
-   else if $\term{halign}\,(X,\,Y)\in S$
-   then $\term{describes}\,(X,\,Y)\in\Sigma$ /\ $\,\term{vert}\,(X,\,Y)\in S$
+ if $\term{vert}\,(X,\,Y)\in S$
+ then $\term{describes}\,(X,\,Y)\in\Sigma$ /\ $\,\term{halign}\,(X,\,Y)\in S$
+ else if $\term{halign}\,(X,\,Y)\in S$
+ then $\term{describes}\,(X,\,Y)\in\Sigma$ /\ $\,\term{vert}\,(X,\,Y)\in S$
 \end{lstlisting}
 
-Мы \emph{не проверяем максимальность} на данном шаге. Причина этому в особенности функционально-реляционного программирования.
-Чтобы проверить максимальность, нам нужно найти все остальные совместные экземпляры, которые и подтверждены, и покрыты.
-Но именно этой задачи мы хотим \emph{избежать}, написав функциональный верификатор.
-Поэтому, реализация этого на функциональном языке подрывает всю идею использования реляционного программирования.
-Подчеркиваем, что это довольно частый случай для нашего подхода: для удобства программирования нам необходимо аккуратно провести границу между функциональным и реляционным кодом, чтобы не делать то, что мы получим позже за просто так.
+Мы \emph{не проверяем максимальность} в реализации верификатора, так как это может нивелировать полезность реляционного программирования.
+Максимальность проверяется другим образом: мы запускаем верификатор на конкретной структуре и
+на \emph{свободной переменной} на месте конкретных экземпляров расположения.
+За счет полноты поиска \textsc{miniKanren} выдаст нам все множества, одновременно  совместные, покрытые и подтверждённые.
+Затем мы отфильтруем не максимальные.
+
+На этом первый шаг закончен, и мы получили полный неэффективный синтезатор.
+У наивной реализации можно указать два недостатка.
+
+Во-первых, эффективность синтезатора зависит от структуры данных, которая хранит примитивы расположения.
+Наивная реализация с помощью списков будет выдавать бесконечно много эквивалентных ответов, различающиеся порядком примитивов расположения и повторами.
+Чтобы решить эту проблему мы реализовали так называемый \emph{гиперкуб}~--- структуру данных, которая напоминает битовую карту (англ. bitmap).
+Для данной задачи она будет всегда конечного размера, так как все виды примитивов расположения и количество элементов в структуре известно наперёд.
 
 
-%Note, we do not perform \emph{maximality} check here.
-%The reason is specific to our approach of using functional-relational programming.
-%Indeed, to perform maximality check we would need to
-%find other compatible sets of instances which are confirmed and covering. But this is exactly the
-%task which we are trying \emph{avoid} to perform by writing functional verifier.
-%Thus, implementing it in a functional language would compromise the whole idea of using relational
-%programming. We emphasize that this is rather a common case for the approach we advocate: in order
-%to be efficient we need to carefully set the border between functional and relational programming
-%in order to avoid doing explicitly what we intend to have later for free.
 
-Максимальность проверяется другим образом. Мы применяем реляционное преобразование для функионального верификатора, и запускаемся на конкретной структуре и
-на \emph{свободной переменной} на месте конкретных экземпляров расположения. За счет полноты поиска \textsc{miniKanren} выдаст нам все множества, одновременно  совместные, покрытые и подтверждённые. Затем мы просто отфильтруем не максимальные.
-
-%The maximality problem is solved in another manner. We apply relational conversion for the
-%functional verifier and run it for a given concrete structure and a \emph{free variable} in
-%the position of the set of layout instances. By the completeness of \textsc{miniKanren}
-%search procedure this gives us all sets which are compatible, covering and confirmed at
-%the same time. Then, having them at our hands already, we filter non-maximal ones out.
-
-На этом первый шаг закончен, и мы получили полный неэффективный синтезатор. У наивной реализации присутствуют следующие недостатки:
-%The first step gave us a complete, but not efficient synthesizer to play with. We identified
-%the following problems with this na\"ive implementation:
-\begin{itemize}
-\item Синтезатор выдает (экспоненциально) большое количество эквивалентных ответов. Мы использовали списки для представления множеств, и синтезатор выдал нам все перестановки как уникальные ответы.
-%The synthesizer produced an (exponentially) large collection of equivalent answers. Indeed, as
-%  we initially used list representation for sets of layout instances, the synthesizer
-%  considered all permutations of lists comprised of the same controls as different answers.
-\item Мы узнали, что представление структуры с помощью типов данных чрезмерно, и мы можем напрямую строить реляции \textsc{miniKanren} по структуре.
-%We realized that encoding of structures using functional data structures was
-%  excessive as they could be directly generated as \textsc{miniKanren} relations.
-\item Синтезатор выдает много частичных (не максимальных) ответов, что замедляет синтез и делает его непрактичным.
-\end{itemize}
+%\begin{itemize}
+%\item Выдается (экспоненциально) большое количество эквивалентных ответов.
+%Мы использовали списки для представления множеств, и синтезатор выдал нам все перестановки как уникальные ответы.
+%%\item Мы узнали, что представление структуры с помощью типов данных чрезмерно, и мы можем напрямую строить реляции \textsc{miniKanren} по структуре.
+%\item Синтезатор выдает много частичных (не максимальных) ответов, что замедляет синтез и делает его непрактичным.
+%\end{itemize}
 %\begin{itemize}
 %\item The synthesizer produced an (exponentially) large collection of equivalent answers. Indeed, as
 %  we initially used list representation for sets of layout instances, the synthesizer
@@ -97,95 +58,85 @@
 %\item The synthesizer generated a lot of partial (non-maximal) layouts which slowed
 %  done the synthesis and made it impractical.
 %\end{itemize}
-
-\noindent В следующих подразделах мы решим эти проблемы.
-
-\he{Представление с помощью бинарных гиперкубов}
-
-Для первой проблемы мы применили специальное представление расположения (\emph{бинарный гиперкуб}), в котором любое расположение представляется однозначно.
-В сущности это побитовое представление множеств и отношений, которое по-разному определяется для каждой структуры.
-Например, пусть у нас два элемента управления \lstinline|a| и \lstinline|b|, и, для простоты, два примитива расположения $\term{vert}$ и $\term{hor}$.
-Следующие объявления типов на языке  \textsc{OCaml} определяют представление расположений:
-
-%For the first problem we devised a specific representation for the layouts (\emph{binary hypercube}) in which any layout can be
-%represented uniquely. This representation in essence is a bitscale representation of sets and relations, and it has to
-%be specifically defined for each structure. For example, let us have two GUI controls \lstinline|a| and \lstinline|b| and, for
-%simplicity, only two layout primitives $\term{vert}$ and $\term{hor}$. Then the following \textsc{OCaml} definitions introduce
-%the representation for layouts:
-
-\begin{lstlisting}[basicstyle=\small,language=ocaml,escapeinside={/*}{*/} ]
-   type rels = { vert : bool; hor : bool}
-   type /*$\alpha$*/ roles = { a : /*$\alpha$*/; b : /*$\alpha$*/ }
-   type layout  = rels roles roles
-\end{lstlisting}
-
-Этот подход нивелирует накладные расходы на поиск эквивалентных ответов с разными представлениями.
-Однако он требует специализации функционального верификатора под конкретную структуру.
-Это не такое уж и большое неудобство, к тому же, улучшения из следующего подраздела, потребуют сходной специализации.
+%%%
+%%%\noindent В следующих подразделах мы решим эти проблемы.
+%%%
+%%%\he{Представление с помощью бинарных гиперкубов}
+%%%
+%%%Для первой проблемы мы применили специальное представление расположения (\emph{бинарный гиперкуб}), в котором любое расположение представляется однозначно.
+%%%В сущности это побитовое представление множеств и отношений, которое по-разному определяется для каждой структуры.
+%%%Например, пусть у нас два элемента управления \lstinline|a| и \lstinline|b|, и, для простоты, два примитива расположения $\term{vert}$ и $\term{hor}$.
+%%%Следующие объявления типов на языке  \textsc{OCaml} определяют представление расположений:
+%%%
+%%%%For the first problem we devised a specific representation for the layouts (\emph{binary hypercube}) in which any layout can be
+%%%%represented uniquely. This representation in essence is a bitscale representation of sets and relations, and it has to
+%%%%be specifically defined for each structure. For example, let us have two GUI controls \lstinline|a| and \lstinline|b| and, for
+%%%%simplicity, only two layout primitives $\term{vert}$ and $\term{hor}$. Then the following \textsc{OCaml} definitions introduce
+%%%%the representation for layouts:
+%%%
+%%%\begin{lstlisting}[basicstyle=\small,language=ocaml,escapeinside={/*}{*/} ]
+%%%   type rels = { vert : bool; hor : bool}
+%%%   type /*$\alpha$*/ roles = { a : /*$\alpha$*/; b : /*$\alpha$*/ }
+%%%   type layout  = rels roles roles
+%%%\end{lstlisting}
+%%%
+%%%Этот подход нивелирует накладные расходы на поиск эквивалентных ответов с разными представлениями.
+%%%Однако он требует специализации функционального верификатора под конкретную структуру.
+%%%Это не такое уж и большое неудобство, к тому же, улучшения из следующего подраздела, потребуют сходной специализации.
 
 %This approach eliminates an extra overhead of the search for equivalent answers with different representations. However,
 %it requires the specialization of functional verifier for a concrete structure. This is not a great price; in addition, the
 %technique described in the next subsection requires similar specialization to be performed.
 
-\he{Представление структуры как набора реляционных отношений}
+%%%\he{Представление структуры как набора реляционных отношений}
+%%%
+%%%Как уже известно, структура --- это набор отношений над элементами управления. В реляционном языке мы можем представлять отношения непосредственно как отношения.
+%%%Предположим, мы работаем с фрагментом структуры с рис.~\ref{rel_rel}\subref{rel_abs}. В оригинальном изложении она представлялась бы как данные,
+%%%используя соответствующие типы для элементов управления и отношений. Однако, те же самые части структуры можно закодировать непосредственно в
+%%%\textsc{OCanren} (рис.~\ref{rel_rel}\subref{rel_con}).
+%%%
+%%%\begin{figure}[t]
+%%%  \begin{subfigure}[t]{0.5\textwidth}
+%%%    \begin{lstlisting}[basicstyle=\small,language=ocanren]
+%%%  $\term{type}\,(A,\, \term{checkbox})$
+%%%  $\term{type}\,(B,\, \term{label})$
+%%%  $\term{describes}\,(B,\, A)$
+%%%    \end{lstlisting}
+%%%    %\vskip16mm
+%%%    \caption{Отношения в абстрактной записи}
+%%%    \label{rel_abs}
+%%%  \end{subfigure}
+%%%  \begin{subfigure}[t]{0.5\textwidth}
+%%%    \begin{lstlisting}[basicstyle=\small,language=ocanren]
+%%%  let $\mbox{\texttt{type}}^o$ x y = ocanren {
+%%%    y === Checkbox /\ x === A \/
+%%%    y === Label    /\ x === B \/ ...
+%%%  }
+%%%  let $\mbox{\texttt{describes}}^o$ x y = ocanren {
+%%%    x === B /\ y === A \/ ...
+%%%  }
+%%%    \end{lstlisting}
+%%%    \caption{Кодирование в \textsc{OCanren}. Многоточия обозначают другие части структуры, находящиеся в том же отношении.}
+%%%    \label{rel_con}
+%%%  \end{subfigure}
+%%%  \caption{Реляционное преставление структуры как набора отношений}
+%%%  \label{rel_rel}
+%%%\end{figure}
+%%%
+%%%После реляционного преобразования, шаблоны над структурой будут преобразованы в обычную реляционную форму. Это преобразование
+%%%полностью убирает накладные расходы на интерпретацию для сопоставления структуры. Недостатком является то, что нам необходимо
+%%%порождать эту часть системы для каждого изменения в структуре. Это естественный компромисс для подходов на основе специализации.
+%%%
 
-Как уже известно, структура --- это набор отношений над элементами управления. В реляционном языке мы можем представлять отношения непосредственно как отношения.
-Предположим, мы работаем с фрагментом структуры с рис.~\ref{rel_rel}\subref{rel_abs}. В оригинальном изложении она представлялась бы как данные,
-используя соответствующие типы для элементов управления и отношений. Однако, те же самые части структуры можно закодировать непосредственно в
-\textsc{OCanren} (рис.~\ref{rel_rel}\subref{rel_con}).
+%\he{Жадный алгоритм разрешения конфликтов}
 
-%As we know, a structure is just a set of relations over the set of controls. In a relational language we can directly
-%represent relations as relations. Assume we have a (fragment) of structure shown in Fig.~\ref{rel_rel}\subref{rel_abs}.
-%In original implementation it was represented as a data structure using dedicated types for representing
-%controls and relations. However, the same elements of the structure can be directly encoded in
-%\textsc{OCanren} as it shown in Fig.~\ref{rel_rel}\subref{rel_con} (the ellipses indicate that there can be other
-%parts of these definitions corresponding to other controls bound with said relations).
-
-\begin{figure}[t]
-  \begin{subfigure}[t]{0.5\textwidth}
-    \begin{lstlisting}[basicstyle=\small,language=ocanren]
-  $\term{type}\,(A,\, \term{checkbox})$
-  $\term{type}\,(B,\, \term{label})$
-  $\term{describes}\,(B,\, A)$
-    \end{lstlisting}
-    %\vskip16mm
-    \caption{Отношения в абстрактной записи}
-    \label{rel_abs}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.5\textwidth}
-    \begin{lstlisting}[basicstyle=\small,language=ocanren]
-  let $\mbox{\texttt{type}}^o$ x y = ocanren {
-    y === Checkbox /\ x === A \/
-    y === Label    /\ x === B \/ ...
-  }
-  let $\mbox{\texttt{describes}}^o$ x y = ocanren {
-    x === B /\ y === A \/ ...
-  }
-    \end{lstlisting}
-    \caption{Кодирование в \textsc{OCanren}. Многоточия обозначают другие части структуры, находящиеся в том же отношении.}
-    \label{rel_con}
-  \end{subfigure}
-  \caption{Реляционное преставление структуры как набора отношений}
-  \label{rel_rel}
-\end{figure}
-
-После реляционного преобразования, шаблоны над структурой будут преобразованы в обычную реляционную форму. Это преобразование
-полностью убирает накладные расходы на интерпретацию для сопоставления структуры. Недостатком является то, что нам необходимо
-порождать эту часть системы для каждого изменения в структуре. Это естественный компромисс для подходов на основе специализации.
-
-%After the conversion, a pattern to match over a structure can be turned into a conventional relational goal. This conversion
-%completely eliminates the interpretation overhead for matching over structures. The drawback is that we need to regenerate a
-%part of the system for each change of the structure; this is rather a natural trade-off when specialization techniques are used.
-
-\he{Жадный алгоритм разрешения конфликтов}
-
-Изначальная реализация порождала все возможные совместные множества экземпляров расположения.
-Но их число огромно, даже если мы рассматриваем только подтверждённые и покрытые.
-Чтобы сделать синтезатор применимым, нужно устранить эту неэффективность. Воспользуемся жадным подходом:
-вместо порождения всех подходящих и последующей фильтрации, построим максимальное несовместное расположение, а затем найдем
-все конфликты и устраним их путём \emph{недетерминированной} отмены минимального набора правил, которые образуют конфликты.
+Во-вторых, изначальная реализация порождает все возможные совместные множества экземпляров расположения, число которых \emph{огромно}, даже если рассматривать только подтверждённые и покрытые.
+Чтобы это решить, будет стоит  максимальное несовместное расположение, а из него получать все совместные путём поиска конфликтов
+и \emph{недетерминированной} отмены минимального набора правил, которые образуют конфликты.
 Такой подход даст нам множество всех максимальных совместных расположений.
-Каждый шаг   нами реализован как отдельная реляционная компонента.
+Это является оптимизаций за счет того, что конфликтующих примитивов расположения меньше, чем не конфликтующих, и поэтому проще получить все и недерминированно выкинуть все конфликтующие, чем недетерминированно искать все не конфликтующие.
+
+Каждый из трёх шагов получения максимальных не конфликтующих   расположений   реализован как отдельная реляционная компонента.
 %
 %Our initial solution generate all compatible sets of instances. However their number can be huge even if
 %only confirmed and covered sets are considered. In order to make our synthesizer applicable we have to eliminate
@@ -201,18 +152,8 @@
 %(but probably non-compatible) set of layout instances represented as a hypercube.
 
 На втором шаге воспользуемся особым реляционным верификатором, чтобы найти все конфликты. Для каждого вида конфликта применим
-специальный верификатор, который по гиперкубу и набору экземпляров расположения, проверяет, что
-
-
-%For the second step we use a specific relational verifier to find all conflicts. For each kind of conflict we implement
-%a dedicated verifier which, given a hypercube and a set of layout instances, checks that
-
-\begin{itemize}
-\item множество содержится в гиперкубе;
-\item оно действительно содержит искомый конфликт.
-\end{itemize}
-
-Запустившись в обратном направлении на конкретном гиперкубе верификатор вернёт множество экземпляров расположения, которое образует конфликт соответствующего вида. Запуск в обратном направлении дизъюнкции верификаторов даст нам все конфликтующие экземпляры.
+специальный верификатор, который по гиперкубу и набору экземпляров расположения, проверяет, что элементы набора содержатся в гиперкубе и действительно образуют рассматриваемый конфликт.\footnotetext{\textcolor{red}{Пётр, перепроверь это место, потому что по-моему в ворде как-то стрёмно написано.} }
+Запустившись в обратном направлении на конкретном гиперкубе верификатор вернёт набор экземпляров расположения, который образует конфликт соответствующего вида. Запуск в обратном направлении дизъюнкции верификаторов даст нам все конфликтующие экземпляры.
 
 %Being run in the reverse direction for a ground hypercube and free variable this verifier returns all
 %sets of layout instances which occur in the hypercube and constitute a conflict of given kind. Running a disjunction
@@ -220,20 +161,11 @@
 
 На третьем шаге мы для каждого конфликтующего расположения разрешаем конфликты, что даст нам (для каждого набора) множество максимальных совместных расположений.
 Сделаем это следующим образом. Обозначим множество конфликтующих экземпляров как   $S$.
-Каждый найденный конфликт можно разрешить убрав только один примитив расположения. Поэтому, будем по-одному выкидывать экземпляры из $S$ и смотреть какие конфликты разрешились. Заметим,что выкидывание одного примитива может разрешить сразу несколько конфликтов.
-Когда не останется ни одного конфликта, мы вернём максимальное совместное расположение. Однако, тут есть одна тонкость, осложняющая реализацию.
-Удаляя экземпляры мы можем получить расположение, которые более не подтверждается предписанием так как некоторые части расположения могут появляться и исчезать только одновременно. Поэтому, надо аккуратно реализовывать процедуру отмены правил. Весь шаг реализован реляционно, из-за многочисленного использования недетерминизма.
-
-%On the third step we take each set of conflicting layout instances and resolve all conflicts which gives us (for each set)
-%the set of maximal compatible layouts. We do this in the following manner. Let $S$ be a set of conflicting
-%instances. The property of all identifiable conflicts is that each of them can be resolved by removing just
-%one layout instance. So, we nondeterministically one-by-one remove layout instances from $S$ and see what conflicts disappear
-%due to this removal. Note, the removal of just one instance can resolve multiple conflicts. When no conflicts remain we return
-%the set as a maximal compatible layout. There is, however, a subtlety which makes the implementation trickier. By simply removing
-%layout instances we may arrive at a layout which is not confirmed by a guideline since some layout instances can appear (and,
-%conversely, disappear) only simultaneously. So we need to implement a certain ``canceling'' procedure to correctly
-%undo guideline rules application. The whole step is, again, implemented relationally due to extensive use of
-%nondeterminism.
+Каждый найденный конфликт можно разрешить убрав только один примитив расположения. Поэтому, будем по-одному выкидывать экземпляры из $S$ и смотреть какие конфликты разрешились. Выкидывание одного примитива может разрешить сразу несколько конфликтов.
+Так мы получим максимальное совместное расположение, когда не останется ни одного конфликта.
+Тут есть тонкость, осложняющая реализацию:
+удаляя экземпляры мы можем получить расположение, которые более не подтверждается предписанием, так как некоторые части расположения могут появляться и исчезать только одновременно.
+Поэтому, надо аккуратно реализовывать процедуру отмены правил. Весь шаг реализован реляционно, из-за многочисленного использования недетерминизма.
 
 Обращаем внимание, что решение задействует три реляционные программы, которые передают результаты друг в друга. Эти программы нельзя объединить в одну, так как запуск следующей требует нахождения всех результатов предыдущей программы.
 
@@ -241,7 +173,7 @@
 %Moreover, it is impossible to combine them into a single relational program since each step requires all the answers
 %of the previous one to be found.
 
-\he{Вычисление абсолютных координат}
+\He{Вычисление абсолютных координат}
 
 Чтобы привести расположение к окончательному виду, необходимо посчитать координаты всех элементов управления.
 Для корректного множества экземпляров расположения эта задача сводится к решению задачи в \emph{целочисленных линейных ограничениях}.

@@ -7,12 +7,12 @@
 %The implementation of our layout synthesizer employs the techniques of relational programming. Here
 %we briefly recollect what relational programming is and how the approaches and tools we use work.
 
-Реляционное программирование~\cite{TRS} --- это подход, основанный на идее описания программ как отношений.
+Реляционное программирование~\cite{TRS}~--- это подход, основанный на идее описания программ как отношений.
 Его можно рассматривать как вид логического программирования, в котором порицается использование всех не реляционных конструкций (эффекты, не логические конструкции).
-В узком смысле реляционное программирование --- это написание программ на \miniKanren~--- специально сконструированном для этих целей, встраиваемом предметно-ориентированном языке. В оригинале он разрабатывался для \textsc{Scheme}/\textsc{Racket}, позже \textsc{miniKanren} был портирован на другие языки\footnote{\url{http://minikanren.org/#implementations} (проверено: \DTMDate{2024-08-26})}.
-Мы используем строго статически типизированную реализацию \miniKanren, встроенную в \OCaml, которая называется \OCanren~\cite{OCanren}.
-В \miniKanren используется та же теория дизъюнктов Хорна как и в \textsc{Prolog}, но с другим синтаксисом: явные унификации и дизъюнкции, конъюнкции, явное создание свежих (англ. fresh) переменных, а также  используется стратегия \emph{поиска с чередованием} (англ. interleaving search)~\cite{interleaving}, которая полна~\cite{certified}.
-Кроме унификации с проверкой цикличности вхождений (англ. occurs-check) по-умолчанию, \miniKanren можно оснастить другими ограничениями, например: неравенства~\cite{disuni}, конечные домены~\cite{cKanren} или конструкции из номинальной логики~\cite{aKanren}.
+В узком смысле реляционное программирование~--- это написание программ на \miniKanren~--- специально сконструированном для этих целей, встраиваемом предметно-ориентированном языке. В оригинале он разрабатывался для \textsc{Scheme}/\textsc{Racket}, позже \miniKanren был портирован на другие языки\footnote{\url{http://minikanren.org/#implementations} (проверено: \DTMDate{2024-08-26})}.
+Мы используем строго статически типизированную реализацию \miniKanren{}, встроенную в \OCaml{}, которая называется \OCanren{}~\cite{OCanren}.
+От \textsc{Prolog} язык \miniKanren отличается синтаксисом (явные унификации и дизъюнкции, конъюнкции, явное создание свежих (англ. fresh) переменных) и стратегией \emph{поиска с чередованием} (англ. interleaving search)~\cite{interleaving}, которая полна~\cite{certified}.
+Кроме унификации с проверкой цикличности вхождений (англ. occurs-check) по-умолчанию, \miniKanren{} можно расширять другими ограничениями, например: неравенства~\cite{disuni}, конечные домены~\cite{cKanren} или конструкции из номинальной логики~\cite{aKanren}.
 
 
 %Relational programming~\cite{TRS} is an approach based on the idea of describing programs as
@@ -43,22 +43,24 @@
 %inverse computations particularly easy~\cite{searchproblems}, which opens a way for program
 %synthesis~\cite{Untagged,WBirdSeven,PatternMatching}.
 
-Другим компонентом нашего подхода является \emph{реляционное преобразование} (англ. \emph{relational conversion}).
-Во многих случаях (но не всегда) проще получить реляционную спецификацию из кода на функциональном языке, чем написать спецификацию вручную.
-Мы используем инструмент \noCanren, который преобразует программы, написанные на подмножестве \OCaml, в  \OCanren-спецификации, корректные по построению.
-\textcolor{red}{noCanren не упоминать}
+%Другим компонентом нашего подхода является \emph{реляционное преобразование} (англ. \emph{relational conversion}).
+%Во многих случаях (но не всегда) проще получить реляционную спецификацию из кода на функциональном языке, чем написать спецификацию вручную.
+%Мы используем инструмент \noCanren, который преобразует программы, написанные на подмножестве \OCaml, в  \OCanren-спецификации, корректные по построению.
+%\textcolor{red}{noCanren не упоминать}
 
 %Another component of our approach is \emph{relational conversion}. In many cases (but not always!) it is easier to obtain a relational specification
 %from functional program than writing the one by hands. We use a tool, called \textsc{noCanren}, which converts programs written is a reasonable
 %subset of \textsc{OCaml} into correct-by-construction\cite{conversion} \textsc{OCanren} specifications.
 
-Продемонстрируем наш подход на следующем обозримом примере. Рассмотрим программу на рис.~\ref{fun_vs_rel}\subref{funadd}, которая складывает два натуральных числа в форме Пеано. Её реляционный образ, полученный с помощью реляционного преобразования (не буквально, но в эквивалентной записи)~--- на рис. ~\ref{fun_vs_rel}\subref{reladd}.
-Сравнивая их, можно обратить внимание, что сопоставление с образцом было заменено на дизъюнкцию (\lstinline[language=ocanren,basicstyle=\small]|\/|)
-и унификацию  (\lstinline[language=ocanren,basicstyle=\small]|===|); модификации потока данных --- на конъюнкцию (\lstinline[language=ocanren,basicstyle=\small]|/\|); свежие переменные были добавлены, где это необходимо; а постфиксная нотация ``$^o$'' (\textcolor{red}{Нотация с кружочком идет нафиг}) традиционно используется для обозначения определения реляций (вычислимых отношений).
-В отличие от функциональной реализации, у реляционной три аргумента (\lstinline[language=ocanren,basicstyle=\small]|x|, \lstinline[language=ocanren,basicstyle=\small]|y|,
-и \lstinline[language=ocanren,basicstyle=\small]|z|), каждый из которых может содержать  свежие переменные.
-Вычисление конструкции  \lstinline[language=ocanren,basicstyle=\small]|run$^*$ {add$^o$ x y z}| возвращает \emph{ленивый поток ответов}, который содержит все подстановки этих трёх переменных, такие, что отношение $\{(x,y,z)\in\mathbb{N}^3 \mid x+y=z\}$ верно.
-Этот поток можно исследовать в \OCaml, чтобы получать ответы по-одному. Одна и та же спецификация может использоваться и для сложения, и для вычитания, и для разбиения числа на два слагаемых.
+Продемонстрируем наш подход на следующем обозримом примере.
+Рассмотрим программу на рис.~\ref{fun_vs_rel}\subref{funadd}, которая конкатенирует два списка, и её реляционный эквивалент на рис. ~\ref{fun_vs_rel}\subref{reladd}.
+Сравнивая их, можно обратить внимание, что сопоставление с образцом было заменено на дизъюнкцию (\lstinline[language=ocanren,basicstyle=\small]|conde|)
+и унификацию  (\lstinline[language=ocanren,basicstyle=\small]|===|); модификации потока данных --- на конъюнкцию (\lstinline[language=ocanren,basicstyle=\small]|&&&|); свежие переменные были добавлены, где это необходимо; а постфиксная нотация \enquote{o}) традиционно используется для обозначения определения реляций (вычислимых отношений).
+В отличие от функциональной реализации, у реляционной три аргумента (\lstinline[language=ocanren,basicstyle=\small]|xs|, \lstinline[language=ocanren,basicstyle=\small]|ys|,
+и \lstinline[language=ocanren,basicstyle=\small]|zs|), каждый из которых может содержать  свежие переменные.
+Вычисление конструкции  \lstinline[language=ocanren,basicstyle=\small]|run$^*$ {appendo$^o$ x y z}| возвращает \emph{ленивый поток ответов}, который содержит все подстановки этих трёх переменных, такие, что отношение $\{(x,y,z)\in\mathbb{N}^3 \mid x +\kern-1.3ex+\kern0.8ex y=z\}$ верно.
+Этот поток можно исследовать в \OCaml{}, чтобы получать ответы по-одному.
+Одна и та же спецификация может использоваться и для конкатенации, и для отрезания префикса, и для разбиения списка на две части.
 
 %We demonstrate the roadmap of our approach by the following observable example. Let us have a program
 %shown in Fig.~\ref{fun_vs_rel}\subref{funadd} which adds two natural numbers in Peano form. Its relational counterpart,
@@ -76,28 +78,28 @@
 \begin{figure}[t]
   \begin{subfigure}[t]{0.5\textwidth}
   \begin{lstlisting}[language=ocanren,basicstyle=\small]
-   let rec add x y =
-     match x with
-     | O    -> y
-     | S xp -> S (add xp y)
+   let rec append xs yy =
+     match xs with
+     | []    -> ys
+     | x::xs -> x :: append xs ys
   \end{lstlisting}
-  %\vskip12mm
   \caption{Реализация на функциональном языке}
   \label{funadd}
   \end{subfigure}
   \begin{subfigure}[t]{0.5\textwidth}
     \begin{lstlisting}[language=ocanren,basicstyle=\small]
-  let rec add$^o$ x y z = ocanren {
-    x === O /\ z === y \/
-    fresh xp, zp in
-      x === S xp /\
-      z === S zp /\
-      add$^o$ xp y zp
-  }
+  let rec appendo xs ys zs =
+    conde
+      [ (xs === nil()) &&& (ys === xs)
+      ; fresh (h tl tmp)
+          (xs === List.cons h tl)
+          (appendo tl ys tmp)
+          (zs === List.cons h tmp)
+      ]
     \end{lstlisting}
-    \caption{Реляционное сложение \textcolor{red}{Можно переписать без булычевского расширения}}
+    \caption{Реляционное слияние списков. Использует конъюнкция \texttt{\&\&\&}, дизъюнкция \texttt{conde} и квантор существования (\texttt{fresh}), совмещенный с конъюнкцией}
     \label{reladd}
   \end{subfigure}
-  \caption{Функциональное и реляционное сложение чисел Пеано (\textcolor{red}{Сделать пример про списки})}
+  \caption{Функциональное и реляционное слияние списков}
   \label{fun_vs_rel}
 \end{figure}

@@ -6,36 +6,37 @@
 	\centering
 	\subfloat[Пример интерфейса GUI\label{form1}]{
 		\centering
-		\includegraphics[scale=0.5]{../eng/form1.png}
+		\includegraphics[scale=0.1]{../eng/form1_rus.png}
 	}
+
 	\vskip5mm
 	\subfloat[Пример структуры GUI\label{form1-structure}]{
 		\scalebox{0.5}{
 			\begin{tikzpicture}
-				\node[rectangle,draw] (check) at (12, 3) {\includegraphics{../eng/check.png}};
-				\node[rectangle,draw] (label) at (9, 0)  {\includegraphics{../eng/label.png}};
-				\node[rectangle,draw] (combo) at (15, 0) {\includegraphics{../eng/combo.png}};
+				\node[rectangle,draw] (check) at (12, 2.5) {\includegraphics[scale=0.2]{../eng/check_rus.png}};
+				\node[rectangle,draw] (label) at (9.5, 0)  {\includegraphics[scale=0.2]{../eng/label_rus.png}};
+				\node[rectangle,draw] (combo) at (14.5, 0) {\includegraphics[scale=0.2]{../eng/combo_rus.png}};
 				\begin{scope}
-					\node[rectangle,dashed,draw,fit=(label)(combo),minimum height=2cm,minimum width=12cm] (composite) (0, 0) {};
+					\node[rectangle,dashed,draw,fit=(label)(combo),minimum height=2cm,minimum width=9cm] (composite) (0, 0) {};
 				\end{scope}
 				\path[draw,->] (label.east) -- node[above] {\emph{descr}} (combo.west);
-				\path[draw,->] (check.south) -- node[right] {\emph{order}} (12,1);
+				\path[draw,->] (check.south) -- node[right] {\emph{order}} (12, 1);
 	\end{tikzpicture}}}
 	\vskip5mm
 	\subfloat[Пример реального расположения элементов управления\label{form1-layout}]{
 		\scalebox{0.5}{
 			\begin{tikzpicture}
-				\node (label) at (7.8, 2.5) {\emph{justify}};
-				\node[rectangle,draw] (check) at (9.47, 1.6) {\includegraphics{../eng/check.png}};
-				\node[rectangle,draw] (label) at (9.01, 0  ) {\includegraphics{../eng/label.png}};
-				\node[rectangle,draw] (combo) at (14  , 0  ) {\includegraphics{../eng/combo.png}};
+				\node (label) at (7.93, 2.9) {\emph{justify}};
+				\node[rectangle,draw] (check) at (10.46, 2) {\includegraphics[scale=0.2]{../eng/check_rus.png}};
+				\node[rectangle,draw] (label) at (8.86, 0) {\includegraphics[scale=0.2]{../eng/label_rus.png}};
+				\node[rectangle,draw] (combo) at (13.2, 0) {\includegraphics[scale=0.2]{../eng/combo_rus.png}};
 				\begin{scope}
 					\node[rectangle,dashed,draw,fit=(label)(combo)] (composite) (0, 0) {};
 				\end{scope}
 				\path[draw,<->] (label.east) -- node[above] {\emph{inset}} (combo.west);
-				\path[draw,<->] (check.south) -- node[right] {\emph{inset}} (9.47,0.65);
-				\path[draw,-] (7.21,2.7) -- (7.21,0);
-	\end{tikzpicture}}}
+				\path[draw,<->] (check.south) -- node[right] {\emph{inset}} (10.46,0.71);
+				\path[draw,-] (7.3, 3.3) -- (7.3, 0);
+ 	\end{tikzpicture}}}
 	\vskip5mm
 	\subfloat[Пример правила предписания\label{gdrule}]{
 		\includegraphics[scale=0.35]{../eng/jbg-09.png}

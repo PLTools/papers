@@ -26,17 +26,16 @@
 	\subfloat[Пример реального расположения элементов управления\label{form1-layout}]{
 		\scalebox{0.5}{
 			\begin{tikzpicture}
-				\node (label) at (7.93, 2.9) {\emph{justify}};
+				\node (label) at (8.6, 2.9) {\emph{выравнивание}};
 				\node[rectangle,draw] (check) at (10.46, 2) {\includegraphics[scale=0.2]{../eng/check_rus.png}};
 				\node[rectangle,draw] (label) at (8.86, 0) {\includegraphics[scale=0.2]{../eng/label_rus.png}};
-				\node[rectangle,draw] (combo) at (13.2, 0) {\includegraphics[scale=0.2]{../eng/combo_rus.png}};
+				\node[rectangle,draw] (combo) at (14.2, 0) {\includegraphics[scale=0.2]{../eng/combo_rus.png}};
 				\begin{scope}
 					\node[rectangle,dashed,draw,fit=(label)(combo)] (composite) (0, 0) {};
 				\end{scope}
-				\path[draw,<->] (label.east) -- node[above] {\emph{inset}} (combo.west);
-				\path[draw,<->] (check.south) -- node[right] {\emph{inset}} (10.46,0.71);
-				\path[draw,-] (7.3, 3.3) -- (7.3, 0);
- 	\end{tikzpicture}}}
+				\path[draw,<->] (label.east) -- node[above] {\emph{отступ}} (combo.west);
+				\path[draw,<->] (check.south) -- node[right] {\emph{отступ}} (10.46,0.71);
+				\path[draw,-] (7.3, 3.3) -- (7.3, 0);. 	\end{tikzpicture}}}
 	\vskip5mm
 	\subfloat[Пример правила предписания\label{gdrule}]{
 		\includegraphics[scale=0.35]{../eng/jbg-09.png}

@@ -5,6 +5,7 @@
 \documentclass[a4paper,twoside,11pt]{article}
 \usepackage[cp1251]{inputenc}
 \usepackage[english,russian]{babel}
+\usepackage{xurl}
 \usepackage{fancyhdr}
 \usepackage{../eng/newprog1e}
 \usepackage{amsfonts,amsmath,amssymb,amsthm}
@@ -12,13 +13,10 @@
 \usepackage{subcaption}
 \usepackage[autostyle=true]{csquotes}
 \usepackage{listings}
-\usepackage{xurl}
 \usepackage{verbatim}
 \usepackage{verbatimbox}
 \usepackage{xspace}
 \usepackage{array}
-%\usepackage{biblatex}
-
 
 \usepackage{datetime2}
 \DTMsetup{useregional}
@@ -117,12 +115,11 @@
 \journalnumber{1}
 \curyear{2025}
 \authorlist{ЛОЗОВ И ДР.}
-\titlehead{ \textcolor{red}{ПОМЕНЯТЬ} }
+\titlehead{ Реляционный подход к декларативному синтезу графических интерфейсов пользователя }
 \headerdef
 
-\udk{004.421.6}
-%92+004.94}
-\rubrika{КОМПЬЮТЕРНАЯ АЛГЕБРА}
+\udk{004.51}
+\rubrika{ЯЗЫКИ, КОМПИЛЯТОРЫ И СИСТЕМЫ ПРОГРАММИРОВАНИЯ.}
 \dateinput{?.?.2024}
 
 \rusabstr{
@@ -135,7 +132,9 @@
 \\ {\slshape 199034} {\slshape 7-9} {\itshape Санкт-Петербург, Университеская наб. д.} {\slshape 7-9}
 \\ {\itshape **Без аффилиации}
 \\ {\itshape E-mail: d.kosarev@spbu.ru,  lozov.peter@gmail.com,  dboulytchev@math.spbu.ru, denis.fokin@gmail.com }}
-\title{ \textcolor{red}{ПОМЕНЯТЬ} }
+\title{ Реляционный подход к декларативному синтезу графических интерфейсов пользователя }
+\title{ Программирование в ограничениях для автоматизированного проектирования интерфейсов}
+
 %\thanks{~}
 
 \date{}
@@ -189,7 +188,7 @@
 %{\em Ingram~S.} (2016) The Thumb Zone: Designing For Mobile Users. Smashing Magazine (online). Available at: \url{https://www.smashingmagazine.com/2016/09/the-thumb-zone-designing-for-mobile-users}, accessed 10.11.2024.
 
 \bibitem{UI5}
-Ergonomics of human-system interaction~--- Part 210: Human-centred design for interactive 
+Ergonomics of human-system interaction~--- Part 210: Human-centred design for interactive
 systems. ISO 9241-210:2019, International Organization for Standardization, 2019. Available at: \url{https://www.iso.org/standard/77520.html}.
 
 \bibitem{UI6}
@@ -205,7 +204,12 @@ systems. ISO 9241-210:2019, International Organization for Standardization, 2019
 {\em Leonardo de Moura, Bj{\o}rner~N.} Z3: An Efficient SMT Solver. Tools and Algorithms for the Construction and Analysis of Systems, Springer Berlin Heidelberg, 2008, pp. 337--340.
 
 \bibitem{UI3}
-{\em Bengfort~J.} Thin vs. Thick vs. Zero Client: What’s the Right Fit for Your Business? Online. Available at:  \url{https://biztechmagazine.com/article/2018/10/thin-vs-thick-vs-zero-client-whats-right-fit-your-business-perfcon}, accessed: 10.11.2024.
+{\em Bengfort~J.} Thin vs. Thick vs. Zero Client: What’s the Right Fit for Your Business? Online. Available at:
+\url{https://biztechmagazine.com/article/2018/10/thin-vs-thick-vs-zero-client-whats-right-fit-your-business-perfcon}, accessed: 10.11.2024.
+% TODO: On Kakadu's computer link is not being breaked properly. We should either
+% * oblige Peter to compile PDF
+% * rewrite with \texttt beacuse URLs are alredy unclickable
+% * Understand why \href doesn't work
 
 \bibitem{JBG}
 Intellij platform UI guidelines: Layout (online). JetBrains s.r.o., 2000--2022. Available at: \url{https://jetbrains.github.io/ui/principles/layout}, accessed: 10.11.2024.
@@ -285,6 +289,7 @@ Android \texttt{ConstraintLayout} widget. Available at: \url{https://developer.a
 \bibitem{Grid}
 {\em Shiripour~M., Dayama~N.R., Oulasvirta~A.} Grid-based Genetic Operators for Graphical Layout Generation. Proc. ACM Hum.-Comput. Interact., vol. 5, Association for Computing Machinery, New York, NY, USA, 2021. DOI: 10.1145/3461730.
 
+\newpage
 \bibitem{Scout}
 {\em }Swearngin~A., Wang~C., Oleson~A., Fogarty~J., Amy~J.Ko. Scout: Rapid Exploration of Interface Layout Alternatives through High-Level Design Constraints. Proceedings of the 2020 CHI Conference on Human Factors in Computing Systems, 2020. Available at: \url{https://api.semanticscholar.org/CorpusID:210177012}, accessed: 10.11.2024.
 
@@ -294,7 +299,7 @@ Android \texttt{ConstraintLayout} widget. Available at: \url{https://developer.a
 
 %\bibliographystyle{ugost2008ls}
 %\bibliography{report_19_09.bib}
-
+\newpage
 \input{900figures}
 
 \label{lastpage}

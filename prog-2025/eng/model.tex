@@ -13,15 +13,15 @@ does not introduce any essential changes into the synthesis algorithm.
   \centering
   \subfloat[Sample GUI form\label{form1}]{
       \centering
-      \includegraphics[scale=0.5]{form1.png}
+      \includegraphics[scale=0.35]{form1.png}
   }
   \vskip5mm
   \subfloat[Sample GUI form structure\label{form1-structure}]{    
   \scalebox{0.5}{
   \begin{tikzpicture}
-    \node[rectangle,draw] (check) at (12, 3) {\includegraphics{check.png}};
-    \node[rectangle,draw] (label) at (9, 0)  {\includegraphics{label.png}};
-    \node[rectangle,draw] (combo) at (15, 0) {\includegraphics{combo.png}};
+    \node[rectangle,draw] (check) at (12, 2.5) {\includegraphics[scale=0.7]{check.png}};
+    \node[rectangle,draw] (label) at (8.7, 0)  {\includegraphics[scale=0.7]{label.png}};
+    \node[rectangle,draw] (combo) at (15.3, 0) {\includegraphics[scale=0.7]{combo.png}};
     \begin{scope}
       \node[rectangle,dashed,draw,fit=(label)(combo),minimum height=2cm,minimum width=12cm] (composite) (0, 0) {};
     \end{scope}
@@ -32,20 +32,20 @@ does not introduce any essential changes into the synthesis algorithm.
 \subfloat[Sample GUI form layout\label{form1-layout}]{
   \scalebox{0.5}{
   \begin{tikzpicture}
-    \node (label) at (7.8, 2.5) {\emph{justify}};
-    \node[rectangle,draw] (check) at (9.47, 1.6) {\includegraphics{check.png}};
-    \node[rectangle,draw] (label) at (9.01, 0  ) {\includegraphics{label.png}};
-    \node[rectangle,draw] (combo) at (14  , 0  ) {\includegraphics{combo.png}};
+    \node (label) at (7.3, 2.65) {\emph{justify}};
+    \node[rectangle,draw] (check) at (9.45, 1.8) {\includegraphics[scale=0.7]{check.png}};
+    \node[rectangle,draw] (label) at (8.91, 0  ) {\includegraphics[scale=0.7]{label.png}};
+    \node[rectangle,draw] (combo) at (15.5, 0  ) {\includegraphics[scale=0.7]{combo.png}};
     \begin{scope}
       \node[rectangle,dashed,draw,fit=(label)(combo)] (composite) (0, 0) {};
     \end{scope}
     \path[draw,<->] (label.east) -- node[above] {\emph{inset}} (combo.west);
-    \path[draw,<->] (check.south) -- node[right] {\emph{inset}} (9.47,0.65);
-    \path[draw,-] (7.21,2.7) -- (7.21,0);
-\end{tikzpicture}}}
+    \path[draw,<->] (check.south) -- node[right] {\emph{inset}} (9.47,0.7);
+    \path[draw,-] (6.7,3) -- (6.7,-0.4);
+  \end{tikzpicture}}}
 \vskip5mm
 \subfloat[Sample GUI guideline rule\label{gdrule}]{
-  \includegraphics[scale=0.35]{jbg-09.png}
+  \includegraphics[scale=0.28]{jbg-09.png}
 }
 
 \caption{GUI form example, structure, layout, and guideline}

@@ -3,7 +3,7 @@
 % !TEX root = mainrus.tex
 
 В нашей модели логическая структура, упомянутая в предыдущем разделе, описывается как набор отношений на некотором множестве элементов управления $\mathcal{C}$. Обозначим нашу структуру $\Sigma=\{r^{n_i}_i\, |\, r^{n_i}_i\subseteq\mathcal{C}^{n_i}\}$ как множество отношений, где    $r^{n_i}_i$ является \mbox{$n_i$-арным} отношением над $\mathcal{C}$;
-без потери общности мы не будем рассматривать такие отношения, как размер, текстовое содержимое элементов управления и т.п.
+без потери общности не будем рассматривать такие отношения, как размер, текстовое содержимое элементов управления и т.п.
 
 %In our model given in the previous section the logical structure of GUI is described by
 %a number of relations between a certain set of controls. Let $\mathcal{C}$ be a set of
@@ -21,7 +21,7 @@
 %A \emph{layout template} is a syntactic form $l\,(X_1,\dots,X_n)$, where $l$ is a layout primitive and
 %$X_i$~--- variables.
 
-Как $s\,[X_i\gets c_i]$ мы будем обозначать результат подстановки элементов управления
+Как $s\,[X_i\gets c_i]$ будем обозначать результат подстановки элементов управления
 $c_i\in\mathcal{C}$
 вместо переменных $X_i$ в реляционный шаблон или в шаблон расположения  $s$. Пусть $\mathcal{FV}\,(s)$~--- это множество всех переменных в реляционном шаблоне или в шаблоне расположения $s$, и будем называть \emph{экземпляром расположения} шаблон без переменных.
 
@@ -127,7 +127,7 @@ $c^\prime_1,\dots,c^\prime_t\in\mathcal{C}$ такие, что для всех $j$ подстановка 
 %call a confirmed and covering set of layout instances $S$ \emph{maximal} iff there is no
 %confirmed and covering set $S^\prime$ such that $S\subset S^\prime$.
 
-Наконец, расположения могут содержать конфликты. Например, если элемент $A$ должен быть расположен сверху $B$ и наоборот, то, очевидно, что мы получили несовместные ограничения. Среди всех конфликтов мы можем выделить следующие:
+Наконец, расположения могут содержать конфликты. Например, если элемент $A$ должен быть расположен сверху $B$ и наоборот, то, очевидно, что были получены несовместные ограничения. Среди всех конфликтов можно выделить следующие:
 
 %Finally, layouts can contain conflicts. For example, if a layout says that a control $A$ has to be put on
 %the top of control $B$ and visa versa then, obviously, it is unusable since these two primitives introduce
@@ -166,13 +166,11 @@ $c^\prime_1,\dots,c^\prime_t\in\mathcal{C}$ такие, что для всех $j$ подстановка 
 
 Стоит обсудить вопрос производительности подхода в худшем случае. Легко заметить, что нахождение корректного расположения~--- в общем случае NP-полная задача.
 Для подтверждения этого, рассмотрим решение NP-полной задачи поиска Гамильтонова пути в графе с помощью нашего подхода.
-Для произвольного ненаправленного графа мы можем построить структуру, в которой один элемент управления соответствует одной вершине графа,  а некоторое бинарное отношение  ``$E$'' --- рёбрам. Затем рассмотрим такие правила расположения:
-
+Для произвольного ненаправленного графа можно построить структуру, в которой один элемент управления соответствует одной вершине графа,  а некоторое бинарное отношение $E$~--- рёбрам. Затем рассмотрим такие правила расположения:
 %It is worth mentioning the worst-case complexity of the problem in question. First, it is rather
 %easy to see that finding if there exists a sound layout is $NP$-complete in general case.
 %Indeed, given an undirected graph we can construct a structure where controls correspond to its nodes
 %and some binary relation (call it ``$E$'') corresponds to edges. Then we take the following guideline:
-
 \[
 \begin{array}{rcl}
   E\,(x,\, y) & \mapsto & \mbox{hor}\,(x,\, y)\\

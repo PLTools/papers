@@ -328,8 +328,10 @@ solve(layPart, sizePart) {
     return [ Z3.model ]
   }
 
-  // If unsat we need to find and solve layout
-  // conflict MUC is one of conflicts
+  // If unsat we need to find and solve
+  // layout conflict
+
+  // MUC is one of conflicts
   muc = Z3.minimalUnsatCore
 
   // A list of refined models

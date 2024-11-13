@@ -249,34 +249,34 @@
 
 \begin{figure}
 \begin{lstlisting}[language=algo,mathescape=true,basicstyle=\ttfamily]
-  solve(layPart, sizePart) {
-    // Try to solve the full system
-    if (Z3.solve (layPart $\cup$ sizePart)) {
-        // Return a model
-        return [ Z3.model ]
-    }
-
-    // If unsat we need to find and solve
-    // layout conflict MUC is one
-    // of conflicts
-    muc = Z3.minimalUnsatCore
-    // A list of refined models
-    answers = []
-
-    for (mucElement $\in$ muc) {
-      // To solve the conflict we need
-      // to remove any layout element
-      // of MUC from the system
-      if (mucElement $\in$ layPart) {
-        reducedLayPart =
-          layPart $\setminus$ {mucElement}
-        answers ++= solve(
-            reducedLayPart, sizePart)
-      }
-    }
-
-    return answers
+solve(layPart, sizePart) {
+  // Try to solve the full system
+  if (Z3.solve (layPart $\cup$ sizePart)) {
+      // Return a model
+      return [ Z3.model ]
   }
+
+  // If unsat we need to find and solve layout
+  // conflict MUC is one of conflicts
+  muc = Z3.minimalUnsatCore
+
+  // A list of refined models
+  answers = []
+
+  for (mucElement $\in$ muc) {
+    // To solve the conflict we need
+    // to remove any layout element
+    // of MUC from the system
+    if (mucElement $\in$ layPart) {
+      reducedLayPart =
+        layPart $\setminus$ {mucElement}
+      answers ++= solve(
+          reducedLayPart, sizePart)
+    }
+  }
+
+  return answers
+}
 \end{lstlisting}
 \caption{Алгоритм решения конфликтов координат}
 \label{Z3op}

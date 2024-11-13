@@ -319,36 +319,40 @@ in advance that some sets of layout instances will inevitably introduce inconsis
 some controls' coordinates; however at the conflict identification and elimination stage we do not have
 enough information to do this job in utterly precise manner.
 
-\begin{figure*}
+\begin{figure}
 \begin{lstlisting}[language=algo,mathescape=true,basicstyle=\ttfamily]
-  solve (lay_part, size_part) {
-    // Try to solve the full system
-    if (Z3.solve (lay_part $\cup$ size_part)) {
-        // Return a model
-        return [ Z3.model ]
-    }
-
-    // If unsat we need to find and solve layout conflict
-    // MUC is one of conflicts
-    muc = Z3.minimal_unsat_core
-    // A list of refined models
-    answers = []
-
-    for (muc_element $\in$ muc) {
-        // To solve the conflict we need to remove any layout
-        // element of MUC from the system
-        if (muc_element $\in$ lay_part) {
-            reduced_lay_part = lay_part $\setminus$ {muc_element}
-            answers ++= solve (reduced_lay_part, size_part)
-        }
-    }
-
-    return answers
+solve(layPart, sizePart) {
+  // Try to solve the full system
+  if (Z3.solve (layPart $\cup$ sizePart)) {
+    // Return a model
+    return [ Z3.model ]
   }
+
+  // If unsat we need to find and solve layout
+  // conflict MUC is one of conflicts
+  muc = Z3.minimalUnsatCore
+
+  // A list of refined models
+  answers = []
+
+  for (mucElement $\in$ muc) {
+    // To solve the conflict we need
+    // to remove any layout element
+    // of MUC from the system
+    if (mucElement $\in$ layPart) {
+      reducedLayPart =
+        layPart $\setminus$ {mucElement}
+      answers ++= solve(
+        reducedLayPart, sizePart)
+    }
+  }
+
+  return answers
+}
 \end{lstlisting}
 \caption{Solving coordinate conflicts}
 \label{Z3op}
-\end{figure*}
+\end{figure}
 
 Restoring the completeness requires more accurate interoperation with \textsc{Z3}. When the inconsistency of the system
 $S$ is discovered, a \emph{minimal unsatisfiable core}~\cite{minUnsatCore} is returned.

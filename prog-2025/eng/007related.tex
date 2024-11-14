@@ -10,7 +10,9 @@ and reports on the subject. A fair share of them (if not all) present declarativ
 discovers that this ``declarativeness'' and ``automation'' is understood differently then in our case.
 
 First of all, we need to mention some software frameworks and tools for design and implementation of GUI and visualization of data, for example, \textsc{React}~\cite{react},
-\textsc{Jetpack Compose}~\cite{Jetpack}, \textsc{SwiftUI}~\cite{SwiftUI}, \textsc{Streamlit}~\cite{Streamlit}, \textsc{D3}~\cite{D3} and others.
+\textsc{Jetpack Compose}~\cite{Jetpack},% \textsc{SwiftUI}~\cite{SwiftUI},
+\textsc{Streamlit}~\cite{Streamlit}%, \textsc{D3}~\cite{D3} 
+and others.
 These frameworks provide a number of layout primitives which end-users can employ in order to render their data or UI. For example, \textsc{Streamlit}
 provides a number of builtin layout primitives like ``columns'', ``container'', ``modal dialog'', etc.~\cite{StreamlitLayout} and an endless
 variety of third-party external components. These primitives allow end-users to abstract away of concrete controls coordinate calculation and their
@@ -20,6 +22,7 @@ end-users do not specify concrete layouts, only the logical structure of the UI.
 external constraints such as enclosing pane size, screen resolution or even regional settings (for example, right-to-left writing system). As long
 as the logical structure remains unchanged no interference from end-users is required for laying out the UI in different settings. On the
 other hand these frameworks can be used as back-ends in our approach since they provide a similar set of layout primitives.
+In this paper we used Qt/QML as a backend.
 
 Constraint programming has already been used for deciding the placement of GUI controls. One of the examples are constraint reactive programming
 language \textsc{Wallingford}~\cite{Wallingford2016} and the \textsc{Cassowary} system~\cite{Cassowary2001}. \textsc{Wallingford} allows to attach

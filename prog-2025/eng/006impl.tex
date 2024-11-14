@@ -2,7 +2,7 @@
 % !TeX spellcheck = en_US
 % !TEX root = main.tex
 
-\section{Implementation and Evaluation}
+\section{Implementation}
 
 \begin{figure*}[t]
 \begin{verbnobox}[\fontsize{10pt}{10pt}\selectfont]
@@ -60,22 +60,10 @@ Button "Reset" cancels^ main_group
     \label{fig:QMLtwoGuidelines}
 \end{figure*}
 
-\newcommand{\OCaml}{\textsc{OCaml}\xspace}
-\newcommand{\OCanren}{\textsc{OCanren}\xspace}
-\newcommand{\noCanren}{\textsc{noCanren}\xspace}
-\newcommand{\Zthree}{\textsc{Z3}\xspace}
-\newcommand{\JSOO}{\textsc{Js\_of\_ocaml}\xspace}
-
-%In this section we describe technical details of our prototype implementation and show a few examples of layout synthesis for specific GUI structures.
-
 The prototype of our synthesizer is developed as a \mbox{client}/server application using web technologies\footnote{The implementation is available online
-for review: \url{https://genui.utbot.org}, username: ``public-user'', password: ``1jWMz2oWWmQW40hHSPZb'', no quotes.
-%In case it doesn't work try \url{https://se.math.spbu.ru/genui}.
-Generated design will be shown below specification field.}.
-On the client side we use \textsc{HTML5} for rendering and \OCaml
-compiled to \textsc{JavaScript} via \JSOO~\cite{JSOO} for a client-server interaction. The server side is a native \OCaml application equipped with \OCanren and \Zthree.
-%An initial attempt was to build a serverless prototype but, first, we observed that \JSOO runs as twice as slower than the native \OCaml even for simple cases, and,
-%second, we found making \Zthree to run in a web-browser a burden.
+for review: \url{https://se.math.spbu.ru/projects/genui}}.
+On the client side we use \textsc{HTML5} for rendering and \textsc{JavaScript} for a client-server interaction. 
+The server side is a native \OCaml{} application equipped with \OCanren{} and \Zthree{}.
 
 In order to provide end-users a way to represent GUI structures and guidelines we developed two textual DSLs. In addition in our implementation
 the expressivity of guidelines description was a little bit extended~--- for example, we actually allow the rules to be equipped with custom constraints, there are
@@ -212,10 +200,12 @@ If an input box is long, and the horizontal space is limited, place the label ab
 %The second part of server implementation is the calculation of absolute coordinates with assistance from \Zthree. This stage filters out problematical layouts and performs much
 %faster than our relational synthesis. But we linked \OCaml and \Zthree to a single executable anyway  to avoid paying any costs  for inter process communication.
 
-To evaluate our prototype in the context of the real world GUI framework we implemented a renderer based on Qt/QML. On Fig.~\ref{fig:QMLtwoGuidelines} you can see two layouts of the
-Google Drive search settings dialog structure rendered  w.r.t. two slightly different versions of JetBrains GUI guidelines~\cite{JBG} using QtQuick Controls\footnote{\url{https://doc.qt.io/qt-5/qtquick-controls2-qmlmodule.html}} and Material Design theme. The guideline says that if a text edit is ``too long'', one has to put it below the label.
-On the bottom layout the
-factor describing the informal notion of ``being too long'' was increased. The synthesis of each layout took 5 seconds.
+To evaluate our prototype in the context of the real world GUI framework we implemented a renderer based on Qt/QML. 
+On Fig.~\ref{fig:QMLtwoGuidelines} you can see two layouts of the
+Google Drive search settings dialog structure rendered  w.r.t. two slightly different versions of JetBrains GUI guidelines~\cite{JBG} using QtQuick Controls\footnote{\url{https://doc.qt.io/qt-5/qtquick-controls2-qmlmodule.html}} and Microsoft Universal Design theme. 
+The guideline says that if a text edit is ``too long'', one has to put it below the label.
+On the bottom layout the factor describing the informal notion of ``being too long'' was increased. 
+The synthesis of each layout took 5 seconds.
 
 A few more examples are shown in Fig.~\ref{fig:evaluation}.
 

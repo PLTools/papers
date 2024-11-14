@@ -1,0 +1,86 @@
+\usepackage[cp1251]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{xurl}
+\usepackage[
+%backref
+]{hyperref}
+\usepackage{fancyhdr}
+\usepackage{../eng/newprog1e}
+\usepackage{amsfonts,amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage[autostyle=true]{csquotes}
+\usepackage{listings}
+\usepackage{verbatim}
+\usepackage{verbatimbox}
+\usepackage{xspace}
+\usepackage{array}
+
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,backgrounds,fit,calc}
+
+\tolerance=1000
+
+\lstdefinelanguage{ocanren}{
+	keywords={run, conde, fresh, let, in, match, with, when, class, type,
+		object, method, of, rec, repeat, until, while, not, do, done, as, val, inherit,
+		new, module, sig, deriving, datatype, struct, if, then, else, open, private, virtual, include, success, failure, switch,
+		true, false, ocanren},
+	sensitive=true,
+	commentstyle=\small\itshape\ttfamily,
+	keywordstyle=\ttfamily\textbf,
+	identifierstyle=\ttfamily,
+	basewidth={0.5em,0.5em},
+	columns=fixed,
+	mathescape=true,
+	fontadjust=true,
+	literate={fun}{{$\lambda$}}1 {->}{{$\to$}}3 {===}{{$\equiv$}}1 {=/=}{{$\not\equiv$}}1 {|>}{{$\triangleright$}}3 {\\/}{{$\vee$}}2 {/\\}{{$\wedge$}}2 {^}{{$\uparrow$}}1
+	%{[]}{{\texttt|[]|}}1
+	,
+	morecomment=[s]{(*}{*)}
+}
+
+\lstdefinelanguage{ocaml}{
+	keywords={type, struct},
+	sensitive=true,
+	commentstyle=\small\itshape\ttfamily,
+	keywordstyle=\ttfamily\textbf,
+	%keywordstyle=\ttfamily\underbar,
+	identifierstyle=\ttfamily,
+	basewidth={0.5em,0.5em},
+	columns=fixed,
+	fontadjust=true,
+	literate={->}{{$\to$}}3 {=>}{{$\Rightarrow$}}3,
+	morecomment=[s]{(*}{*)}
+}
+
+\lstdefinelanguage{algo}{
+	basicstyle=\small\ttfamily,
+	keywords={if, for, return},
+	sensitive=true,
+	commentstyle=\small\itshape\rmfamily,
+	keywordstyle=\rmfamily\textbf,
+	%keywordstyle=\ttfamily\underbar,
+	identifierstyle=\rmfamily,
+	basewidth={0.5em,0.5em},
+	columns=fixed,
+	fontadjust=true,
+	literate={->}{{$\to$}}3 {=>}{{$\Rightarrow$}}3,
+	morecomment=[l]{//},
+	morecomment=[s]{(*}{*)}
+}
+
+
+\newcommand{\term}[1]{\mbox{\texttt{\textbf{#1}}}}
+\newcommand{\prg}[1]{\mbox{\lstinline|#1|}}
+\newcommand{\run}[2]{\term{run}^{#1}\,\left[#2\right]}
+\newcommand{\OCaml}{\textsc{OCaml}\xspace}
+\newcommand{\OCanren}{\textsc{OCanren}\xspace}
+\newcommand{\miniKanren}{\textsc{miniKanren}\xspace}
+\newcommand{\JavaScript}{\textsc{JavaScript}\xspace}
+\newcommand{\JSOO}{\textsc{Js\_of\_ocaml}\xspace}
+\newcommand{\Zthree}{\textsc{Z3}\xspace}
+\newcommand{\noCanren}{\textsc{noCanren}\xspace}
+
+\renewcommand{\leq}{\ensuremath{\leqslant}}
+\renewcommand{\geq}{\ensuremath{\geqslant}}

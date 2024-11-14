@@ -2,19 +2,17 @@
 % !TeX spellcheck = en_US
 % !TEX root = main.tex
 
-\section{Relational Programming, Verifiers, and Solvers}
-\label{sec:rel}
 
 The implementation of our layout synthesizer employs the techniques of relational programming. Here
 we briefly recollect what relational programming is and how the approaches and tools we use work.
 
-Relational programming~\cite{TRS} is an approach based on the idea of describing programs as
-relations. It can be considered as a branch of logic programming in which the use of
-all non-relational constructs (side-effects, extra-logic features) is discouraged. In a
-narrow sense relational programming amounts to writing programs in \textsc{miniKanren}~--- a
-specifically designed for this purpose embedded DSL. Initially developed for \textsc{Scheme}/\textsc{Racket}
+Relational programming~\cite{TRS} is an approach based on the idea of describing programs as relations. 
+It can be considered as a branch of logic programming in which the use of
+all non-relational constructs (side-effects, extra-logic features) is discouraged. 
+In a narrow sense relational programming amounts to writing programs in \textsc{miniKanren}~--- a specifically designed for this purpose embedded DSL.
+Initially developed for \textsc{Scheme}/\textsc{Racket}
 \textsc{miniKanren} later was ported for dozens of host
-languages\footnote{\url{http://minikanren.org/\#implementations}}.
+languages\footnote{\url{http://minikanren.org/\#implementations} (accessed: \DTMDate{2024-11-14})}.
 We, specifically, use a strongly typed \textsc{miniKanren} implementation for \textsc{OCaml}~\cite{ocaml}, called \textsc{OCanren}~\cite{OCanren}.
 \textsc{miniKanren} uses the same theory of Horn clauses as \textsc{Prolog} but with a different
 concrete syntax with explicit unification, conjunction, disjunction and fresh variable introduction, and
@@ -25,28 +23,32 @@ constructs of nominal logic~\cite{aKanren}.
 
 In the context of our work the most valuable property of \textsc{miniKanren} is its capability of expressing \emph{reverse computations}.
 It is well-known~\cite{SemanticsModifiers,SemanticsModifiers1} that some complicated programs can be constructed as
-the results of inversion of some other, much simpler, programs. In particular, a \emph{solver} for a
+the results of inversion of some other, much simpler, programs. 
+In particular, a \emph{solver} for a
 certain search problem can be considered as an inversion of its \emph{verifier}; it is rather a matter of common knowledge that verifying a
-solution is, as a rule, much easier than finding one. The relational nature of \textsc{miniKanren} makes
+solution is, as a rule, much easier than finding one. 
+The relational nature of \textsc{miniKanren} makes
 inverse computations particularly easy~\cite{searchproblems}, which opens a way for program
 synthesis~\cite{Untagged,WBirdSeven,PatternMatching}.
 
-Another component of our approach is \emph{relational conversion}. In many cases (but not always!) it is easier to obtain a relational specification
-from functional program than writing the one by hands. We use a tool, called \textsc{noCanren}, which converts programs written is a reasonable
-subset of \textsc{OCaml} into correct-by-construction\cite{conversion} \textsc{OCanren} specifications.
+%Another component of our approach is \emph{relational conversion}. In many cases (but not always!) it is easier to obtain a relational specification
+%from functional program than writing the one by hands. We use a tool, called \textsc{noCanren}, which converts programs written is a reasonable
+%subset of \textsc{OCaml} into correct-by-construction\cite{conversion} \textsc{OCanren} specifications.
 
 We demonstrate the roadmap of our approach by the following observable example. Let us have a program
-shown in Fig.~\ref{fun_vs_rel}\subref{funadd} which adds two natural numbers in Peano form. Its relational counterpart,
-acquired via relational conversion (not literally, but in equivalent form), is shown in Fig.~\ref{fun_vs_rel}\subref{reladd}.
-Comparing both of them we can notice that pattern-matching was replaced by disjunction (\lstinline[language=ocanren,basicstyle=\small]|\/|)
-and unification (\lstinline[language=ocanren,basicstyle=\small]|===|), data-flow dependent computations with conjunction (\lstinline[language=ocanren,basicstyle=\small]|/\|),
-and fresh variables can be allocated when needed; the postfix ``$^o$'' is traditionally used to distinguish relational definitions. Unlike its functional
-counterpart the relational specification has \emph{three} arguments \lstinline[language=ocanren,basicstyle=\small]|x|, \lstinline[language=ocanren,basicstyle=\small]|y|,
-and \lstinline[language=ocanren,basicstyle=\small]|z|, each of which can contain fresh (initially undefined) variables.
-The evaluation of construction \lstinline[language=ocanren,basicstyle=\small]|run$^*$ {add$^o$ x y z}| returns all substitutions for these
-fresh variables which make the relation $\{(\mbox{\texttt x}, \mbox{\texttt y}, \mbox{\texttt z})\in\mathbb{N}^3\, |\, \mbox{\texttt x+y=z}\}$ hold, represented as a \emph{lazy stream of answers}. This stream can
-then be inspected in a host functional application to retrieve individual answers. Thus the same specification can be equally used for plain addition,
-subtraction or decomposition of a number into two summands.
+shown in Fig.~\ref{fun_vs_rel}\subref{funadd} which concatenates two lists,
+and its relational counterpart (Fig.~\ref{fun_vs_rel}\subref{reladd}).
+Comparing both of them we can notice that pattern-matching was replaced by disjunction (\lstinline[language=ocanren,basicstyle=\small]|conde|)
+and unification (\lstinline[language=ocanren,basicstyle=\small]|===|), data-flow dependent computations with conjunction (\lstinline[language=ocanren,basicstyle=\small]|&&&|),
+and fresh variables can be allocated when needed; the postfix ``o'' is traditionally used to distinguish relational definitions. 
+Unlike its functional
+counterpart the relational specification has \emph{three} arguments \lstinline[language=ocanren,basicstyle=\small]|xs|, \lstinline[language=ocanren,basicstyle=\small]|ys|,
+and \lstinline[language=ocanren,basicstyle=\small]|zs|, each of which can contain fresh (initially undefined) variables.
+The evaluation of construction \lstinline[language=ocanren,basicstyle=\small]|run$^*$ {appendo xs ys zs}| returns all substitutions for these
+fresh variables which make the relation $\{(\mbox{\texttt x}, \mbox{\texttt y}, \mbox{\texttt z})\in\mathbb{N}^3\, |\, \mbox{\texttt x++y=z}\}$ hold, represented as a \emph{lazy stream of answers}. This stream can
+then be inspected in a host functional application to retrieve individual answers. 
+Thus the same specification can be equally used for concatenation,
+prefix removal or decomposition of a list into two sublists.
 
 \begin{figure}[t]
   \begin{subfigure}[t]{0.5\textwidth}

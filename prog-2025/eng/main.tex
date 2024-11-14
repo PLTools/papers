@@ -1,40 +1,24 @@
-% !TEX TS-program = xelatex
+% !TEX TS-program = pdflatex
 % !TeX spellcheck = cp1251
 % !TEX root = main.tex
 \documentclass[a4paper,twoside,11pt]{article}
-\usepackage[T2A]{fontenc}           % ���������
-\usepackage[utf8]{inputenc}         % ��������� ��������� ������
-\usepackage[english,russian]{babel}
+\input{../preamble.tex}
 
-\usepackage{fancyhdr}
-\usepackage{newprog1e}
-\usepackage{amsfonts,amsmath,amssymb,amsthm}
-\usepackage{graphicx}
+\usepackage{datetime2}
+\DTMsetup{useregional}
+%\DTMlangsetup[ru-RU]{abbr}
+\usepackage{placeins}
 
-\tolerance=1000
-
-\newcommand{\defi}{\stackrel{\mathrm{def}}{=}}
-
-\numberwithin{equation}{section}
-\newtheorem{theorem}{�������}
-
-\newtheorem{definition}{Definition}
-\newtheorem{theorem_ru}{�������}
-
-
-\journalnumber{2}
-\curyear{2024}
+\journalnumber{1}
+\curyear{2025}
 \authorlist{Lozov et al.}
 \titlehead{Declarative GUI Layout Synthesis
   with Relational Constraint Solvers \small{(system description)}}
 \headerdef
 
-\udk{004.421.6}
-%92+004.94}
-%\rubrika{������������ �������}
+\udk{004.51}
 \rubrika{Software engineering, testing and verification}
-%\rubrika{����������� ���������, ������������ � ����������� ��������.}
-\dateinput{??.07.2024}
+\dateinput{??.11.2024}
 
 \rusabstr{We describe a system which, given a set of designer-specified layout constraints (\emph{guidelines})
 and a description of graphic user interface (GUI) logical structure generates a set of concrete layouts,
@@ -45,32 +29,15 @@ of refinements which make the solver more efficient and applicable.
 }
 
 \author{
-{\bfseries Peter Lozov*, Denis Fokin**,}
-\\ {\bfseries Dmitrii Kosarev*, Dmitry Boulytchev*}
+{\bfseries Peter Lozov*, Dmitrii Kosarev*, Dmitry Boulytchev*, Denis Fokin**}
 \\ {\itshape *St.~Petersburg State University}
 \\ {\slshape 199034} {\slshape 7-9} {\itshape  Universitetskaya Embankment, St Petersburg, Russia}
 \\ {\itshape **No affiliation}
-\\ {\itshape E-mail: lozov.peter@gmail.com, denis.fokin@gmail.com, Dmitrii.Kosarev@pm.me, dboulytchev@math.spbu.ru }}
-\title{Declarative GUI Layout Synthesis   with Relational Constraint Solvers \small{(system description)}}
+\\ {\itshape E-mail: lozov.peter@gmail.com, d.kosarev@spbu.ru,  dboulytchev@math.spbu.ru, denis.fokin@gmail.com }}
+\title{Constraint Programming for Automatic User Interface Construction}
 %\thanks{~}
 
 \date{}
-
-
-\input{preamble}
-
-%\usepackage[citestyle=ext-authoryear,
-%            bibstyle=ext-authortitle,
-%            introcite=plain,articlein=false,sorting=nyt]{biblatex}
-%\DeclareOuterCiteDelims{parencite}{\bibopenbracket}{\bibclosebracket}
-%\DeclareDelimFormat{nameyeardelim}{\addcomma\space}
-%\DeclareFieldFormat{bbx@introcite}{\mkbibbold{\mkbibbrackets{#1}}}
-%\DeclareFieldFormat{issuedate}{#1}
-%\renewcommand*{\introcitepunct}{\par}
-%\renewcommand*{\volnumdatedelim}{\addcomma\addspace}
-%\setlength{\bibhang}{0pt}
-%
-%\addbibresource{main.bib}
 
 
 \begin{document}
@@ -78,38 +45,35 @@ of refinements which make the solver more efficient and applicable.
 \maketitle
 \setcounter{page}{3}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\He{� ��������}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\He{Введение}
+\He{Introduction}
 \label{sec:intro}
 \input{001intro}
 
-\He{Модель GUI}
+\He{GUI Model}
 \label{sec:scene}
 \input{002model}
 
-\He{Синтез расположения как задача удовлетворения ограничений}
+\section{Layout Synthesis as a Constraint Satisfaction Problem}
 \label{sec:guidelines}
 \input{003guidelines.tex}
 
-\He{Реляционное программирование, верификаторы и решатели}
+\He{Relational Programming, Verifiers and Solvers}
 \label{sec:rel}
 \input{004rel.tex}
 
-\He{Синтез расположения GUI}
+\He{Synthesis of GUI}
 \label{sec:synthesizing}
 \input{005synthesis.tex}
 
-\He{Реализация}
+\He{Implementation}
 \label{sec:impl}
 \input{006impl.tex}
 
-\He{Смежные работы}
+\He{Related Works}
 \label{sec:related}
 \input{007related.tex}
 
-\He{Заключение}
+\He{Discussion and Future Work}
 \label{sec:conclusion}
 \input{008discussion.tex}
  
@@ -119,92 +83,14 @@ of refinements which make the solver more efficient and applicable.
 %\printbibliography
 
 
-%\begin{thebibliography}{99}
-%
-%\small
-%\bibitem{AZ97}
-%{\em ������� �.�., ���� �.�.} ������� �� ������������ ������� ��
-%���������� �������������� ���������� � ����������� ��� � 1995--1996 �.
-%// ����������������, 1997,
-%No 1. �. 75--77.
-%
-%\bibitem{AZ98}
-%{\em ������� �.�., ���� �.�.} ������-��\-���\-��\-���������� �������
-%``������������ �������'' � 1996--1997 �.
-%// ����������������, 1998,
-%No 1. �. 69--72.
-%
-%\bibitem{AR99}
-%{\em ������� �.�., ��������� �.�.} ������� �� ������������ ������� �
-%1997--1998 �.  // ����������������, 1998, No 6. �. 3--7.
-%
-%\bibitem{AKR00}
-%{\em ������� �.�., ������ �.�., ��������� �.�.} ������� �� ������������
-%������� �
-%1998--1999 �.  // ����������������, 2000, No 1. �. 8--12.
-%
-%\bibitem{AKR01}
-%{\em ������� �.�., ������ �.�., ��������� �.�.} ������� �� ������������
-%�������
-%� 1999--2000 �.  // ����������������, 2001, No 1. �. 3--7.
-%
-%\bibitem{AKR02}
-%{\em ������� �.�., ������ �.�., ��������� �.�.} ������� �� ������������
-%������� � 2000--2001 �.  // ����������������, 2002, No 2. �. 6--9.
-%
-%\bibitem{AKR03}
-%{\em �������~�.�., ������~�.�., ���������~�.�.} ������� �� ������������
-%������� � 2001--2002 �. // ����������������, 2003, No 2. �. 3--7.
-%\bibitem{AER04}
-%{\em �������~�.�., �������~�.�., ���������~�.�.} ������� ��
-%������������ ������� � 2002--2003~�.  // ����������������, 2004, No 2.
-%�. 3--7.
-%\bibitem{ABRE05}
-%{\em �������~�.�., �����������~�.�., ���������~�.�., �������~�.�.} ������� ��
-%������������ ������� � 2003--2004 �.  // ����������������, 2005, No 2.
-%�. 3--9.
-%\bibitem{ABRE06}
-%{\em �������~�.�., �����������~�.�., ���������~�.�., �������~�.�.} ������� ��
-%������������ ������� � 2004--2005 �.  // ����������������, 2006, No 2.
-%�. 3--7.
-%\bibitem{ABRE07}
-%{\em �������~�.�., �����������~�.�., ���������~�.�., �������~�.�.} ������� ��
-%������������ ������� � 2005--2006 �.  // ����������������, 2007, No 2.
-%�. 3--8.
-%\bibitem{ABRE08}
-%{\em �������~�.�., �����������~�.�., ���������~�.�., �������~�.�.} ������� ��
-%������������ ������� � 2006--2007 �.  // ����������������, 2008, No 2.
-%�. 3--8.
-%\bibitem{ABRE09}
-%{\em �������~�.�., �����������~�.�., ���������~�.�., �������~�.�.} ������� ��
-%������������ ������� � 2007--2008 �.  // ����������������, 2009, No 2.
-%�. 3--9.
-%\newpage
-%\bibitem{mmcp09}
-%``Mathematical Modeling and Computational Physics (CAAP'2009)''. Book of abstracts of the internationl conference. Dubna, July 7-11, 2009.
-%Dubna, 2009.
-%\bibitem{ABRE10}
-%{\em �������~�.�., �����������~�.�., ���������~�.�., �������~�.�.} ������� ��
-%������������ ������� � 2008-2009 �.  // ����������������, 2010, No 2. �. 3--8.
-%\bibitem{ABER11}
-%{\em �������~�.�., �����������~�.�., �������~�.�., ���������~�.�.} ������� ��
-%������������ ������� � 2009-2010 �. // ����������������, 2011, No 2. �. 3--8.
-%\bibitem{ABR12}
-%{\em �������~�.�., �����������~�.�.,  ���������~�.�.} ������� ��
-%������������ ������� � 2010-2011 �.  // ����������������, 2012, No 2. �. 3--10.
-%
-%%
-%
-%\end{thebibliography}
+\begin{thebibliography}{99}
+	\small
+	\input{../rus/biblio.tex}
+\end{thebibliography}
 
-%\label{lastpage}
+\newpage
+\input{900figures}
+
+\label{lastpage}
+
 \end{document}
-
-
-
-%ORDERING OF REFERENCES (if non-author/year and non-alph)
-%(*) Alphabetical by all authors
-%(c) Citation order (unsorted, like unsrt.bst)
-%(d) Year ordered and then by authors
-%(r) Reverse year ordered and then by authors
-%Select:

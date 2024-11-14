@@ -3,18 +3,10 @@
 % !TEX root = mainrus.tex
 
 \documentclass[a4paper,twoside,11pt]{article}
+
+\usepackage[cp1251]{inputenc}
+\usepackage[english,main=russian]{babel}
 \input{../preamble.tex}
-
-\usepackage{datetime2}
-\DTMsetup{useregional}
-\DTMlangsetup[ru-RU]{abbr}
-
-\numberwithin{equation}{section}
-\newtheorem{theorem}{Теорема}
-
-\newtheorem{definition}{Definition}
-\newtheorem{theorem_ru}{Теорема}
-
 
 \journalnumber{1}
 \curyear{2025}
@@ -24,24 +16,28 @@
 
 \udk{004.51}
 \rubrika{ЯЗЫКИ, КОМПИЛЯТОРЫ И СИСТЕМЫ ПРОГРАММИРОВАНИЯ.}
-\dateinput{?.?.2024}
+\dateinput{\DTMDate{2024-11-0}}
 
 \rusabstr{
 \include{000abstract.tex}
 }
 
 \author{
-{\bfseries П.~А.~Лозов*, Д.~С.~Косарев*, Д.~Ю.~Булычев*, Д.~C.~Фокин**}
-\\ {\itshape *СПбГУ}
-\\ {\slshape 199034} {\slshape 7-9} {\itshape Санкт-Петербург, Университеская наб. д.} {\slshape 7-9}
-\\ {\itshape **Без аффилиации}
-\\ {\itshape E-mail:  lozov.peter@gmail.com, d.kosarev@spbu.ru,  dboulytchev@math.spbu.ru, denis.fokin@gmail.com }}
+{\bfseries Лозов~П.~А.$^{a1}$, Косарев~Д.~С.$^{a2}$, Булычев~Д.~Ю.$^{a3}$, Фокин~Д.~C.$^{4}$}
+%\\ {\itshape *СПбГУ}
+%\\ {\slshape 199034} {\slshape 7-9} {\itshape Санкт-Петербург, Университеская наб. д.} {\slshape 7-9}
+\\ {\itshape $^a$СПбГУ,} {\slshape 199034,} {\itshape Санкт-Петербург, Университеская наб. д.} {\slshape 7-9}
+\\ {\itshape $^1$e-mail: lozov.peter@gmail.com,} {  ORCID: 0000-0003-3563-2828}
+\\ {\itshape $^2$e-mail: d.kosarev@spbu.ru,} { ORCID: 0000-0002-6773-5322}
+\\ {\itshape $^3$e-mail: dboulytchev@math.spbu.ru,} {ORCID:  0000-0001-8363-7143}
+\\ {\itshape $^4$e-mail:  denis.fokin@gmail.com, без аффилиации}
+}
 \title{ Реляционный подход к декларативному синтезу графических интерфейсов пользователя }
 \title{ Программирование в ограничениях для автоматизированного проектирования интерфейсов}
 
 %\thanks{~}
 
-\date{}
+\date{\DTMDate{2024-11-0}}
 
 \begin{document}
 

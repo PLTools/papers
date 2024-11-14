@@ -2,67 +2,9 @@
 % !TeX spellcheck = en_US
 % !TEX root = main.tex
 
-\section{Implementation}
-
-\begin{figure*}[t]
-\begin{verbnobox}[\fontsize{10pt}{10pt}\selectfont]
-ordered main_group (
-  Label "Type" describes TextEdit "Any" {width=200}
-  Label "Owner" describes TextEdit "Anyone" {width=200}
-  Label "Has the words" describes TextEdit "Enter words found in the file" {
-   width = 400
-  }
-  Label "Item name" describes
-    TextEdit "Enter a term that matches part of the file name" {
-      width = 400
-    }
-  (Label "Location" describes
-    (TextEdit "Anywhere" { width = 200 }) dominates
-    ordered location_checkboxes (
-      Label "In trash"  describes CheckBox in_trash_checkbox
-      Label "Starred"   describes CheckBox starred_checkbox
-      Label "Encrypted" describes CheckBox encrypted
-    )
-  )
-  Label "Date modified" describes  TextEdit "Any time" {width=200}
-  Label "Approvals" describes
-    ordered approvals_checkboxes (
-      Label "Awaiting my approval" describes CheckBox awaiting_checkbox
-      Label "Requested by me" describes CheckBox requestred_checkbox
-  )
-  Label "Shared to" describes
-    TextEdit "Enter a name or email address..." {width=400}
-  Label "Follow-ups" describes TextEdit "---" {width=200, height=35}
-)
-Button "Search" approves^ main_group
-Button "Reset" cancels^ main_group
-\end{verbnobox}
-\caption{Google Drive Search Settings Dialog Structure Description}
-\label{gd_structure}
-\end{figure*}
-
-\begin{figure*}[t]
-    \begin{subfigure}[t]{.45\textwidth}
-        \vspace{-18em}
-        \centering
-        \begin{minipage}{6cm}
-        \includegraphics[scale=0.25]{google-drive-search-setting-output2.png}
-        \end{minipage}
-        \caption{If label describes controls which are ``too long'', then place them vertically}
-    \end{subfigure}\hspace{1cm}
-    \begin{subfigure}[t]{.45\textwidth}
-      \centering
-      \includegraphics[scale=0.25]{google-drive-search-setting-output3.png}
-      %\vskip17.5mm
-      \caption{The same, but the constant for ``too long'' was decreased}
-    \end{subfigure}
-    \caption{Google Drive Search Settings Dialog Layouts}
-    \label{fig:QMLtwoGuidelines}
-\end{figure*}
-
 The prototype of our synthesizer is developed as a \mbox{client}/server application using web technologies\footnote{The implementation is available online
-for review: \url{https://se.math.spbu.ru/projects/genui}}.
-On the client side we use \textsc{HTML5} for rendering and \textsc{JavaScript} for a client-server interaction. 
+for review: \url{https://se.math.spbu.ru/projects/genui} (accessed: \DTMDate{2024-11-14})}.
+On the client side we use \textsc{HTML5} for rendering and \textsc{JavaScript} for a client-server interaction.
 The server side is a native \OCaml{} application equipped with \OCanren{} and \Zthree{}.
 
 In order to provide end-users a way to represent GUI structures and guidelines we developed two textual DSLs. In addition in our implementation
@@ -200,11 +142,11 @@ If an input box is long, and the horizontal space is limited, place the label ab
 %The second part of server implementation is the calculation of absolute coordinates with assistance from \Zthree. This stage filters out problematical layouts and performs much
 %faster than our relational synthesis. But we linked \OCaml and \Zthree to a single executable anyway  to avoid paying any costs  for inter process communication.
 
-To evaluate our prototype in the context of the real world GUI framework we implemented a renderer based on Qt/QML. 
+To evaluate our prototype in the context of the real world GUI framework we implemented a renderer based on Qt/QML.
 On Fig.~\ref{fig:QMLtwoGuidelines} you can see two layouts of the
-Google Drive search settings dialog structure rendered  w.r.t. two slightly different versions of JetBrains GUI guidelines~\cite{JBG} using QtQuick Controls\footnote{\url{https://doc.qt.io/qt-5/qtquick-controls2-qmlmodule.html}} and Microsoft Universal Design theme. 
+Google Drive search settings dialog structure rendered  w.r.t. two slightly different versions of JetBrains GUI guidelines~\cite{JBG} using QtQuick Controls\footnote{\url{https://doc.qt.io/qt-5/qtquick-controls2-qmlmodule.html}  (accessed: \DTMDate{2024-11-14})} and Microsoft Universal Design theme.
 The guideline says that if a text edit is ``too long'', one has to put it below the label.
-On the bottom layout the factor describing the informal notion of ``being too long'' was increased. 
+On the bottom layout the factor describing the informal notion of ``being too long'' was increased.
 The synthesis of each layout took 5 seconds.
 
 A few more examples are shown in Fig.~\ref{fig:evaluation}.
@@ -214,56 +156,3 @@ A few more examples are shown in Fig.~\ref{fig:evaluation}.
 %%\footnote{https://jetbrains.github.io/ui/principles/layout}.
 %The results are shown in Fig.~\ref{fig:evaluation}. As one can see, a proper layout was synthesized in each case, and the synthesis time for each was no more than 5 seconds.
 
-\begin{figure*}
-	\centering
-    \begin{tabular}{m{85mm}m{6cm}}
-      \begin{lstlisting}[basicstyle=\small]
-ordered (
-  Label "Short label"
-    describes TextEdit "Text 1"
-  Label "Loooooong label"
-    describes TextEdit "Text 2"
-)
-      \end{lstlisting} &
-      \includegraphics[scale=0.4]{Example1-Qt-QML.png} \\
-      \hline
-      \begin{lstlisting}[basicstyle=\small]
-ordered (
-  Label "Looooong label"
-    describes TextEdit "Text 1"
-  Label "Medium label"
-    describes TextEdit "Text 2"
-  Label "Short"
-    describes TextEdit "Text 3"
-  )
-      \end{lstlisting} &
-      \includegraphics[scale=0.4]{Example2-Qt-QML.png} \\
-      \hline
-      \begin{lstlisting}[basicstyle=\small]
-ordered (
-  Label "Short label"
-    describes TextEdit "Text 1"
-  Label "Check box label"
-    describes CheckBox _
-  Label "Looooong label"
-    describes TextEdit "Text 2"
-)
-      \end{lstlisting} &
-      \vspace{1em}\includegraphics[scale=0.4]{Example4-Qt-QML.png} \\
-      \hline
-      \begin{lstlisting}[basicstyle=\small]
-ordered (
-  Label "L 1"     describes CheckBox _
-  Label "Lab 2"   describes CheckBox _
-  Label "Label 3" describes CheckBox _
-  Label "Label 4" describes CheckBox _
-  Label "L 5"     describes CheckBox _
-  Label "Lab 6"   describes CheckBox _
-)
-      \end{lstlisting} &
-      \includegraphics[scale=0.4]{Example5-Qt-QML.png} \\
-    \end{tabular}
-    \caption{Examples of structures (left) and synthesized layouts (right)\\
-      w.r.t. JetBrains guidelines}
-    \label{fig:evaluation}
-  \end{figure*}

@@ -128,7 +128,11 @@
 
 \def\refname{References} % <----------
 \def\thebibliography#1{\begin{center}
- {\cyr\CYRS\CYRP\CYRI\CYRS\CYRO\CYRK \ \CYRL\CYRI\CYRT\CYRE\CYRR\CYRA\CYRT\CYRU\CYRR\CYRERY}
+ {\iflanguage{russian}
+  {\cyr\CYRS\CYRP\CYRI\CYRS\CYRO\CYRK \ \CYRL\CYRI\CYRT\CYRE\CYRR\CYRA\CYRT\CYRU\CYRR\CYRERY}
+  {}
+  \iflanguage{english}{Bibliography}{}
+  }
 \end{center}
  \list
  {\arabic{enumi}.}{\settowidth\labelwidth{#1.}\leftmargin\labelwidth
@@ -266,12 +270,12 @@ to\hsize{\hfil\box\@tempboxa\hfil}
 
 
 % \vskip 0.65em {\footnotesize\itshape{\cyr\CYRU\CYRD\CYRK}\@udk} \par
- \vskip 0.65em {\footnotesize\itshape{\cyr\CYRU\CYRD\CYRK\ }{\slshape \@udk}} \par
+ \vskip 0.65em {\footnotesize\itshape{\choicelang{\cyr\CYRU\CYRD\CYRK}{UDC}\ }{\slshape \@udk}} \par
  \vskip -0.2mm \begin{center}
  {\Large\bfseries \@title \par} \vskip 0.5em {\large\bfseries \lineskip .5em
 %\copyright \hspace*{0.2cm} \@curyear {\cyrg}.  \@author \par}
-\copyright \hspace*{0.2cm} \@curyear$\:$ {\cyrg}. \mdseries \@author \par}
-{\small{\cyr\CYRP\cyro\cyrs\cyrt\cyru\cyrp\cyri\cyrl\cyra\ \cyrv\ \cyrr\cyre\cyrd\cyra\cyrk\cyrc\cyri\cyryu\ }\@dateinput \par}
+\copyright \hspace*{0.2cm} \@curyear{\choicelang{$\:$ \cyrg .}{}} \mdseries \@author \par}
+{\small{\choicelang{\cyr\CYRP\cyro\cyrs\cyrt\cyru\cyrp\cyri\cyrl\cyra\ \cyrv\ \cyrr\cyre\cyrd\cyra\cyrk\cyrc\cyri\cyryu\ }{Accepted for publication:\ }}\@dateinput \par}
 \end{center}
 \vskip -0.2mm \begin{quote}
 \@rusabstr
@@ -346,8 +350,8 @@ to\hsize{\hfil\box\@tempboxa\hfil}
 \leftmarginvi .5em
 %\oddsidemargin 30pt
 %\evensidemargin 30pt
-\marginparwidth 48pt 
-\marginparsep 10pt 
+\marginparwidth 48pt
+\marginparsep 10pt
 
 %\input{russian.sty}
 
@@ -366,15 +370,15 @@ to\hsize{\hfil\box\@tempboxa\hfil}
 \def\titlehead#1{\def\@titlehead{#1}}
 
 \def\headerdef{
-\def\thisnumber{\hspace*{0.5cm}{{\footnotesize{\cyr\CYRP\CYRR\CYRO\CYRG\CYRR\CYRA\CYRM\CYRM\CYRI\CYRR\CYRO\CYRV\CYRA\CYRN\CYRI\CYRE}
+\def\thisnumber{\hspace*{0.5cm}{{\footnotesize{\choicelang{\cyr\CYRP\CYRR\CYRO\CYRG\CYRR\CYRA\CYRM\CYRM\CYRI\CYRR\CYRO\CYRV\CYRA\CYRN\CYRI\CYRE}{PROGRAMMING}}
 \hspace*{0.3cm}  ${\mathrm N}^{\underline{\mathrm o}}$ \@journumb\hspace*{0.3cm}
 \@curyear}\hspace*{0.5cm}}}
 %\def\thisnumbertitle{{\footnotesize \itshape{\cyr\CYRP\CYRR\CYRO\CYRG\CYRR\CYRA\CYRM\CYRM\CYRI\CYRR\CYRO\CYRV\CYRA\CYRN\CYRI\CYRE}, \@curyear,
-\def\thisnumbertitle{{\footnotesize \itshape{\cyr\CYRP\CYRR\CYRO\CYRG\CYRR\CYRA\CYRM\CYRM\CYRI\CYRR\CYRO\CYRV\CYRA\CYRN\CYRI\CYRE}},
+\def\thisnumbertitle{{\footnotesize \itshape{\choicelang{\cyr\CYRP\CYRR\CYRO\CYRG\CYRR\CYRA\CYRM\CYRM\CYRI\CYRR\CYRO\CYRV\CYRA\CYRN\CYRI\CYRE}{PROGRAMMING}}},
 {\footnotesize \slshape \@curyear},
 %$N^o$ \@journumb, \hspace*{0.3cm} {\cyrs}. \thepage\ - \pageref{lastpage}}}
 {\footnotesize $N^{\underline o}$ {\slshape \@journumb}}, %\hspace*{0.1cm}
-{\footnotesize {\itshape {\cyrs}}. {\slshape \thepage}\ $\!\!$--{\slshape \pageref{lastpage}}}}
+{\footnotesize {\itshape {\choicelang{\cyrs}{pp}}}. {\slshape \thepage}\ $\!\!$--{\slshape \pageref{lastpage}}}}
 % Previous state:
 % $N^o$ \@journumb }}
 
@@ -410,7 +414,7 @@ ${\small{\mathbf 4}^*}$\else {\ifnum\thepage=65 {\small\bfseries 5}
 ${\small{\mathbf 3}^*}$\else
 \ifnum\thepage=49 \hspace{-10.25cm}{\small\bfseries 4}\thisnumber\else
 %\ifnum\thepage=51 \hspace{8.65cm}{\small\thepage}\hspace{8.0cm}
-\ifnum\thepage=51 \hspace{8.5cm}{\small\thepage}\hspace{7.8cm} 
+\ifnum\thepage=51 \hspace{8.5cm}{\small\thepage}\hspace{7.8cm}
 ${\small{\mathbf 4}^*}$\else \ifnum\thepage=65 \hspace{-10.25cm}{\small\bf
 5}\thisnumber\else \ifnum\thepage=67 \hspace*{7.75cm}{\small\thepage}
 %\hspace{8.65cm}{\small\thepage}

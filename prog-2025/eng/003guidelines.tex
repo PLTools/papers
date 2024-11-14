@@ -28,22 +28,18 @@ variables in a relational pattern or layout template $s$, and call \emph{layout 
 template with no variables.
 
 Let $r^n\,(X_1,\dots,X_n)$ be a relational pattern. If for some controls $c_1,\dots,c_n\in\mathcal{C}$
-
 \[
 (c_1,\dots,c_n)\in r^n
 \]
 
 \noindent  then we say that the result of substitution
-
 \[
 r^n\,(X_1,\dots,X_n)\,[X_i\gets c_i]
 \]
 
 \noindent \emph{occurs} in the structure $\Sigma$ (we remind that $r^n$ is an $n$-ary relation on the set of controls).
 
-
 A \emph{guideline rule} is a syntactic form
-
 \[
 p_1,\dots,p_k\mapsto l_1,\dots,l_m
 \]
@@ -131,7 +127,6 @@ It is worth mentioning the worst-case complexity of the problem in question. Fir
 easy to see that finding if there exists a sound layout is $NP$-complete in general case.
 Indeed, given an undirected graph we can construct a structure where controls correspond to its nodes
 and some binary relation (call it ``$E$'') corresponds to edges. Then we take the following guideline:
-
 \[
 \begin{array}{rcl}
   E\,(x,\, y) & \mapsto & \mbox{hor}\,(x,\, y)\\

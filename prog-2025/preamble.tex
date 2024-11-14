@@ -1,5 +1,9 @@
-\usepackage[cp1251]{inputenc}
-\usepackage[english,russian]{babel}
+%babel should be preloaded
+\def\choicelang#1#2{
+\iflanguage{russian}{#1}{}
+\iflanguage{english}{#2}{}
+}
+
 \usepackage{xurl}
 \usepackage[
 %backref
@@ -15,6 +19,22 @@
 \usepackage{verbatimbox}
 \usepackage{xspace}
 \usepackage{array}
+
+\choicelang{
+\usepackage{datetime2}
+\DTMsetup{useregional}
+\DTMlangsetup[ru-RU]{abbr}
+}{
+\usepackage[yearmonthsep=.,monthdaysep=.]{datetime2}
+\DTMsetdatestyle{dmyyyy}
+}
+
+%\DTMsetup{useregional}
+%\choicelang{\DTMlangsetup[ru-RU]{abbr}}{}
+%\DTMlangsetup[en-GB]{abbr}
+%\DTMsetdatestyle{yyyymd}
+
+\usepackage{placeins}
 
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric,backgrounds,fit,calc}
@@ -84,3 +104,4 @@
 
 \renewcommand{\leq}{\ensuremath{\leqslant}}
 \renewcommand{\geq}{\ensuremath{\geqslant}}
+

@@ -16,7 +16,7 @@ $(MAIN).pdf: $(MAIN).tex  $(MAIN).fmt
 
 clean::
 	@$(RM) -r _minted*
-	@$(RM) *.aux *.bbl *.blg *.dvi *.log *.nav *.out *.snm *.toc *.vrb *.synctex.gz
+	@$(RM) *.aux *.bbl *.blg *.brf *.dvi *.log *.nav *.out *.snm *.toc *.vrb *.synctex.gz
 	@$(RM) *.pdf *.fmt
 
 DEBS += texlive-font-utils

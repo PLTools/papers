@@ -7,7 +7,7 @@ and reports on the subject. A fair share of them (if not all) present declarativ
 discovers that this ``declarativeness'' and ``automation'' is understood differently then in our case.
 
 First of all, we need to mention some software frameworks and tools for design and implementation of GUI and visualization of data, for example, \textsc{React}~\cite{react},
-\textsc{Jetpack Compose}~\cite{Jetpack},% \textsc{SwiftUI}~\cite{SwiftUI},
+\textsc{Jetpack Compose}~\cite{Jetpack}, % \textsc{SwiftUI}~\cite{SwiftUI},
 \textsc{Streamlit}~\cite{Streamlit}%, \textsc{D3}~\cite{D3}
 and others.
 These frameworks provide a number of layout primitives which end-users can employ in order to render their data or UI. For example, \textsc{Streamlit}
@@ -45,7 +45,7 @@ an interface while in our case a designer is only involved when guidelines are d
 interfaces \emph{en masse} automatically. In~\cite{Robust} a slightly different task is addressed: given a picture of an interface synthesize its
 implementable layout in terms of Android GUI primitives which would be scalable across various devices while avoiding a typical layout errors.
 To achieve this goal, after recognizing UI controls and their locations a certain set of relational layout constraints is extracted. This
-set of constraints resembles our layout primitives but is aligned with Android's \texttt{ConstraintLayout} widget~\cite{ConstraintLayout} semantics.
+set of constraints resembles our layout primitives but is aligned with Android's \textsc{ConstraintLayout} widget~\cite{ConstraintLayout} semantics.
 Given these constraints and a set of \emph{robustness properties} developed by the authors an implementation code is generated with
 the aid of a probabilistic model trained on a large set of existing Android interfaces. This implementation is more stable under screen size
 or resolution change, than that provided by image recognition only. Interestingly, one of the motivations for the work, as the authors

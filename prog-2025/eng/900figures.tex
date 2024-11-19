@@ -46,60 +46,6 @@
 \end{figure}
 
 
-\begin{figure*}
-	\centering
-    \begin{tabular}{m{85mm}m{6cm}}
-      \begin{lstlisting}[basicstyle=\small]
-ordered (
-  Label "Short label"
-    describes TextEdit "Text 1"
-  Label "Loooooong label"
-    describes TextEdit "Text 2"
-)
-      \end{lstlisting} &
-      \includegraphics[scale=0.4]{Example1-Qt-QML.png} \\
-      \hline
-      \begin{lstlisting}[basicstyle=\small]
-ordered (
-  Label "Looooong label"
-    describes TextEdit "Text 1"
-  Label "Medium label"
-    describes TextEdit "Text 2"
-  Label "Short"
-    describes TextEdit "Text 3"
-  )
-      \end{lstlisting} &
-      \includegraphics[scale=0.4]{Example2-Qt-QML.png} \\
-      \hline
-      \begin{lstlisting}[basicstyle=\small]
-ordered (
-  Label "Short label"
-    describes TextEdit "Text 1"
-  Label "Check box label"
-    describes CheckBox _
-  Label "Looooong label"
-    describes TextEdit "Text 2"
-)
-      \end{lstlisting} &
-      \vspace{1em}\includegraphics[scale=0.4]{Example4-Qt-QML.png} \\
-      \hline
-      \begin{lstlisting}[basicstyle=\small]
-ordered (
-  Label "L 1"     describes CheckBox _
-  Label "Lab 2"   describes CheckBox _
-  Label "Label 3" describes CheckBox _
-  Label "Label 4" describes CheckBox _
-  Label "L 5"     describes CheckBox _
-  Label "Lab 6"   describes CheckBox _
-)
-      \end{lstlisting} &
-      \includegraphics[scale=0.4]{Example5-Qt-QML.png} \\
-    \end{tabular}
-    \caption{Examples of structures (left) and synthesized layouts (right)\\
-      w.r.t. JetBrains guidelines}
-    \label{fig:evaluation}
-  \end{figure*}
-
 
 \begin{figure*}[t]
 \begin{verbnobox}[\fontsize{10pt}{10pt}\selectfont]
@@ -156,3 +102,58 @@ Button "Reset" cancels^ main_group
     \caption{Google Drive Search Settings Dialog Layouts}
     \label{fig:QMLtwoGuidelines}
 \end{figure*}
+
+
+\begin{figure*}
+	\centering
+    \begin{tabular}{m{85mm}m{6cm}}
+      \begin{lstlisting}[basicstyle=\small]
+ordered (
+  Label "Short label"
+    describes TextEdit "Text 1"
+  Label "Loooooong label"
+    describes TextEdit "Text 2"
+)
+      \end{lstlisting} &
+      \includegraphics[scale=0.4]{Example1-Qt-QML.png} \\
+      \hline
+      \begin{lstlisting}[basicstyle=\small]
+ordered (
+  Label "Looooong label"
+    describes TextEdit "Text 1"
+  Label "Medium label"
+    describes TextEdit "Text 2"
+  Label "Short"
+    describes TextEdit "Text 3"
+  )
+      \end{lstlisting} &
+      \includegraphics[scale=0.4]{Example2-Qt-QML.png} \\
+      \hline
+      \begin{lstlisting}[basicstyle=\small]
+ordered (
+  Label "Short label"
+    describes TextEdit "Text 1"
+  Label "Check box label"
+    describes CheckBox _
+  Label "Looooong label"
+    describes TextEdit "Text 2"
+)
+      \end{lstlisting} &
+      \vspace{1em}\includegraphics[scale=0.4]{Example4-Qt-QML.png} \\
+      \hline
+      \begin{lstlisting}[basicstyle=\small]
+ordered (
+  Label "L 1"     describes CheckBox _
+  Label "Lab 2"   describes CheckBox _
+  Label "Label 3" describes CheckBox _
+  Label "Label 4" describes CheckBox _
+  Label "L 5"     describes CheckBox _
+  Label "Lab 6"   describes CheckBox _
+)
+      \end{lstlisting} &
+      \includegraphics[scale=0.4]{Example5-Qt-QML.png} \\
+    \end{tabular}
+    \caption{Examples of structures (left) and synthesized layouts (right)\\
+      w.r.t. JetBrains guidelines}
+    \label{fig:evaluation}
+  \end{figure*}

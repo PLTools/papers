@@ -6,7 +6,7 @@ In this section we describe the construction of guideline-driven layout synthesi
 from the implementation of the simple functional verifier and performing a few optimizations.
 
 The construction of initial naive verifier can be done
-by straightforward encoding of the coverage, compatibility and confirmation properties (Section~\ref{sec:guidelines}) as a relation between structures and layout primitives.
+by straightforward encoding of the coverage, compatibility and confirmation properties (Section~\ref{sec:guidelines}) as a relation between structure and layout primitives.
 % is rather straightforward.
 %We use conventional functional data structures like lists and algebraic data types to encode structures and layout primitives.
 %Given guideline rules we
@@ -23,7 +23,7 @@ rule of the guidelines to be \emph{inverted}. For example, consider the followin
    $\term{describes}\,(X,\,Y)\,\mapsto\,\term{vert}\,(X,\,Y),\,\term{halign}\,(X,\,Y)$
 \end{lstlisting}
 
-It determines the following (sub)cases for the confirmation check procedure for a structure $\Sigma$ and
+\noindent It determines the following (sub)cases for the confirmation check procedure for a structure $\Sigma$ and
 a set of layout instances $S$:
 
 \begin{lstlisting}[language=ocanren,basicstyle=\small]
@@ -46,8 +46,8 @@ We do not perform \emph{maximality} check here because it will diminish value of
 The maximality problem is solved in another manner.
 We run verifier for a given concrete structure and a \emph{free variable} in
 the position of the set of layout instances.
-By the completeness of \textsc{miniKanren} search procedure this gives us all sets which are compatible, covering and confirmed at
-the same time.
+This gives us all sets which are compatible, covering and confirmed at
+the same time by the completeness of \textsc{miniKanren} search procedure.
 Then, having them at our hands already, we filter out non-maximal ones.
 
 The first step gave us a complete, but not efficient synthesizer to play with.
@@ -141,6 +141,7 @@ We do this using greedy approach: instead of enumerating all compatible layouts 
 filtering out non-maximal ones we first build one maximal but not compatible layout, then identify all conflicts and,
 finally, eliminate the conflicts by \emph{nondeterministically} canceling minimal numbers of rules which introduce these conflicts.
 This approach gives us a set of all maximal compatible layouts.
+This optimization works because a number of conflicting primitives is lesser than non-conflicting ones, and it's easier to remove them in the end.
 
 All three steps of construction of maximal non-conflicting layout is implemented as an independent relational component.
 
@@ -189,7 +190,7 @@ For example, a primitive $\term{hor}\,(C_1,\,C_2)$ (horizontal placement of cont
   C_2\prg{.y} - C_1\prg{.y} = a_V
 \end{gather*}
 
-where \emph{variables} $C_i\prg{.x}$ and $C_i\prg{.y}$ designate $x$ and $y$ coordinates of given control respectively, integer
+\noindent where \emph{variables} $C_i\prg{.x}$ and $C_i\prg{.y}$ designate $x$ and $y$ coordinates of given control respectively, integer
 \emph{constants} $C_1\prg{.width}$~--- the width of $C_1$, $i_H$~--- horizontal inset, $a_V$~--- vertical alignment.
 
 Also, for each virtual GUI control $C$ containing GUI controls $C_1, \ldots, C_n$ the following constraints are needed that define

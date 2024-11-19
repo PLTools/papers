@@ -13,26 +13,35 @@
 \headerdef
 
 \udk{004.51}
-\rubrika{Software engineering, testing and verification}
+\rubrika{Software Engineering, Testing and Verification}
 \dateinput{??.11.2024}
 
-\rusabstr{We describe a system which, given a set of designer-specified layout constraints (\emph{guidelines})
-and a description of graphic user interface (GUI) logical structure generates a set of concrete layouts,
-each of which complies with these guidelines by construction. We give a formal treatment of the task as a
-constraint satisfiability problem and describe the construction of a sound and complete solver
-based on the utilization of \emph{relational verifier-to-solver} approach. We also describe a number
-of refinements which make the solver more efficient and applicable.
-\textcolor{red}{RECHECK}
+\rusabstr{
+We approach a task of automatized design of  graphic user interface (GUI) by construction a system based and constraint programming.
+It takes designer-specified layout constraints (\emph{guidelines}) and  logical structure of desired interface, and generate layouts,
+each of which complies with these guidelines by construction.
+The system is implemented as WEB application, and genereates results in a real time.
+%To
+%We describe a system which, given a set of designer-specified layout constraints (\emph{guidelines})
+%and a description of graphic user interface (GUI) logical structure generates a set of concrete layouts,
+%each of which complies with these guidelines by construction. We give a formal treatment of the task as a
+%constraint satisfiability problem and describe the construction of a sound and complete solver
+%based on the utilization of \emph{relational verifier-to-solver} approach. We also describe a number
+%of refinements which make the solver more efficient and applicable.
+%\textcolor{red}{RECHECK}
 }
+%В работе рассматривается задача автоматизированного проектирования графических интерфейсов пользователя (GUI).
+%Система, основанная на программировании в ограничениях, принимает правила расположения элементов управления, сами элементы и выдает некоторое количество расположений, удовлетворяющих правилам.
+%Система реализована как WEB-приложение позволяет получать ответы постепенно и в реальном времени.
+
 
 \author{
 {\bfseries Lozov~P.~A.$^{a1}$, Kosarev~D.~S.$^{a2}$, Boulytchev~D.~Yu.$^{a3}$, Fokin~D.~S.$^{4}$}
 \\ {\itshape $^a$St.~Petersburg State University,}
-%\\ {\slshape 199034} {\slshape 7-9} {\itshape  Universitetskaya Embankment, St Petersburg, Russia}
 \\ {\itshape }  {\slshape 7-9} {\itshape  Universitetskaya Embankment,} {\slshape St Petersburg, 199034,   Russia}
-\\ {\itshape $^1$e-mail: lozov.peter@gmail.com,} {  ORCID: 0000-0003-3563-2828}
-\\ {\itshape $^2$e-mail: d.kosarev@spbu.ru,} { ORCID: 0000-0002-6773-5322}
-\\ {\itshape $^3$e-mail: dboulytchev@math.spbu.ru,} {ORCID:  0000-0001-8363-7143}
+\\ {\itshape $^1$e-mail: lozov.peter@gmail.com,} { ORCID: \ORCIDLozov{} }
+\\ {\itshape $^2$e-mail: d.kosarev@spbu.ru,} { ORCID: \ORCIDKosarev{} }
+\\ {\itshape $^3$e-mail: dboulytchev@math.spbu.ru,} {ORCID: \ORCIDBoulytchev{} }
 \\ {\itshape $^4$e-mail:  denis.fokin@gmail.com, no affiliation}
 }
 \title{Constraint Programming for Automatic User Interface Construction}

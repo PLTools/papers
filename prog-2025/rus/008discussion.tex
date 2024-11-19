@@ -16,7 +16,7 @@
 Однако мы считаем, что в этом случае большая часть работы по обоснованию корректности решения должна быть повторена заново.
 В нашем же случае обоснование тривиально следует из полноты поиска \textsc{miniKanren} и полноты по опровержению (англ. refutational completeness) нашего решения.
 Мы также предсказываем, что решение потребует изобретения заново недетерминизма и поиска с возвратами, которые уже есть в реляционном программировании.
-Также дуальность\footnote{\textcolor{red}{Кажется я выпили дуальность из главы про синтез. Надо что-то ещё отсюда выкинуть.}} между экземплярами в структуре и реляционными отношениями, изначально не ожидаемая нами, по нашему мнению, демонстрирует, что реляционное программирование~--- это подходящий подход для решения поставленной задачи.
+%Также дуальность\footnote{\textcolor{red}{Кажется я выпили дуальность из главы про синтез. Надо что-то ещё отсюда выкинуть.}} между экземплярами в структуре и реляционными отношениями, изначально не ожидаемая нами, по нашему мнению, демонстрирует, что реляционное программирование~--- это подходящий подход для решения поставленной задачи.
 
 %One interesting question which may arise is if the application of relational programming is essential for this problem to be solved. Indeed, the set of guidelines
 %describes a matching (or rewriting) system which, in principle, can be directly implemented without any use of relational techniques. We argue, however,
@@ -25,3 +25,5 @@
 %that such a solution would require reinventing of some implementation techniques to support nondeterminism and backtracking, which are already native to relational
 %programming. Finally, the duality between patterns over structure and relational goals (initially unexpected for us), to our opinion, witnesses, that relational
 %programming is a truly relevant technique for this problem.
+
+В будущем стоит попытаться интегрировать целочисленные ограничения в поиск примитивов расположения, так как это позволит раньше избегать неподходящих ответов, что  улучшит производительность.

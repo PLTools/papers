@@ -150,14 +150,8 @@ On the first step we non-deterministically apply all guideline rules and combine
 
 For the second step we use a specific relational verifier to find all conflicts.
 For each kind of conflict we implement
-a dedicated verifier which, given a hypercube and a set of layout instances, checks that
-
-\begin{itemize}
-\item the set, indeed, occurs in the hypercube;
-\item the set constitutes the conflict in question.
-\end{itemize}
-
-\noindent Being run in the reverse direction for a ground hypercube and free variable this verifier returns all
+a dedicated verifier which, given a hypercube and a set of layout instances, checks that the set, indeed, occurs in the hypercube and the set constitutes the conflict in question.
+Being run in the reverse direction for a ground hypercube and free variable this verifier returns all
 sets of layout instances which occur in the hypercube and constitute a conflict of given kind.
 Running a disjunction of all such verifiers in the reverse direction gives us the set of all sets of conflicting layout instances.
 

@@ -107,9 +107,8 @@ the top of control $B$ and visa versa then, obviously, it is unusable since thes
 incompatible constraints. Among the conflicts we can identify the following:
 
 \begin{itemize}
-\item There should be no loops or branching comprised of layout primitives for vertical and horizontal composition. This
-  requirement originates from the observation that the relations introduced by these
-  primitives have to be unions of linear orders.
+\item There should not be cycles composed only of layout primitives for vertical (horizontal) composition.
+\item No more than one control should be placed strictly to the right/bottom of another control. This and the previous requirement follow from the fact that the relations composed of these primitives must be linear orders.
 \item If two compositional virtual controls are laid out horizontally then there should not be
   controls within both of them which are laid out vertically; symmetrically for vertically
   laid out virtual controls.

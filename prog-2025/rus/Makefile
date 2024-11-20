@@ -7,7 +7,7 @@ MAIN = mainrus
 all: $(MAIN).pdf
 clean::
 	latexmk -C $(MAIN).pdf -f
-$(MAIN).fmt: $(MAIN).tex preamble.tex
+$(MAIN).fmt: $(MAIN).tex ../preamble.tex
 	$(ENGINE) -synctex=1 -ini -jobname="$(@:.fmt=)" "&$(ENGINE)" mylatexformat.ltx $<
 $(MAIN).pdf: $(MAIN).tex  $(MAIN).fmt
 	#/usr/bin/time -f "%U" $(ENGINE) -synctex=1 -fmt=$(<:.tex=.fmt) $<

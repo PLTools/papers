@@ -59,7 +59,7 @@ prefix removal or decomposition of a list into two sublists.
      | x::xs -> x :: append xs ys
   \end{lstlisting}
   %\vskip12mm
-  \caption{Functional addition}
+  \caption{Functional list concatenation}
   \label{funadd}
   \end{subfigure}
   \begin{subfigure}[t]{0.5\textwidth}
@@ -73,9 +73,9 @@ prefix removal or decomposition of a list into two sublists.
           (zs === List.cons h tmp)
       ]
     \end{lstlisting}
-    \caption{Relational addition}
+    \caption{Relational list concatenation. The conjunction \texttt{\&\&\&}, disjunction \texttt{conde} and the existential quantifier (\texttt{fresh}) combined with the conjunction are used}
     \label{reladd}
   \end{subfigure}
-  \caption{Functional vs. relational addition of Peano numbers}
+  \caption{Functional vs. relational list concatenation}
   \label{fun_vs_rel}
 \end{figure}

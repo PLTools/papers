@@ -15,9 +15,9 @@ layout primitives.
 We demonstrate these notions with the following example. Let us have a GUI form shown in Fig.~\ref{form1}. We can describe its structure as follows:
 
 \begin{itemize}
-\item there are three GUI controls: a check box, a text label, a drop-down list (combobox);
-\item there is a dependency relation between the text label and the combobox since the former \emph{describes} the
-  latter; thus, the text label and the combobox constitute a compositional entity;
+\item there are three GUI controls: a check box, a text label, a drop-down list (combo box);
+\item there is a dependency relation between the text label and the combo box since the former \emph{describes} the
+  latter; thus, the text label and the combo box constitute a compositional entity;
 \item there is an order relation between the checkbox and this compositional entity
   since (as we speculate) there is an implied dependency caused by the importance of the components
   from the perspective of the GUI author.
@@ -39,16 +39,16 @@ semantics is completely determined by a guideline, and the system does not conta
 these relations. End-users can freely add custom abstract relations and define their semantics in the guidelines.
 
 For a given structure its \emph{layout} can be specified using a set of primitives describing the placement
-of controls, their alignment and other similar properties. In the given example the label and combobox are
+of controls, their alignment and other similar properties. In the given example the label and combo box are
 laid out horizontally next to each other with a certain horizontal inset, the checkbox is stacked over the compositional
-label-combobox pair with a certain vertical inset, and the whole layout is left-justified. We can depicture the
+label and combo box pair with a certain vertical inset, and the whole layout is left-justified. We can depicture the
 layout in question as shown in Fig.~\ref{form1-structure-layout}\subref{form1-layout}. Unlike relations used for
 describing structures, all primitives of layout description have a hardcoded semantics which the
 synthesis algorithm relies upon.
 
 Finally, a guideline contains a set of rules prescribing what layout primitives should be used for
 certain (sub)structures of GUI under certain conditions. In Fig.~\ref{form1-structure-layout}\subref{gdrule}
-we show an example of such a rule, taken from JetBrains set of conventional GUI guidelines~\cite{JBG}.
+we show an example of such a rule, taken from \textsc{JetBrains} set of conventional GUI guidelines~\cite{JBG}.
 As a rule, GUI guidelines are described in informal terms using a number of examples; in the next section
 we present their formal treatment.
 

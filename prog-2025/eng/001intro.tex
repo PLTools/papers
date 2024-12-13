@@ -29,7 +29,5 @@ vanilla form the solver turned out to be inefficient so we applied a number of r
 final solver is a mixture of functional and relational code. The set of synthesized layout primitives, in turn, is reified into linear
 integer constraints which are then solved using \textsc{Z3} solver~\cite{Zthree} providing absolute coordinates for all GUI controls.
 Our approach delivers a \emph{sound} and \emph{complete} solver~--- for a given logical GUI structure it synthesizes a set of all layouts each of which is
-admissible w.r.t. given guidelines.
-
-The solver is also efficient and can be run on a regular laptop.
+admissible w.r.t. given guidelines. The solver is also efficient and can be run on a regular laptop.
 

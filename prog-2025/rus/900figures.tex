@@ -50,8 +50,8 @@
 \begin{figure*}[t]
 \begin{verbnobox}[\fontsize{10pt}{10pt}\selectfont]
 ordered main_group (
-  Label "Type" describes TextEdit "Any" {width=200}
-  Label "Owner" describes TextEdit "Anyone" {width=200}
+  Label "Type" describes TextEdit "Any" { width=200 }
+  Label "Owner" describes TextEdit "Anyone" { width=200 }
   Label "Has the words" describes TextEdit "Enter words found in the file" {
    width = 400
   }
@@ -67,15 +67,15 @@ ordered main_group (
       Label "Encrypted" describes CheckBox encrypted
     )
   )
-  Label "Date modified" describes  TextEdit "Any time" {width=200}
+  Label "Date modified" describes  TextEdit "Any time" { width=200 }
   Label "Approvals" describes
     ordered approvals_checkboxes (
       Label "Awaiting my approval" describes CheckBox awaiting_checkbox
       Label "Requested by me" describes CheckBox requestred_checkbox
   )
   Label "Shared to" describes
-    TextEdit "Enter a name or email address..." {width=400}
-  Label "Follow-ups" describes TextEdit "---" {width=200, height=35}
+    TextEdit "Enter a name or email address..." { width=400 }
+  Label "Follow-ups" describes TextEdit "---" { width=200, height=35 }
 )
 Button "Search" approves^ main_group
 Button "Reset" cancels^ main_group
@@ -156,6 +156,6 @@ ordered (
       \end{lstlisting} &
       \includegraphics[scale=0.4]{../eng/Example5-Qt-QML.png} \\
     \end{tabular}
-    \caption{Примеры структур (слева) и синтезированных расположений (справа) с учётом предписания от JetBrains}
+    \caption{Примеры структур (слева) и синтезированных расположений (справа) с учётом предписания от \JetBrains{}}
     \label{fig:evaluation}
   \end{figure*}

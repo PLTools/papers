@@ -2,8 +2,7 @@
 % !TeX spellcheck = ru_RU
 % !TEX root = mainrus.tex
 
-Дизайн и реализация GUI~--- актуальная тема уже много десятилетий, поэтому можно найти много инструментов, подходов, статей и отчётов по теме. 
-Большая часть из них (если не все) предлагают декларативные и автоматические решения. Но если присмотреться, то их понимание \enquote{декларативности} и \enquote{автоматизации} отличается от наших.
+Дизайн и реализация GUI~--- горячая тема уже много десятилетий, поэтому можно найти много инструментов, подходов, статей и отчётов по теме. Большая часть из них (если не все) предлагают декларативные и автоматические решения. Но если присмотреться, то их понятия \enquote{декларативности} и \enquote{автоматизации} отличаются от наших.
 
 %GUI design and implementation has been a hot topic for decades. Thus, to no surprise there is a lot of frameworks, approaches, papers
 %and reports on the subject. A fair share of them (if not all) present declarative and automatic solutions. A careful study, however,
@@ -17,70 +16,32 @@
 И если расположение элементов должно по какой-то причине измениться, то эти изменения нужно реализовывать вручную. В нашем случае, разработчики не задают конкретное расположение, а только логическую структуру пользовательского интерфейса.
 Предписание определяет конкретное расположение элементов управления,
 в зависимости от внешних ограничений, таких как разрешение экрана или региональные настройки (например, письмо справа-налево). Пока логическая структура не изменяется,
-не потребуется никакого взаимодействия с программистом для отображения интерфейса по-другому. С другой стороны, данные инструменты могут использоваться совместно c нашим как способ визуализации интерфейса, так как они предоставляют сходные примитивы расположения. 
-%В этой работе мы таким образом задействовали Qt/QML.
+не потребуется никакого взаимодействия с программистом для отображения интерфейса по-другому. С другой стороны, данные инструменты могут использоваться совместно c нашим как способ визуализации интерфейса, так как они предоставляют сходные примитивы расположения. В этой работе мы таким образом задействовали Qt/QML.
 
-%First of all, we need to mention some software frameworks and tools for design and implementation of GUI and visualization of data, for example, \textsc{React}~\cite{react},
-%\textsc{Jetpack Compose}~\cite{Jetpack}, \textsc{SwiftUI}~\cite{SwiftUI}, \textsc{Streamlit}~\cite{Streamlit}, \textsc{D3}~\cite{D3} and others.
-%These frameworks provide a number of layout primitives which end-users can employ in order to render their data or UI. For example, \textsc{Streamlit}
-%provides a number of builtin layout primitives like ``columns'', ``container'', ``modal dialog'', etc.~\cite{StreamlitLayout} and an endless
-%variety of third-party external components. These primitives allow end-users to abstract away of concrete controls coordinate calculation and their
-%relative alignment; they also prescribe a reasonable behavior on enclosing pane resizing. However, which layout primitives to use is decided by
-%end-users, not the system. If due to any reason the layout needs to be changed these changes have to be implemented manually. In our case
-%end-users do not specify concrete layouts, only the logical structure of the UI. The guideline takes care of concrete layout, depending on
-%external constraints such as enclosing pane size, screen resolution or even regional settings (for example, right-to-left writing system). As long
-%as the logical structure remains unchanged no interference from end-users is required for laying out the UI in different settings. On the
-%other hand these frameworks can be used as back-ends in our approach since they provide a similar set of layout primitives.
-
-Программирование в ограничениях уже использовалось для размещения элементов управления GUI. Одним из примеров реактивного языка программирования в ограничениях является язык \textsc{Wallingford}~\cite{Wallingford2016} и система \textsc{Cassowary}~\cite{Cassowary2001}. \textsc{Wallingford} позволяет прикреплять ограничения различной силы к значениям в программе. Система реагирует на изменения времени и обновляет значения, не нарушая ограничения. Например, можно реализовать элемент управления с шириной равной синусу текущего времени. Система \textsc{Cassowary} и её потомки позволяют вычислять размеры и положения элементов динамически, например при изменении размера холста. Она поддерживает множество ограничений, в том числе глубину по оси Z; арифметические операции (например, ширина одного элемента может быть половиной высоты другого); элементы, накладывающиеся друг на друга и т.д. Эти система предназначена для задач автоматической изменения размеров элементов при изменении общего размера холста. Также, она не предоставляет поддержки правил общего вида для корректного позиционирования элементов.
+Программирование в ограничениях уже использовалось для размещения элементов управления GUI.
+Одним из примеров реактивного языка программирования в ограничениях является язык \textsc{Wallingford}~\cite{Wallingford2016} и система \textsc{Cassowary}~\cite{Cassowary2001}.
+\textsc{Wallingford} позволяет задавать ограничения различной силы к значениям в программе. Система реагирует на изменения времени и обновляет значения, не нарушая ограничения.
+Например, можно реализовать элемент управления с шириной, равной синусу текущего времени.
+Система \textsc{Cassowary} и её потомки позволяют вычислять размеры и положения элементов динамически, например при изменении размера холста.
+Она поддерживает множество ограничений, в том числе глубину по оси Z; арифметические операции (например, ширина одного элемента может быть половиной высоты другого); элементы, накладывающиеся друг на друга и т.д.
+Эта система предназначена для задач автоматической изменения размеров элементов при изменении общего размера холста.
+Однако она не предоставляет поддержки правил общего вида для корректного позиционирования элементов.
 Мы сомневаемся в выразимости неоднозначных расположений элементов в данных системах, например, если вертикально или горизонтальное взаимоположение определяется на основе размеров. С другой стороны, количество различных ограничений больше, чем у нас. Например, поддержка накладывающихся друг на друга элементов управления запрещена у нас с самого начала, и такие расположения не создаются вообще.
-
-%Constraint programming has already been used for deciding the placement of GUI controls. One of the examples are constraint reactive programming
-%language \textsc{Wallingford}~\cite{Wallingford2016} and the \textsc{Cassowary} system~\cite{Cassowary2001}. \textsc{Wallingford} allows to attach
-%constraints of various strength to different values in the program. The system reacts to the time changes and updates these values without violation
-%of the constraints. For example, one could calculate a width of a GUI control as the sine of current time. The \textsc{Cassowary} system and its
-%descendants allow to calculate the sizes and positions of controls dynamically, for example at the moment of canvas resize.
-%%The background theory is linear arithmetic.
-%It supports many different constraints, for example, Z-ordering, arithmetic operators (for example, a control's width can be the half
-%of another one's height), overlapping views, etc.  These systems are targeted for the tasks of dynamic adaptation the sizes of controls on resize.
-%Also, they don't provide support of expressing general rules about correct control placing, the constraints are added for values of concrete structure.
-%In our work we make a strict separation between GUI structure and rules of correct positioning of controls. We have doubts about expressing non-deterministic
-%layouts in these systems, for example, if vertical or horizontal placement of controls depend on their sizes. On the other hand, the number of various
-%constraint types is larger than in our approach. For example, they allow to express overlapping views, but based on our experience we initially ruled out
-%this option, and our current implementation doesn't generate such layouts at all.
 
 В последние годы появились методы на основе машинного обучения. Некоторые работы ставят гораздо более амбициозные цели, чем наши.
 
-%Finally, in recent years methods and approaches from AI in ML/data-science sense start to percolate into the area. Some of the works address much more
-%ambitious objectives, than ours.
-
-Существует направление исследования, занимающееся порождением кода UI на основе картинок~\cite{Cai2023}. По полученному от дизайнера рисунку интерфейса,  инструмент распознает элементы управления и их относительное местоположение, и создает код реализации для инструмента создания GUI.
+Существует направление исследования, занимающееся порождением кода UI на основе картинок~\cite{Cai2023}.
+По полученному от дизайнера рисунку интерфейса инструмент распознает элементы управления и их относительное местоположение, и создает код реализации для инструмента создания GUI.
 Подход ортогонален и не совместим с предлагаемым нами. Он требует взаимодействия с дизайнером во время получения каждой части интерфейса, у нас же дизайнер задействован только при описании предписания. Также наш подход позволяет создавать много интерфейсов автоматически. В инструменте~\cite{Robust} была поставлена несколько другая задача: по картинке интерфейса синтезируется его реализация в терминах примитивов Android GUI, масштабируемая между различными устройствами и без типичных ошибок. Для выполнения этой задачи из картинки извлекается элементы управления, их местоположения, а также некоторые ограничения.
 Эти ограничения напоминают наши примитивы расположения, но специализированы для семантики виджета \textsc{ConstraintLayout}~\cite{ConstraintLayout} из Android.
-На основе этих ограничений и набору \emph{свойств надёжности}, разработанному авторами, вероятностная модель, обученная на большем наборе существующих интерфейсов, порождает код. Эти реализации, более устойчивы к измерению размера и  разрешения экрана, чем полученные только путём распознавания картинок.
+На основе этих ограничений и набору \emph{свойств надёжности}, разработанному авторами, вероятностная модель, обученная на большем наборе существующих интерфейсов, порождает код.
+Эти реализации более устойчивы к измерению размера и  разрешения экрана, чем полученные только путём распознавания картинок.
 Любопытно, что авторы мотивируют свою работу, заявляя, что \enquote{одно и то же расположение должно отображаться более чем на 15000 устройствах Android с $\approx$100 различных плотностей пикселей; требовать от программистов разработки и поддержки всех сочетаний входа чрезвычайно не желательно}.
 Именно   это делает наша система за несколько минут со 100\% точностью, поэтому мы считаем свой подход более общим.
 
-%First of all, there is a direction of research on UI code generation from images~\cite{Cai2023}. Given a designer-drawn form, a code
-%generator recognizes UI controls and their relative placements and generates implementation code for one of GUI frameworks. This approach
-%is completely orthogonal and incompatible with what we suggest. Indeed, it requires an interaction with a designer when implementing every piece of
-%an interface while in our case a designer is only involved when guidelines are developed; then our system produces guideline-compatible
-%interfaces \emph{en masse} automatically.
-%In~\cite{Robust} a slightly different task is addressed: given a picture of an interface synthesize its
-%implementable layout in terms of Android GUI primitives which would be scalable across various devices while avoiding a typical layout errors.
-%To achieve this goal, after recognizing UI controls and their locations a certain set of relational layout constraints is extracted. This
-%set of constraints resembles our layout primitives but is aligned with Android's \texttt{ConstraintLayout} widget~\cite{ConstraintLayout} semantics.
-%Given these constraints and a set of \emph{robustness properties} developed by the authors an implementation code is generated with
-%the aid of a probabilistic model trained on a large set of existing Android interfaces. This implementation is more stable under screen size
-%or resolution change, than that provided by image recognition only.
-%Interestingly, one of the motivations for the work, as the authors
-%specify explicitly, is that ``the same layout needs to be rendered potentially on more than 15 000 Android devices with $\approx$100 different density
-%independent screen sizes. Requiring the user to provide and maintain input specifications for all of them is infeasible yet highly desirable.''
-%That is exactly what our system is capable of doing within a few minutes and with 100\% accuracy, so we consider our approach
-%much more general.
-
-Также решалась задача согласованного во всём приложении оформления GUI~\cite{LearningGUI}. Подход основан на идее заполнения:
-в предположении, что уже есть набор согласованных расположений, решается проблема добавления ещё одного элемента так, чтобы новое расположение было согласовано со старым. Эта задача связана с нашей, так как мы можем рассматривать уже существующее расположение как неявно заданное предписание, но мы можем указать несколько потенциальных недостатков. Во-первых,  учитывается только добавление элементов, без удаления. Во-вторых, добавление/удаление компонент не обязательно приводит к \enquote{монотонному} изменению расположения: добавление ещё одного поля ввода может существенно поменять расположение. Наконец, начальный согласованный дизайн редко появляется из воздуха, наверняка это результат следования уже существующему предписанию, которое было описано явно.
+Также решалась задача согласованного во всём приложении оформления GUI~\cite{LearningGUI}.
+Подход основан на идее дополнения:
+в предположении, что уже есть набор согласованных расположений, решается проблема добавления ещё одного элемента так, чтобы новое расположение было согласовано со старым. Эта задача связана с нашей, так как мы можем рассматривать уже существующее расположение как неявно заданное предписание, но мы можем указать несколько потенциальных недостатков. Во-первых,  учитывается только добавление элементов, без удаления. Во-вторых, добавление/удаление компонент не обязательно приводит к \enquote{монотонному} изменению расположения: добавление ещё одного поля ввода может существенно поменять расположение. Наконец, начальный согласованный дизайн редко появляется \enquote{из воздуха}, наверняка это результат следования уже существующему предписанию, которое было описано явно.
 
 %Automatic design of consistent (uniform throughout an application) GUI is addressed in~\cite{LearningGUI}. The approach is based on the idea of completion:
 %assuming there is already a set of consistent layouts a problem of adding yet another element is addressed; the addition should be consistent with the previous
@@ -99,8 +60,10 @@
 %layout consistency for sufficiently different structures is left unaddressed.
 
 Встречается интересная задача~\cite{Scout} исследования различных расположений элементов. Она ставит своей целью помочь дизайнерам разрабатывать убедительные и разнообразные расположения элементов управления. Вводится набор ограничений, с помощью которого дизайнеры составляют требования к результату.
-Любопытно, что в наших терминах этот набор ограничений является смесью структурных ограничений и ограничений на расположение: например, можно указывать и порядок элементов, и выравнивание. По набору ограничений система порождает множество расположений, удовлетворяющих им. Изменяя ограничения дизайнер исследует возможные интерфейсы.
-Для решения ограничений используется метод ветвей и границ. С ростом числа возможных решений применяются эвристики для отсечения эстетически неподходящих ответов. Не смотря на то, что эта работа похожа на нашу, она нацелена на дизайнеров и может рассматриваться скорее как средство разработки предписаний, чем как средство получения расположения элементов, удовлетворяющего предписанию.
+Любопытно, что в наших терминах этот набор ограничений является смесью структурных ограничений и ограничений на расположение: например, можно указывать и порядок элементов, и выравнивание. По набору ограничений система порождает множество расположений, удовлетворяющих им.
+Изменяя ограничения, дизайнер исследует возможные интерфейсы.
+Для решения ограничений используется метод ветвей и границ. С ростом числа возможных решений применяются эвристики для отсечения эстетически неподходящих ответов.
+Несмотря на то, что эта работа похожа на нашу, она нацелена на дизайнеров и может рассматриваться скорее как средство разработки предписаний, чем как средство получения расположения элементов, удовлетворяющего предписанию.
 
 %An interesting problem of layout exploration is considered in~\cite{Scout}. The objective is to help the \emph{designers} to develop convincing and
 %diverse layouts. A set of constraints is introduced which designers can use in order to specify some requirements for the design. Interestingly, in our terms the

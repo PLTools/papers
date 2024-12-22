@@ -12,9 +12,9 @@ COMPILER=pdflatex -interaction=nonstopmode -jobname=$(MAIN)
 $(MAIN).pdf: $(OCANREN_TEX)
 	$(COMPILER) -shell-escape -ini "&pdflatex" mylatexformat.ltx $<
 	$(COMPILER) $<
-	bibtex $(MAIN)
+	#bibtex $(MAIN)
 	$(COMPILER) $<
-	$(COMPILER) $<
+	#$(COMPILER) $<
 
 celan: clean
 clean:

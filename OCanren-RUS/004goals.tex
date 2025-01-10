@@ -1,11 +1,15 @@
-\section{Streams, States, and Goals}
+% !TeX spellcheck = ru_RU
+% !TEX root = main.tex
+
+\section{Потоки, состояния и цели}
 \label{sec:goals}
 
-This section describes a top-level framework for our implementation. Even though it contains
-nothing more than a reiteration of the original implementation~\cite{MicroKanren, CKanren}
-in OCaml, we still need some notions to be properly established.
+Этот раздел содержит некоторые детали нашей реализации.
+Не смотря на то, что это почти повторение оригинальной реализации ~\cite{MicroKanren, CKanren} для OCaml, он нужен, чтобы аккуратно ввести некоторые понятия.
+%This section describes a top-level framework for our implementation. Even though it contains nothing more than a reiteration of the original implementation~\cite{MicroKanren, CKanren} in OCaml, we still need some notions to be properly established.
 
-The search itself is implemented using a backtracking lazy stream monad~\cite{KiselyovBacktracking}:
+Процедура поиска реализована с использованием монады для ленивых потоков с возвратами~\cite{KiselyovBacktracking}:
+%The search itself is implemented using a backtracking lazy stream monad~\cite{KiselyovBacktracking}:
 
 \begin{lstlisting}
    type $\alpha$ stream
@@ -14,10 +18,11 @@ The search itself is implemented using a backtracking lazy stream monad~\cite{Ki
    val bind  : $\alpha$ stream -> ($\alpha$ -> $\beta$ stream) -> $\beta$ stream
 \end{lstlisting}
 
-Monadic primitives describe the shape of the search, and their implementations may
-vary in concrete \miniKanren versions.
+\noindent Монадические примитивы используются для запуска поиска, низкоуровневые детали могут различаться в  различные вариантах \miniKanren.
 
-An essential component of the implementation is a bundle of the following types:
+%\noindent Monadic primitives describe the shape of the search, and their implementations may vary in concrete \miniKanren{} versions.
+Важной компонентой является реализация следующих типов данных:
+%An essential component of the implementation is a bundle of the following types:
 
 \begin{lstlisting}
    type env         = $\dots$
@@ -26,39 +31,35 @@ An essential component of the implementation is a bundle of the following types:
 
    type state = env * subst * constraints
 \end{lstlisting}
+Тип состояния \lstinline|state| описывает позицию в лениво стоящимся дереве поиска:
+тип \lstinline|env| соответсвует  \emph{окружению}, содежащему дополнительную информацию (в частности, для создания свежих переменных);
+\lstinline|subst| хранить подстановку, которая содержит отображения некоторых логических переменных;
+ти \lstinline|constraints| представляет ограничения-неравенства, которые надо соблюдать.
+В самом простом случае \lstinline|env| содержит только номер последней введённой свежей переменной, \lstinline|subst| --- это конечное отображение и \lstinline|constraints| --- просто список подстановок.
 
-Type \lstinline{state} describes a point in a lazily constructed search tree: type \lstinline{env} corresponds
-to an \emph{environment}, which contains some supplementary information (in particular, an environment is needed to
-correctly allocate fresh variables), type \lstinline{subst} describes a substitution, which keeps current bindings
-for some logical variables, and, finally, type \lstinline{constraints} represents disequality constraints,
-which have to be respected. In the simplest case \lstinline{env} is just a counter for the number of the next free
-variable, \lstinline{subst} is a map-like structure and \lstinline{constraints} is a list of substitutions.
+%Type \lstinline|state| describes a point in a lazily constructed search tree:
+% type \lstinline|env| corresponds to an \emph{environment}, which contains some supplementary information (in particular, an environment is needed to
+%correctly allocate fresh variables),
+%type \lstinline|subst| describes a substitution, which keeps current bindings for some logical variables,
+%and, finally, type \lstinline|constraints| represents disequality constraints, which have to be respected.
+%In the simplest case \lstinline|env| is just a counter for the number of the next free variable, \lstinline|subst| is a map-like structure and \lstinline|constraints| is a list of substitutions.
 
 %In our case, the environment contains some extra information to make it possible to identify variables
-%in a constant time. 
+%in a constant time.
 
-\begin{comment}
-This check is not needed in faster-miniKanren or any other untyped approach to implement
-relational DSL. In case of OCanren it is dangerous to allow reification of a logic variable
-(attributed by a type one the first state) in the context of an another state where it is attributed by another type.
-Cases like this one can trigger undefined behavior. In the current implementation of logical variables created in the foreign
-state are not treated as logic variables. This restriction is difficult to express in types, so the check was moved
-from compile-time to runtime. This design decision is unfortunate, however this check doesn't affect perfomance in
-any significant way and we don't know any useful program where such a mistake can happen.
-\end{comment}
-
-The next cornerstone element is the \emph{goal} type, which is considered as a transformer of a state into
-a lazy stream of states:
+Тип целей (\lstinline|goal|) является преобразованием одного состояния в ленивый поток состояний:
+%The next cornerstone element is the \emph{goal} type, which is considered as a transformer of a state into a lazy stream of states:
 
 \begin{lstlisting}
    type goal = state -> state stream
 \end{lstlisting}
 
-In terms of the search, a goal nondeterministically performs one step of the search: for a given
-node in a search tree it produces its immediate descendants. On the user level the type \lstinline{goal}
-is abstract, and states are completely hidden.
+В терминах поиска выполнение цели соответствует одному шагу поиска: для конкретного узла дерева поиска вычисляются его непосредственные потомки.
+Со стороны пользователя тип \lstinline|goal| является абстрактным и все состояния полностью скрыты.
+%\noindent In terms of the search, a goal nondeterministically performs one step of the search: for a given node in a search tree it produces its immediate descendants. On the user level the type \lstinline|goal| is abstract, and states are completely hidden.
 
-Next to last, there are a number of predefined combinators:
+Также присутствует набор заранее реализованных комбинаторов:
+%Next to last, there are a number of predefined combinators:
 
 \begin{lstlisting}
    val (&&&)      : goal -> goal -> goal
@@ -67,43 +68,58 @@ Next to last, there are a number of predefined combinators:
    ....
 \end{lstlisting}
 
-Conjunction ``\lstinline{&&&}'' combines the results of its argument goals using \lstinline{bind},
-disjunction ``\lstinline{|||}'' concatenates the results using \lstinline{mplus}, abstraction
-primitive \lstinline{call_fresh} takes an abstracted goal and applies it to a freshly created
-variable. Type $v$ in the last case designates the type for a fresh variable, which we leave
-abstract for now. These combinators serve as the bricks for the implementation of conventional
-\miniKanren constructs and syntax extensions (\lstinline{conde}, \lstinline{fresh}, etc.)
+Конъюнкция \enquote{\lstinline=&&&=} объединяет результаты своих целей-аргументов с помощью \lstinline|bind|,
+дизъюнкция \enquote{\lstinline=|||=} конкатенирует результаты с помощью \lstinline|mplus|,
+примитив \lstinline|call_fresh| принимает абстрагированную цель и применяет её к только что созданной свежей переменной.
+Тип $v$ соответствует типу свежей логической переменной, детали которого мы обсудим позже.
+Эти комбинаторы являются базовыми для реализации более удобных конструкций реляционного программирования (\lstinline|conde|, \lstinline|fresh| и т.д.)
 
-Finally, there are two primitive goal constructors:
+%Conjunction ``\lstinline|&&&|'' combines the results of its argument goals using \lstinline|bind|,
+%disjunction ``\lstinline=|||='' concatenates the results using \lstinline|mplus|, abstraction
+%primitive \lstinline|call_fresh| takes an abstracted goal and applies it to a freshly created
+%variable. Type $v$ in the last case designates the type for a fresh variable, which we leave
+%abstract for now. These combinators serve as the bricks for the implementation of conventional
+%\miniKanren constructs and syntax extensions (\lstinline|conde|, \lstinline|fresh|, etc.)
+
+Наконец, существуют два примитива для создания примитивных целей: ограничения унификации и ограничения-неравенства. Тип  $t$ мы также оставим абстрактным и вернемся к нему позже.
+%Finally, there are two primitive goal constructors:
 
 \begin{lstlisting}
    val (===) : $t$ -> $t$ -> goal
    val (=/=) : $t$ -> $t$ -> goal
 \end{lstlisting}
 
-The first one is a unification, while the other is a disequality constraint. Here, we again left
-the type of terms $t$ abstract; it will be instantiated later.
+%The first one is a unification, while the other is a disequality constraint. Here, we again left the type of terms $t$ abstract; it will be instantiated later.
 
-In the implementation of \miniKanren both of these goals are implemented using unification~\cite{CKanren}; this
-is true for us as well. However, due to a drastic difference between the host languages, the implementation of
-efficient polymorphic unification itself leads to a number of tricks with typing and data representation, which are
-absent in the original version.
+\noindent В различных реализациях miniKanren все конструкции можно реализовывать сходным образом.
+Но в случае с OCaml реализация полиморфной унификации потребовало использования нетривиальных решений, которые отсутствуют в оригинальном miniKanren.
 
-In this setting, the run primitive is represented by the following function:
+%In the implementation of \miniKanren both of these goals are implemented using unification~\cite{CKanren}; this
+%is true for us as well. However, due to a drastic difference between the host languages, the implementation of
+%efficient polymorphic unification itself leads to a number of tricks with typing and data representation, which are
+%absent in the original version.
+
+С использованием объявленных выше типов, сигнатура примитива \lstinline|run| выглядит так:
 
 \begin{lstlisting}
    val run : goal -> state stream
 \end{lstlisting}
 
-This function creates an initial state and applies a goal to it. The states in the return stream describe
-various solutions for the goal. As the stream is constructed lazily, taking elements one by one makes
-the search progress.
+\noindent Данная функция создает начальное состояние и применяет к нему цель. Состояния в получившемся потоке описывают различные решения данной цели.
+Так как поток строится постепенно, для проведения поиска следуют получать состояния по одному.
 
-To discover concrete answers, the state has to be queried for its contents. As a rule, a few variables
-are reified in a state, i.e. their bindings in the corresponding substitution are retrieved.
-Disequality constraints for free variables have to be reified additionally (e.g. represented as a list of
-``forbidden'' terms). As forbidden terms can contain free variables, the constraint reification
-process is recursive.
+%\noindent This function creates an initial state and applies a goal to it. The states in the return stream describe various solutions for the goal.
+%As the stream is constructed lazily, taking elements one by one makes the search progress.
 
-In our case, the reification is a subtle part, since, as we will see shortly, it can not be implemented in a
-type-safe fragment of the language.
+Конкретные ответы реконструируются из состояний. Как правило, несколько переменных реифицируются в этом состоянии, т.е. оттуда достаются их конкретные значения.
+Также для свободных переменных извлекаются ограничения-неравенства, представленные как список \enquote{запрещённых} термов.
+Так как эти запрещённые термы могут в свою очередь содержать другие свободные переменные, то реификация ограничений является реализована рекурсивно.
+
+%To discover concrete answers, the state has to be queried for its contents. As a rule, a few variables
+%are reified in a state, i.e. their bindings in the corresponding substitution are retrieved.
+%Disequality constraints for free variables have to be reified additionally (e.g. represented as a list of
+%``forbidden'' terms). As forbidden terms can contain free variables, the constraint reification
+%process is recursive.
+
+В случае OCaml реификация является нетривиальной частью реализации, так как, как мы увидим, она не может быть реализована на типобезопасном фрагменте языка.
+%In our case, the reification is a subtle part, since, as we will see shortly, it can not be implemented in a type-safe fragment of the language.

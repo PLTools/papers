@@ -13,3 +13,7 @@
 *.pdf
 .aspell.*
 
+comment.cut 
+*.fmt
+*.txss2
+

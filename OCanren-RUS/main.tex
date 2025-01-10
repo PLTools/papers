@@ -1,10 +1,12 @@
-% !TEX TS-program = xelatex
+% !TEX TS-program = pdflatex
 % !TeX spellcheck = ru_RU
 % !TEX root = main.tex
 
 
 \documentclass[acmsmall, language=english, language=russian
   %, review
+  %, xcolor
+  %, hyperref={colorlinks=true}
   ]{acmart}
 
 \input{preamble.tex}
@@ -84,11 +86,11 @@
 %% used to denote shared contribution to the research.
 \author{Dmitrii Kosarev}
 %\authornote{Both authors contributed equally to this research.}
-\email{trovato@corporation.com}
+\email{EMAIL }
 \orcid{0000-0002-6773-5322}
 \author{D. Boulytchev}
 %\authornotemark[1]
-\email{webmaster@marysville-ohio.com}
+\email{EMAIL}
 \affiliation{%
   \institution{St. Petersburg University}
   \city{St. Petersburg}
@@ -116,7 +118,7 @@
 %% other information printed in the page headers. This command allows
 %% the author to define a more concise list
 %% of authors' names for this purpose.
-\renewcommand{\shortauthors}{Trovato et al.}
+\renewcommand{\shortauthors}{Kosarev et al.}
 
 %%
 %% The abstract is a short summary of the work to be presented in the
@@ -174,8 +176,8 @@
 %% information and builds the first part of the formatted document.
 \maketitle
 
-\input{001introduction.tex}
-\input{002related-works}
+%\input{001introduction.tex}
+%\input{002related-works}
 \input{003demo}
 \input{004goals}
 \input{005polymorphic-unification}

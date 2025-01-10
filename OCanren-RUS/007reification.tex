@@ -1,7 +1,10 @@
+% !TeX spellcheck = ru_RU
+% !TEX root = main.tex
+
 \section{Reification and Top-Level Primitives}
 \label{sec:reification}
 
-In Section~\ref{sec:goals} we presented a top-level function \lstinline{run}, which
+In Section~\ref{sec:goals} we presented a top-level function \lstinline|run|, which
 runs a goal and returns a stream of states. To acquire answers to the query,
 represented by that goal, its free variables have to be reified in these states, and
 we described the reification primitives in Section~\ref{sec:injection}. However,
@@ -14,8 +17,8 @@ top-level primitives, which enforce this requirement.
 
 We provide a set of top-level combinators, which should be used to surround relational code
 and perform reification in a transparent manner only in correct states.
-We reimplement the top-level primitive \lstinline{run} to take three
-arguments. The exact type of \lstinline{run} is rather complex and non-instructive,
+We reimplement the top-level primitive \lstinline|run| to take three
+arguments. The exact type of \lstinline|run| is rather complex and non-instructive,
 so we prefer to describe the typical form of its application:
 
 \begin{lstlisting}[mathescape=true]
@@ -23,7 +26,7 @@ so we prefer to describe the typical form of its application:
 \end{lstlisting}
 
 Here $\overline{n}$ stands for a \emph{numeral}, which describes the number of
-parameters for two other arguments of \lstinline{run}, \mbox{$l_1\dots l_n$}~---
+parameters for two other arguments of \lstinline|run|, \mbox{$l_1\dots l_n$}~---
 free logical variables, $G$~--- a goal (which can make use of \mbox{$l_1\dots l_n$}),
 \mbox{$a_1\dots a_n$}~--- reified answers for \mbox{$l_1\dots l_n$}, respectively, and,
 finally, $H$~--- a \emph{handler} (which can make use of \mbox{$a_1\dots a_n$}).
@@ -43,16 +46,16 @@ have the form
    $(\alpha,\;\beta)$ reified stream
 \end{lstlisting}
 
-\noindent where the type \lstinline{reified}, in turn, is
+\noindent where the type \lstinline|reified|, in turn, is
 
 \begin{lstlisting}
    type ($\alpha$, $\beta$) reified = $<\;$prj : $\alpha$; reify : (helper -> $\{\alpha,\;\beta\}$ -> $\beta$) -> $\beta>$
 \end{lstlisting}
 
 Two methods of this type can be used to perform two different styles of reification: first, a value without
-free variables can be returned as is (using the method \lstinline{prj} which checks that in the value of
+free variables can be returned as is (using the method \lstinline|prj| which checks that in the value of
 interest no free variables occur, and raises an exception otherwise). If the value contains some free
-variables, it has to be properly injected into the logic domain~--- this is what \lstinline{reify} stands
+variables, it has to be properly injected into the logic domain~--- this is what \lstinline|reify| stands
 for. It takes as an argument a type-specific tagging function, constructed using generic
 primitives described in the previous section.
 
@@ -61,7 +64,7 @@ goal. All streams $a_i$ contain coherent elements, so they all have the same len
 streams correspond to the $n$-th answer, produced by the goal $G$.
 
 There are a few predefined numerals for one, two, etc. arguments (called, traditionally,
-\lstinline{q}, \lstinline{qr}, \lstinline{qrs} etc.), and a successor function, which
+\lstinline|q|, \lstinline|qr|, \lstinline|qrs| etc.), and a successor function, which
 can be applied to existing numeral to increment the number of expected arguments. The
 implementation technique generally follows~\cite{Unparsing, DoWeNeed}.
 

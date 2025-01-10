@@ -1,3 +1,6 @@
+% !TeX spellcheck = ru_RU
+% !TEX root = main.tex
+
 \section{Term Representation and Injection}
 \label{sec:injection}
 
@@ -49,7 +52,7 @@ we present the results of performance evaluation for both approaches.
 \subsection{Tagged Logical Values}
 
 The first natural solution is to use tagging for representing logical representations.
-We introduce the following polymorphic type $[\alpha]$\footnote{In concrete syntax called ``$\alpha\;$\lstinline{logic}''}, which
+We introduce the following polymorphic type $[\alpha]$\footnote{In concrete syntax called ``$\alpha\;$\lstinline|logic|''}, which
 corresponds to a logical representation of the type $\alpha$:
 
 \begin{lstlisting}
@@ -73,7 +76,7 @@ Both unification and disequality constraint would still use the same polymorphic
 however, is restricted to logical types only.
 
 Apart from variables, other logical values can be obtained by injection; conversely, sometimes a logical value can be projected to
-a regular one. We supply two basic functions\footnote{In concrete syntax called ``\lstinline{inj}'' and ``\lstinline{prj}''.}
+a regular one. We supply two basic functions\footnote{In concrete syntax called ``\lstinline|inj|'' and ``\lstinline|prj|''.}
 for these purposes
 
 \begin{lstlisting}[mathescape=true]
@@ -100,7 +103,7 @@ for a regular polymorphic list in OCaml:
 \end{lstlisting}
 
 For this type we can only place a logical variable in the position of a list element, but not of the tail, since the tail
-always has the type \lstinline{$\alpha$ list}, fixed in the definition of constructor \lstinline{Cons}. In order to create
+always has the type \lstinline|$\alpha$ list|, fixed in the definition of constructor \lstinline|Cons|. In order to create
 a full-fledged logical representation, we first have to abstract the type into a fully-polymorphic functor:
 
 \begin{lstlisting}
@@ -140,7 +143,7 @@ variables by their tags only and, thus, cannot simply use pattern matching. In o
 as follows:
 
 \begin{itemize}
-\item in an environment, we additionally keep some unique boxed value~--- the \emph{anchor}~--- created by \lstinline{run} at the moment of initial
+\item in an environment, we additionally keep some unique boxed value~--- the \emph{anchor}~--- created by \lstinline|run| at the moment of initial
 state generation; the anchor is inherited unchanged in all derived environments during the search session;
 \item we change the logic type definition into
 
@@ -154,7 +157,7 @@ state generation; the anchor is inherited unchanged in all derived environments 
 
   \begin{enumerate}
     \item the scrutinee is boxed;
-    \item the scrutinee's tag and layout correspond to those for variables (i.e. the values, created with the constructor \lstinline{Var} of
+    \item the scrutinee's tag and layout correspond to those for variables (i.e. the values, created with the constructor \lstinline|Var| of
 type \lstinline{[$\alpha$]});
     \item the scrutinee's anchor and the current environment's anchor have equal addresses.
   \end{enumerate}
@@ -173,12 +176,12 @@ function:
 
 This function takes a state and a logic value and recursively substitutes all logic variables in that value w.r.t.
 the substitution in the state until no occurrences of bound variables are left. Since in our implementation the type of a substitution is
-not polymorphic, \lstinline{reify} is also implemented in an unsafe manner. However, it is easy to see that \lstinline{reify}
+not polymorphic, \lstinline|reify| is also implemented in an unsafe manner. However, it is easy to see that \lstinline|reify|
 does not produce ill-typed terms. Indeed, all original types of variables are preserved in a substitution; unification does not
-change unified terms, so all terms bound in a substitution are well-typed. Hence, \lstinline{reify} always substitutes
+change unified terms, so all terms bound in a substitution are well-typed. Hence, \lstinline|reify| always substitutes
 some subterms in a well-typed term with other terms of the corresponding types, which preserves the well-typedness.
 
-In addition to performing substitutions, \lstinline{reify} also reifies disequality constraints. Constraint reification
+In addition to performing substitutions, \lstinline|reify| also reifies disequality constraints. Constraint reification
 attaches to each free variable in a reified term a list of reified terms, describing the disequality constraints for that
 free variable. Note, disequality can be established only for equally-typed terms, which justifies the type-safety of reification.
 Note also, additional care has to be taken to avoid infinite looping, since reification of answers and constraints are
@@ -233,7 +236,7 @@ do not get in the way of unification itself (since it can handle them properly, 
 be disclosed to the outer world as is.
 
 Our idea is to use this generally unsound representation for all internal actions, and perform tagging only during the reification
-stage. However, this scenario raises the following question: what would the type of \lstinline{reify} be? It can not be simply
+stage. However, this scenario raises the following question: what would the type of \lstinline|reify| be? It can not be simply
 
 \begin{lstlisting}
    val reify : state -> $[\alpha]$ -> $[\alpha]$
@@ -245,9 +248,9 @@ anymore since $[\alpha]$ now equals $\alpha$. We \emph{want}, however, it be som
    val reify : state -> $[\alpha]$ -> $(\mbox{``tagged'' } [\alpha])$
 \end{lstlisting}
 
-If $\alpha$ is not a parametric type, we can simply test if the value is a variable, and if yes, tag it with the constructor \lstinline{Var};
-we tag it with \lstinline{Value} otherwise, and we're done. This trick, however, would not work for parametric types. Consider, for example,
-the reification of a value of type \lstinline{$[[$int$]$ list$]$}. The (hypothetical) approach being described would return a value of
+If $\alpha$ is not a parametric type, we can simply test if the value is a variable, and if yes, tag it with the constructor \lstinline|Var|;
+we tag it with \lstinline|Value| otherwise, and we're done. This trick, however, would not work for parametric types. Consider, for example,
+the reification of a value of type \lstinline|$[[$int$]$ list$]$|. The (hypothetical) approach being described would return a value of
 type \lstinline{$(\mbox{``tagged'' }[[$int$]$ list$])$}, i.e. tagged only on the top level; we need to repeat the procedure
 recursively. In other words, we need the following (meta) type for the reification primitive:
 
@@ -260,7 +263,7 @@ recursively. In other words, we need the following (meta) type for the reificati
 These considerations can be boiled down to the following concrete implementation.
 
 First, we roll back to the initial definition of $[\alpha]$~--- it will play the role of our ``tagged'' type.
-We introduce a new, two-parameter type\footnote{In concrete syntax called ``$(\alpha,\;\beta)\;$\lstinline{injected}''.}
+We introduce a new, two-parameter type\footnote{In concrete syntax called ``$(\alpha,\;\beta)\;$\lstinline|injected|''.}
 
 \begin{lstlisting}
    type $\{\alpha,\;\beta\}$ = $\alpha$
@@ -314,8 +317,8 @@ functors for the types with two-, three- etc. parameters; existing works on high
 polymorphism in OCaml~\cite{HKinded} require the similar scaffolding to be erected as a bootstrap step.
 
 Given the functor(s) of the described shape, we can implement logic representations for
-all type's constructors. For example, for standard type \lstinline{$\alpha$ option} with two constructors
-\lstinline{None} and \lstinline{Some} the implementation looks like as follows:
+all type's constructors. For example, for standard type \lstinline|$\alpha$ option| with two constructors
+\lstinline|None| and \lstinline|Some| the implementation looks like as follows:
 
 \begin{lstlisting}
    module FOption = FMap (struct
@@ -354,7 +357,7 @@ first, we have reifiers for all primitive types:
    ...
 \end{lstlisting}
 
-and, then, we add the reifier to the output signature in all \lstinline{FMap}-like functors:
+and, then, we add the reifier to the output signature in all \lstinline|FMap|-like functors:
 
 \begin{lstlisting}
    val reify: (helper -> $\{\alpha,\;\beta\}$ -> $\beta$) -> helper -> $\{\alpha$ T.t, $[\beta$ T.t$]$ as $\gamma\}$ -> $\gamma$

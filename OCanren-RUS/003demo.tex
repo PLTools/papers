@@ -1,88 +1,111 @@
-\section{\miniKanren~--- a Short Presentation}
+% !TeX spellcheck = ru_RU
+% !TEX root = main.tex
+
+\section{\miniKanren~--- краткое изложение}
 \label{sec:demo}
 
-In this section we briefly describe \miniKanren in its original form, using a canonical example.
-\miniKanren is organized as a set of combinators and macros for Scheme/Racket, designated to describe
-a search for the solution of a certain \emph{goal}. There are four domain-specific constructs
-to build \emph{goals}:
+В этом разделе miniKanren будет кратко описан в его оригинальном виде на основе канонических примеров.
+Предметно-ориентированный язык организован как набор комбинаторов и макросов для Scheme/Racket, которые должны описывать поиск некоторой \enquote{цели} (англ. goal).
+Всего четыре реляционных конструкции для создания целей:
+%In this section we briefly describe miniKanren in its original form, using a canonical example.
+%\miniKanren is organized as a set of combinators and macros for Scheme/Racket, designated to describe
+%a search for the solution of a certain \emph{goal}.
+%There are four domain-specific constructs to build \emph{goals}:
 
 \begin{itemize}
-\item Syntactic unification~\cite{Unification} in the form \lstinline[language=scheme]{(== $t_1$ $t_2$)}, where $t_1$, $t_2$ are
-some \emph{terms}; unification establishes a syntactic basis for all other goals. If there is a unifier for
-two given terms, the goal is considered satisfied, a most general unifier is kept as a partial solution, and the execution
-of current branch continues. Otherwise, the current branch backtracks.
+\item Ограничение синтаксической унификации~\cite{Unification} в форме \lstinline[language=scheme]|(== $t_1$ $t_2$)|, где  $t_1$, $t_2$ --- это некоторые \enquote{термы}.
+Унификация является основой для проведения поиска: если существует унификатор двух термов, то цель считается выполненной, наиболее общий унификатор сохраняется как частичное решение, и поиск в данной ветви дерева поиска продолжается. Иначе происходит возврат назад (англ. backtracking) по дереву поиска.
+%unification~\cite{Unification} in the form \lstinline[language=scheme]{(== $t_1$ $t_2$)}, where $t_1$, $t_2$ are
+%some \emph{terms}; unification establishes a syntactic basis for all other goals. If there is a unifier for
+%two given terms, the goal is considered satisfied, a most general unifier is kept as a partial solution, and the execution
+%of current branch continues. Otherwise, the current branch backtracks.
 
-\item Disequality constraint~\cite{CKanren} in the form \lstinline[language=scheme]{($\not\equiv$ $t_1$ $t_2$)}, where
-$t_1$, $t_2$ are some terms; a disequality constraint prevents all branches (starting from the current), in which the
-specified terms are equal (w.r.t. the search state), from being considered.
+\item Ограничения-неравенства ~\cite{CKanren} в форме \lstinline[language=scheme]|($\not\equiv$ $t_1$ $t_2$)|, где $t_1$, $t_2$ --- это некоторые \enquote{термы}.
+Данное ограничения запрещает поиск в поддеревьях, где данные темы равны с учетом соответствующей подстановки.
+%Disequality constraint~\cite{CKanren} in the form \lstinline[language=scheme]{($\not\equiv$ $t_1$ $t_2$)}, where
+%$t_1$, $t_2$ are some terms; a disequality constraint prevents all branches (starting from the current), in which the
+%specified terms are equal (w.r.t. the search state), from being considered.
 
-\item Conditional construct in the form
+\item Условная конструкция в форме %Conditional construct in the form
 
 \begin{lstlisting}[language=scheme]
-   (conde
-      [$g^1_1\;\;g^1_2\;\;\dots\;\;g^1_{k_1}$]
-      [$g^2_1\;\;g^2_2\;\;\dots\;\;g^2_{k_2}$]
-      $\ldots$
-      [$g^n_1\;\;g^n_2\;\;\dots\;\;g^n_{k_n}$]
-   )
+(conde
+    [$g^1_1\;\;g^1_2\;\;\dots\;\;g^1_{k_1}$]
+    [$g^2_1\;\;g^2_2\;\;\dots\;\;g^2_{k_2}$]
+    $\ldots$
+    [$g^n_1\;\;g^n_2\;\;\dots\;\;g^n_{k_n}$]),
 \end{lstlisting}
 
-where each $g^i_j$ is a goal. A \lstinline{conde} goal considers each collection of subgoals, surrounded by square brackets, as
-implicit conjunction (so \lstinline[language=scheme]{[$g^i_1\;\;g^i_2\;\;\dots\;\;g^i_{k_i}$] } is considered as a
-conjunction of all $g^i_j$) and tries to satisfy each of them independently~--- in other words, operates on them
-as a disjunction.
+где каждый $g^i_j$ является некоторой целью. Построенная с использованием \lstinline|conde| цель, рассматривает коллекцию подцелей в квадратных скобках как неявную конъюнкцию (т.е. \lstinline[language=scheme]|[$g^i_1\;\;g^i_2\;\;\dots\;\;g^i_{k_i}$]| считается конъюнкцией всех $g^i_j$) и пытается решать их независимо, т.е. \lstinline|conde| работает как дизъюнкция.
+%where each $g^i_j$ is a goal. A \lstinline|conde| goal considers each collection of subgoals, surrounded by square brackets, as
+%implicit conjunction (so \lstinline[language=scheme]|[$g^i_1\;\;g^i_2\;\;\dots\;\;g^i_{k_i}$] | is considered as a
+%conjunction of all $g^i_j$) and tries to satisfy each of them independently~--- in other words, operates on them
+%as a disjunction.
 
-\item Fresh variable introduction construct in the form
+\item Создание новых (англ. fresh) логических переменных осуществляется с помощью
 
 \begin{lstlisting}[language=scheme]
    (fresh ($x_1\;\;x_2\;\;\dots\;\;x_k$)
      $g_1$
      $g_2$
      $\ldots$
-     $g_n$
-   )
+     $g_n$),
 \end{lstlisting}
 
-where each $g_i$ is a goal. This form introduces fresh variables $x_1\;\;x_2\;\;\dots\;\;x_k$ and
-tries to satisfy the conjunction of all subgoals $g_1\;\;g_2\;\;\dots\;\;g_n$ (these subgoals may contain
-introduced fresh variables).
+где каждый $g^i_j$ является некоторой целью. Здесь создаются свежие переменные  $x_1\;\;x_2\;\;\dots\;\;x_k$ и
+осуществляется поиск цели, являющейся конъюнкцией подцелей $g_1\;\;g_2\;\;\dots\;\;g_n$, внутри которых могут использоваться только что введенные логические переменные.
+%This form introduces fresh variables $x_1\;\;x_2\;\;\dots\;\;x_k$ and
+%tries to satisfy the conjunction of all subgoals $g_1\;\;g_2\;\;\dots\;\;g_n$ (these subgoals may contain introduced fresh variables).
 \end{itemize}
 
-As an example consider a list concatenation relation; by a well-established tradition, the names
-of relational objects are superscripted by ``$^o$'', hence \lstinline{append$^o$}:
+В качестве примера рассмотрим отношение  \lstinline|append$^o$| для конкатенации списков (по традиции реляционные объекты именуются с суффиксом $^o$).
+%As an example consider a list concatenation relation; by a well-established tradition, the names
+%of relational objects are superscripted by ``$^o$'', hence \lstinline|append$^o$|:
 
 \begin{lstlisting}[mathescape=true,language=scheme,numbers=left,numberstyle=\small,stepnumber=1,numbersep=-5pt]
-   (define (append$^o$ x y xy)
-      (conde
-         [(== '() x) (== y xy)]
-         [(fresh (h t ty)
-            (== `(,h . ,t) x)
-            (== `(,h . ,ty) xy)
-            (append$^o$ t y ty))]))
+  (define (append$^o$ x y xy)
+    (conde
+     [(== '() x) (== y xy)]
+     [(fresh (h t ty)
+        (== `(,h . ,t) x)
+        (== `(,h . ,ty) xy)
+        (append$^o$ t y ty))]))
 \end{lstlisting}
 
-We interpret the relation ``\lstinline{append$^o$ x y xy}'' as ``the concatenation of \lstinline{x} and \lstinline{y}
-equals \lstinline{xy}''. Indeed, if the list \lstinline{x} is empty, then (regardless the content of \lstinline{y}) in order for the relation to hold
-the value for \lstinline{xy} should by equal to that of \lstinline{y}~--- hence line 3. Otherwise, \lstinline{x} can be decomposed into the head
-\lstinline{h} and the tail \lstinline{t}~--- so we need some fresh variables. We also need the additional variable \lstinline{ty} to designate the list
-that is in the relation \lstinline{append$^o$} with \lstinline{t} and \lstinline{y}. Trivial relational reasonings complete the implementation (lines 5-7).
+Отношение \lstinline|append$^o$ x y xy|'' интерпретируется как ``конкатенация  \lstinline|x| и \lstinline|y| даёт \lstinline|xy|''.
+Если список \lstinline|x| пуст (строка 3), то, вне зависимости от содержимого \lstinline|y|, чтобы отношение выполнялось значение \lstinline|xy| должно быть таким же как \lstinline|y|.
+Иначе, \lstinline|x| нужно разделить на голову \lstinline|h| и хвост \lstinline|t|, для этого понадобятся введённые свежие переменные.
+Также понадобится дополнительная переменная \lstinline|ty|, чтобы хранить список, находящий в отношении \lstinline|append$^o$| с \lstinline|t| и \lstinline|y|.
+Дополнив тривиальными соображениями (строки 5--7), получим полную реализацию отношения.
 
-A goal, built with the aid of the aforementioned constructs, can be run by the following primitive:
+%We interpret the relation ``\lstinline|append$^o$ x y xy|'' as ``the concatenation of \lstinline|x| and \lstinline|y| equals \lstinline|xy|''.
+%Indeed, if the list \lstinline|x| is empty, then (regardless the content of \lstinline|y|) in order for the relation to hold
+%the value for \lstinline|xy| should by equal to that of \lstinline|y|~--- hence line 3.
+%Otherwise, \lstinline|x| can be decomposed into the head \lstinline|h| and the tail \lstinline|t|~--- so we need some fresh variables.
+%We also need the additional variable \lstinline|ty| to designate the list that is in the relation \lstinline|append$^o$| with \lstinline|t| and \lstinline|y|.
+%Trivial relational reasonings complete the implementation (lines 5-7).
+
+Цели, полученные с помощью упомянутых выше конструкций, можно запускать с помощью примитива \lstinline|run|:
+%A goal, built with the aid of the aforementioned constructs, can be run by the following primitive:
 
 \begin{lstlisting}[mathescape=true,language=scheme]
    run $n$ ($q_1\dots q_k$) $G$
 \end{lstlisting}
 
-Here $n$ is the number of requested answers (or ``*'' for all answers), $q_i$ are fresh query variables, and $G$ is a goal, which can
+\noindent Здесь $n$ --- это число желаемых ответов (для всех ответов используется \enquote{\texttt{*}}); $q_i$ --- свежие искомые переменные; а $G$ --- цель, содержащая эти переменные.
+%Here $n$ is the number of requested answers (or ``*'' for all answers), $q_i$ are fresh query variables, and $G$ is a goal, which can
 contain these variables.
 
-The \lstinline{run} construct initiates the search for answers for a given goal and returns a (finite or infinite) list
-of answers~--- the bindings for query variables, which represent individual solutions for that query. For example,
+
+Конструкция \lstinline|run| осуществляет поиск ответов для данной цели, и возвращает потенциально бесконечный список ответов, состоящий из значений искомых переменных, которые хранят ответы на данный запрос. Например
+%The \lstinline|run| construct initiates the search for answers for a given goal and returns a (finite or infinite) list
+%of answers~--- the bindings for query variables, which represent individual solutions for that query. For example,
 
 \begin{lstlisting}[mathescape=true,language=scheme]
    run 1 (q) (append$^o$ q '(3 4) '(1 2 3 4) )
 \end{lstlisting}
 
-\noindent returns a list \lstinline{((1 2))}, which constitutes the answer for a query variable $q$. The process of constructing
-the answers from internal data structures of miniKanren interpreter is called \emph{reification}~\cite{WillThesis}.
+\noindent возвращает список \lstinline|((1 2))|, который хранит одно значение искомой переменной $q$.
+Процесс реконструирования ответов из внутреннего представления называет \emph{реификацией}~\cite{WillThesis} (англ. reification).
+%\noindent returns a list \lstinline|((1 2))|, which constitutes the answer for a query variable $q$. The process of constructing the answers from internal data structures of miniKanren interpreter is called \emph{reification}~\cite{WillThesis}.
 

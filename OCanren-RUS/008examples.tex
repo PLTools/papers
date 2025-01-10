@@ -3,7 +3,7 @@
 
 In this section we present some examples of a relational specification, written with the aid of our library.
 Besides \miniKanren combinators themselves, our implementation contains two syntax extensions~--- one
-for \lstinline{fresh} construct and another for \emph{inverse-$\eta$-delay}~\cite{MicroKanren}, which is
+for \lstinline|fresh| construct and another for \emph{inverse-$\eta$-delay}~\cite{MicroKanren}, which is
 sometimes necessary to delay recursive calls in order to prevent infinite looping. In addition, we included a
 small relational library of data structures like lists, numbers, booleans, etc. This library is written
 completely on the user level using techniques described in Section~\ref{sec:injection} with no utilization
@@ -12,7 +12,7 @@ of any unsafe features. The examples given below illustrate the usage of all the
 \subsection{List Concatenation and Reversing}
 
 List concatenation and reversing are usually the first relational programs considered, and we do not wish
-to deviate from this tradition. We've already considered the implementation of \lstinline{append$^o$} in
+to deviate from this tradition. We've already considered the implementation of \lstinline|append$^o$| in
 original \miniKanren in Section~\ref{sec:demo}. In our case, the implementation looks familiar:
 
 \begin{lstlisting}
@@ -43,9 +43,9 @@ Here we make use of our implementation of relational lists, which provides conve
 standard functional primitives:
 
 \begin{itemize}
-  \item ``\lstinline{nil ()}'' corresponds to ``\lstinline{[]}'';
-  \item ``\lstinline{h % t}'' corresponds to ``\lstinline{h::t}'';
-  \item ``\lstinline{a %< (b %< (c !< d))}'' corresponds to ``\lstinline{[a; b; c; d]}''.
+  \item ``\lstinline|nil ()|'' corresponds to ``\lstinline|[]|'';
+  \item ``\lstinline|h % t|'' corresponds to ``\lstinline|h::t|'';
+  \item ``\lstinline|a %< (b %< (c !< d))|'' corresponds to ``\lstinline|[a; b; c; d]|''.
 \end{itemize}
 
 In our implementation the basic \miniKanren primitive ``\lstinline{conde}'' is implemented as a
@@ -78,8 +78,8 @@ The following snippet literally implements this definition:
      ]
 \end{lstlisting}
 
-The meaning of the expression ``\lstinline{smallest$^o$ x s xs}'' is ``\lstinline{s} is the smallest element of a (non-empty) list \lstinline{x}, and \lstinline{xs} is the
-list of all its remaining elements''. Now, \lstinline{smallest$^o$} can be implemented using a case analysis (note, ``\lstinline{l}'' here is a non-empty list):
+The meaning of the expression ``\lstinline|smallest$^o$ x s xs|'' is ``\lstinline|s| is the smallest element of a (non-empty) list \lstinline|x|, and \lstinline|xs| is the
+list of all its remaining elements''. Now, \lstinline|smallest$^o$| can be implemented using a case analysis (note, ``\lstinline|l|'' here is a non-empty list):
 
 \begin{lstlisting}
    let rec smallest$^o$ l s l' =
@@ -104,9 +104,9 @@ primitive:
      ]
 \end{lstlisting}
 
-Here ``\lstinline{le$^o$}'' and ``\lstinline{gt$^o$}'' are built-in comparison goals for natural numbers in Peano form.
+Here ``\lstinline|le$^o$|'' and ``\lstinline|gt$^o$|'' are built-in comparison goals for natural numbers in Peano form.
 
-Having relational \lstinline{sort$^o$}, we can implement sorting for regular integer lists:
+Having relational \lstinline|sort$^o$|, we can implement sorting for regular integer lists:
 
 \begin{lstlisting}
    let sort l =
@@ -114,11 +114,11 @@ Having relational \lstinline{sort$^o$}, we can implement sorting for regular int
            (fun qs -> from_nat_list ((Stream.hd qs)#prj) )
 \end{lstlisting}
 
-Here \lstinline{Stream.hd} is a function which takes a head from a lazy stream of answers,
-\lstinline{inj_nat_list}~--- an injection from regular integer lists into logical lists of logical Peano numbers,
-\lstinline{from_nat_list}~--- a projection from lists of Peano numbers to lists of integers.
+Here \lstinline|Stream.hd| is a function which takes a head from a lazy stream of answers,
+\lstinline|inj_nat_list|~--- an injection from regular integer lists into logical lists of logical Peano numbers,
+\lstinline|from_nat_list|~--- a projection from lists of Peano numbers to lists of integers.
 
-It is interesting, that since \lstinline{sort$^o$} is
+It is interesting, that since \lstinline|sort$^o$| is
 relational, it can be used to calculate a list of all \emph{permutations}
 for a given list. Indeed, sorting each permutation results in the same list.
 So, the problem of finding all permutations can be relationally reformulated into
@@ -134,7 +134,7 @@ let perm l = map (fun a -> from_nat_list a#prj)
 \end{lstlisting}
 
 Note, for sorting the original list we used exactly the same primitive. Note also,
-we requested exactly \lstinline{fact @@ length l} answers; requesting more
+we requested exactly \lstinline|fact @@ length l| answers; requesting more
 would result in an infinite search for non-existing answers.
 
 \subsection{Type Inference for STLC}
@@ -142,7 +142,7 @@ would result in an infinite search for non-existing answers.
 Our final example is a type inference for Simply Typed Lambda Calculus~\cite{Lambda}. The problem and
 solution themselves are rather textbook examples again~\cite{TRS, WillThesis}; however, with this example
 we show once again the utilization of generic programming techniques we described in Section~\ref{sec:injection}.
-As a supplementary generic programming library here we used object-oriented generic transformers\footnote{\url{https://github.com/dboulytchev/GT}};
+As a supplementary generic programming library here we used object-oriented generic transformers~\cite{?}\footnote{\url{https://github.com/PLTools/GT}};
 we presume, however, that any other framework could equally be used.
 
 We first describe the type of lambda terms and their logic representation:

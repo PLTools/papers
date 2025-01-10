@@ -1,63 +1,89 @@
 % !TeX spellcheck = ru_RU
 % !TEX root = main.tex
 
-\section{Introduction}
+\section{Введение}
 \label{intro}
 
-Relational programming~\cite{TRS} is an attractive technique, based on the idea
-of constructing programs as relations.  As a result, relational programs can be
-``queried'' in various ``directions'', making it possible, for example, to simulate
-reversed execution. Apart from being interesting from a purely theoretical standpoint,
-this approach may have a practical value: some problems look much simpler
-when considered as queries to some relational specification~\cite{WillThesis}. There are a
-number of appealing examples confirming this observation: a type checker
-for simply typed lambda calculus (and, at the same time, a type inferencer and solver
-for the inhabitation problem), an interpreter (capable of generating ``quines''~---
-programs producing themselves as a result)~\cite{Untagged}, list sorting (capable of
-producing all permutations), etc.
+Реляционное программирование~\cite{TRS} --- это привлекательный подход, основанный на представлении программ как отношений.
+%is an attractive technique, based on the idea of constructing programs as relations.
+В результате реляционные программы можно \enquote{запускать} в различных \enquote{направлениях}, что позволяет, например, симулировать обратимые вычисления.
+%As a result, relational programs can be ``queried'' in various ``directions'', making it possible, for example, to simulate reversed execution.
+Это интересно не только с теоретической точки зрения, но обладает и практической ценностью: некоторые задачи выглядят проще, если их рассматривать как запросы к некоторой реляционной спецификации~\cite{WillThesis}.
+%Apart from being interesting from a purely theoretical standpoint, this approach may have a practical value: some problems look much simpler when considered as queries to some relational specification~\cite{WillThesis}.
+Можно назвать некоторое количество примеров, которые подтверждают это наблюдение:
+алгоритм проверки типов для просто типизированного $\lambda$-исчисления (и в то же время алгоритм вывода типов и проверки населенности термов);
+интерпретатор, способный синтезировать \enquote{квайны}~--- программы, вычисляющиеся в самих себя;
+сортировка списков, способная породить все перестановки; т.п.
+%There are a number of appealing examples confirming this observation:
+%a type checker for simply typed lambda calculus (and, at the same time,
+%a type inferencer and solver for the inhabitation problem),
+%an interpreter (capable of generating ``quines''~--- programs producing themselves as a result)~\cite{Untagged},
+%list sorting (capable of producing all permutations), etc.
 
-Many logic programming languages, such as Prolog, Mercury~\cite{MercuryFirstPaper},
-or Curry~\cite{CurryFirstPaper} to some extent
-can be considered relational. We have chosen \miniKanren\footnote{\url{http://minikanren.org}}
-as a model language, because it was specifically designed as a relational DSL, embedded in Scheme/Racket.
-Being rather a minimalistic language, which can be implemented with just a few data structures and
-combinators~\cite{MicroKanren, MuKanrenNew}, \miniKanren{} found its way into dozens of host languages, including Scala, Haskell and Standard ML.
-The paradigm behind \miniKanren can be described as ``lightweight logic programming''\footnote{An in-depth comparison of \miniKanren
-and Prolog can be found here: \url{http://minikanren.org/minikanren-and-prolog.html}}.
+Многие языки логического программирования (например, Prolog, Mercury~\cite{MercuryFirstPaper} или Curry~\cite{CurryFirstPaper}) в некоторой степени могут считаться реляционными.
+%Many logic programming languages, such as Prolog, Mercury~\cite{MercuryFirstPaper}, or Curry~\cite{CurryFirstPaper} to some extent can be considered relational.
+Нами был выбран \miniKanren\footnote{\url{http://minikanren.org}} как модельный язык, потому что он был специально спроектирован как предметно-ориентированный язык, встраиваемый в Scheme/Racket.
+%We have chosen \miniKanren\footnote{\url{http://minikanren.org}} as a model language, because it was specifically designed as a relational DSL, embedded in Scheme/Racket.
+Он довольно минималистичен --- может быть реализован с помощью малого количества структур данных и комбинаторов~\cite{MicroKanren, MuKanrenNew} --- и поэтому, он уже встроен во многие другие языки программирования общего назначения, включая Scala, Haskell and Standard ML.
+%Being rather a minimalistic language, which can be implemented with just a few data structures and combinators~\cite{MicroKanren, MuKanrenNew}, \miniKanren{} found its way into dozens of host languages, including Scala, Haskell and Standard ML.
+Парадигму в основе miniKanren можно описать как \enquote{легковесное логическое программирование}\footnote{Детальное сравнение miniKanren и Prolog можно найти здесь: \url{http://minikanren.org/minikanren-and-prolog.html} (проверено: \DTMDate{2025-01-10}).}.
+%The paradigm behind \miniKanren can be described as ``lightweight logic programming''\footnote{An in-depth comparison of \miniKanren and Prolog can be found here: \url{http://minikanren.org/minikanren-and-prolog.html}}.
 
-This paper addresses the problem of embedding \miniKanren into OCaml\footnote{\url{http://ocaml.org}}~--- a statically-typed functional language with
-a rich type system. A statically-typed implementation would bring us a number of benefits. First, as always,
-we expect typing to provide a certain level of correctness guarantees, ruling out some pathological programs, which
-otherwise would provide pathological results. In the context of relational programming, however, typing would additionally
-help us to interpret the results of queries. Often an answer to a relational query contains a number of
-free variables, which are supposed to take arbitrary values. In the typed case these variables become typed,
-facilitating the understanding of the answers, especially those with multiple free variables. Next, a number of \miniKanren
-applications require additional constraints to be implemented. In the untyped setting, when everything can be anything,
-some symbols or data structures tend to percolate into undesirable contexts~\cite{Untagged}. In order to prevent this from happening, some
-auxiliary constraints (``\lstinline{absent$^o$}'', ``\lstinline{symbol$^o$}'', etc.) were introduced. These constraints play a role
-of a weak dynamic type system, cutting undesirable answers out at runtime. Conversely, in a typed language this work can be
-entrusted to the type checker (at the price of enforcing an end user to write properly typed specifications), not only improving the
-performance of the system but also reducing the number of constraints which have to be implemented. Finally, it is rather natural
-to expect better performance of a statically-typed implementation.
+В данной работе исследуется задача встраивания miniKanren в OCaml\footnote{\url{http://ocaml.org}} --- статически типизированный функциональный язык с богатой системой типов.
+Статическая типизация приносит ряд улучшений.
+Во-первых, типизация даёт некоторый уровень корректности, отсеивая патологические программы, выдающие патологические результаты.
+В контексте реляционного программирования типизация также помогает интерпретировать результаты запросов.
+Часто ответы на реляционные запросы содержат свободные переменные, которые можно заменять на произвольные значения.
+В типизированном случае эти переменные становятся типизированными, что упрощая понимание ответов, особенно с большим количеством свободных переменных.
+Во-вторых, некоторые программы на \miniKanren{} требуют реализации и использования специальных ограничений.
+В слабо типизированном случае, где всё может быть чем угодно, некоторые символы и структуры данных могут просачиваться в нежелательные места~\cite{Untagged}.
+Чтобы это предотвращать в miniKanren для Scheme были добавление дополнительные ограничения (``\lstinline|absent$^o$|``, ``\lstinline|symbol$^o$|'').
+Эти ограничения важны для слабых динамических систем типов, так как они отсекают ответы во время исполнения.
+В статически типизированных языках эта работа может быть переложена на систему типов (при условии, что программист реализует их правильно), что не только улучшит производительность, но и уменьшит количество примитивов miniKanren, которые требуется реализовать.
 
-We present an implementation of a set of relational combinators and syntax extensions for
-OCaml\footnote{The source code of our implementation is accessible from \url{https://github.com/dboulytchev/OCanren}.},
-which, technically speaking, corresponds to $\mu$Kanren~\cite{MicroKanren} with disequality
-constraints~\cite{CKanren}. The contribution of our work is as follows:
+%This paper addresses the problem of embedding \miniKanren into OCaml\footnote{\url{http://ocaml.org}}~--- a statically-typed functional language with
+%a rich type system. A statically-typed implementation would bring us a number of benefits. First, as always,
+%we expect typing to provide a certain level of correctness guarantees, ruling out some pathological programs, which
+%otherwise would provide pathological results. In the context of relational programming, however, typing would additionally
+%help us to interpret the results of queries.
+%Often an answer to a relational query contains a number of
+%free variables, which are supposed to take arbitrary values. In the typed case these variables become typed,
+%facilitating the understanding of the answers, especially those with multiple free variables.
+%Next, a number of \miniKanren
+%applications require additional constraints to be implemented. In the untyped setting, when everything can be anything,
+%some symbols or data structures tend to percolate into undesirable contexts~\cite{Untagged}. In order to prevent this from happening, some
+%auxiliary constraints (``\lstinline|absent$^o$|'', ``\lstinline|symbol$^o$|'', etc.) were introduced.
+%These constraints play a role
+%of a weak dynamic type system, cutting undesirable answers out at runtime. Conversely, in a typed language this work can be
+%entrusted to the type checker (at the price of enforcing an end user to write properly typed specifications), not only improving the
+%performance of the system but also reducing the number of constraints which have to be implemented. Finally, it is rather natural
+%to expect better performance of a statically-typed implementation.
+
+В работе представлена реализация\footnote{\url{https://github.com/PLTools/OCanren}} реляционных комбинаторов и синтаксических расширений для языка OCaml,
+которая в том числе поддерживает ограничения-неравенства~\cite{CKanren}, и поддерживает оптимизации faster-miniKanren\footnote{\url{TODO}}.
+%We present an implementation of a set of relational combinators and syntax extensions for
+%OCaml\footnote{The source code of our implementation is accessible from \url{https://github.com/dboulytchev/OCanren}.},
+%which, technically speaking, corresponds to $\mu$Kanren~\cite{MicroKanren} with disequality
+%constraints~\cite{CKanren}.
+The contribution of our work is as follows:
 
 \begin{enumerate}
-\item Our embedding allows an end user to enjoy strong static typing and type inference in relational
-specifications; in particular, all type errors are reported at compile time and the types for
-all logical variables are inferred from the context.
+\item Реализованное встраивание позволяет программисту использовать статическую типизацию и вывод типов в реляционных спецификациях. В частности, ошибки типизации находятся во время компиляции и типы логических переменных выводятся из контекста.
+%Our embedding allows an end user to enjoy strong static typing and type inference in relational
+%specifications; in particular, all type errors are reported at compile time and the types for
+%all logical variables are inferred from the context.
 
-\item Our implementation is based on the \emph{polymorphic unification}, which, like the polymorphic comparison,
-can be used for arbitrary types. The implementation of polymorphic unification uses unsafe features and
-relies on the intrinsic knowledge of the runtime representation of values; we show, however, that this does not
-compromise type safety.
+\item Реализация основана на полиморфной унификации, которая также как и полиморфное сравнение, может использоваться для произвольных типов.
+Реализация полиморфной унификации использует небезопасные возможности компилятора OCaml и полагается на специфичные особенности представления значений в памяти.
+При этом можно доказать, что это не нарушает корректность типов.
+%Our implementation is based on the \emph{polymorphic unification}, which, like the polymorphic comparison,
+%can be used for arbitrary types. The implementation of polymorphic unification uses unsafe features and
+%relies on the intrinsic knowledge of the runtime representation of values; we show, however, that this does not
+%compromise type safety.
 
 \item We describe a uniform and scalable pattern for using types for relational programming, which
 helps in converting typed data to and from the relational domain. With this pattern, only one
-generic feature (``\lstinline{Functor}'') is needed, and thus virtually any generic
+generic feature (``\lstinline|Functor|'') is needed, and thus virtually any generic
 framework for OCaml can be used. Although being rather a pragmatic observation, this pattern, we
 believe, would lead to a more regular and easy way to maintain relational specifications.
 

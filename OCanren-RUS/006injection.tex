@@ -1,83 +1,105 @@
 % !TeX spellcheck = ru_RU
 % !TEX root = main.tex
 
-\section{Term Representation and Injection}
+\section{Представление термов и их погружение в логический домен}
 \label{sec:injection}
 
-Polymorphic unification, considered in the previous section, works for the values of any type under the assumption that we
-are capable of identifying logical variables. The latter depends on the term representation. In the original
-implementation all terms are represented as a conventional S-expressions, while logical variables (in a simplest case)~--- as one-element vectors; it's an end user responsibility to respect this convention and refrain from operating
-with vectors as a user data.
+Полиморфная унификация из предыдущего раздела работает для значений произвольных типов, при условии, что можно отличать логические переменные от других термов.
+Это предположение зависит  от вида представления термов.
+В оригинальной реализации все термы были обычными s-выражениями, а логические переменные (в простом случае) --- одноэлементными векторами.
+Пользователь обязан выполнять это соглашение и воздерживать от работы с пользовательскими значениями, состоящими из векторов.
 
-In our case we want to preserve both strong typing and type inference. Since we have chosen to use polymorphic
-unification, it is undesirable to represent logical variables of different types differently (while technically
-possible, it would compromise the lightweight approach we used so far). This means that terms with logical
-variables have to be typed differently from user-defined data~--- otherwise it would be possible to use
-terms in contexts where logical variables are not handled properly. At the same time we do not want term types
-to be completely different from user-defined types --- for example, we would like to reuse user-defined constructors, etc.
-This considerations boil down to the idea of \emph{logical representation} for a user-defined type. Informally,
-a logical representation for the type $t$ is a type $\rho_t$ with a couple of conversion functions:
+%Polymorphic unification, considered in the previous section, works for the values of any type under the assumption that we
+%are capable of identifying logical variables. The latter depends on the term representation. In the original
+%implementation all terms are represented as a conventional S-expressions, while logical variables (in a simplest case)~--- as one-element vectors; it's an end user responsibility to respect this convention and refrain from operating
+%with vectors as a user data.
 
-$$
+В нашем случае мы хотим сохранить и строгую статическую типизацию, вы автоматический вывод типов.
+Так как была выбрана полиморфная унификация, нежелательно представлять логический значения различных типов по-разному (технически это возможно, но будет противоречить выбранному легковесному подходу). Из этого следует, что термы с логическими переменными должны быть типизированы не так, как типизируется термы, объявленные пользователем; иначе будет возможно использовать термы в контекстах, где логические переменные не отображаются должным образом.
+В то же время нежелательно, чтобы типы логических значений были полностью отделены от пользовательских типов: могут пригодиться конструкторы, объявленные пользователем и т.п.
+Эти рассуждения подводят к идее \emph{логического представления} для пользовательских типов данных.
+Неформально, логическим представлением типа $t$ является тип $\rho_t$, для которого определена пара функций:
+
+%In our case we want to preserve both strong typing and type inference. Since we have chosen to use polymorphic
+%unification, it is undesirable to represent logical variables of different types differently (while technically
+%possible, it would compromise the lightweight approach we used so far). This means that terms with logical
+%variables have to be typed differently from user-defined data~--- otherwise it would be possible to use
+%terms in contexts where logical variables are not handled properly. At the same time we do not want term types
+%to be completely different from user-defined types --- for example, we would like to reuse user-defined constructors, etc.
+%This considerations boil down to the idea of \emph{logical representation} for a user-defined type. Informally,
+%a logical representation for the type $t$ is a type $\rho_t$ with a couple of conversion functions:
+
+\[
 \begin{array}{rcl}
-   \uparrow  \;: t \to \rho_t & - & \mbox{injection}\\
-   \downarrow\;: \rho_t \to t & - & \mbox{projection}
+   \uparrow  \;: t \to \rho_t & - & \mbox{инъекция}\\
+   \downarrow\;: \rho_t \to t & - & \mbox{проекция}
 \end{array}
-$$
+\]
 
-The type $\rho_t$ repeats the structure of $t$, but can contain logic variables. So, the injection is total,
-while the projection is partial.
+\noindent Тип $\rho_t$ структурно повторяет $t$, но может содержать логические переменные. Также инъекция --- это тотальная функция, а проекция --- частичная.
 
-It is important to design representations as instances of some generic scheme (otherwise, \miniKanren combinators
-could not be properly typed). In addition it is desirable to provide a generic way to build
-injection/projection pair in a uniform manner (and, even better, automatically) to lift the burden of
-their implementation off the end user shoulders and improve the reliability of the solution. Finally,
-the representation must provide a way to detect logic variable occurrences.
+%\noindent  The type $\rho_t$ repeats the structure of $t$, but can contain logic variables. So, the injection is total, while the projection is partial.
 
+Важно спроектировать представление значений следую некоторой обощенной схеме, иначе комбинаторы miniKanren будет невозможно правильно протипизировать.
+Также желательно представить обобщённый способ получения пар инъекции/проекции (а ещё лучше, автоматизировать), чтобы снять с программиста груз ответственности о правильной их реализации. Наконец, представление должно представлять надежный способ отличать логические переменные.
 
-%Unification, considered in Section~\ref{sec:unification}, works for values of any types. However, it
-%is too generic to be used directly. As long as we use it to unify closed terms, it's OK (but rather meaningless);
-%however, for terms with free variables the situation becomes more complicated. Indeed, as we've seen in the
-%previous section, a variable $x^\tau$ must have a runtime representation of some value of type $\tau$. As different
-%types may not have any values in common, if we wish to unify arbitrary types, we would need to specify the
-%ground type for each logical variable explicitly, which would throw our implementation into a non-polymorphic
-%realm with no type inference.
+%It is important to design representations as instances of some generic scheme (otherwise, miniKanren combinators
+%could not be properly typed). In addition it is desirable to provide a generic way to build
+%injection/projection pair in a uniform manner (and, even better, automatically) to lift the burden of
+%their implementation off the end user shoulders and improve the reliability of the solution. Finally,
+%the representation must provide a way to detect logic variable occurrences.
 
-In this part we consider two approaches to implementing logical representations.  The first is rather easy to
-develop and implement; unfortunately, the implementation demonstrates a poor performance for a number of
-important applications. In order to fix this deficiency, we develop a more elaborate technique which
-nevertheless reuses some components from the previous one. In Section~\ref{sec:evaluation}
-we present the results of performance evaluation for both approaches.
+В этом разделе рассмотрен два способа реализовать логические представленя.
+Первый достаточно просто реализовать, но к сожалению реализация будет показывать низкую производительность на практически значимых примерах.
+Чтобы исправить этот недостаток, был разработан другой способ представления значений, который переиспользует некоторые компоненты первого.
+\textcolor{red}{В разделе~\ref{sec:evaluation} представлены результаты экспериментального сравнения производительности.}
 
-\subsection{Tagged Logical Values}
+%In this part we consider two approaches to implementing logical representations.  The first is rather easy to
+%develop and implement; unfortunately, the implementation demonstrates a poor performance for a number of
+%important applications. In order to fix this deficiency, we develop a more elaborate technique which
+%nevertheless reuses some components from the previous one. In Section~\ref{sec:evaluation}
+%we present the results of performance evaluation for both approaches.
 
-The first natural solution is to use tagging for representing logical representations.
-We introduce the following polymorphic type $[\alpha]$\footnote{In concrete syntax called ``$\alpha\;$\lstinline|logic|''}, which
-corresponds to a logical representation of the type $\alpha$:
+\subsection{Теггированные логические значения}
+
+Наиболее естественным решением будет теггированное логическое представление.
+Вводится полиморфный тип $[\alpha]$\footnote{В конкретном синтаксисе ``$\alpha\;$\lstinline|logic|''}, который соответствует логическому представлению типа $\alpha$:
+
+%The first natural solution is to use tagging for representing logical representations.
+%We introduce the following polymorphic type $[\alpha]$\footnote{In concrete syntax called ``$\alpha\;$\lstinline|logic|''}, which
+%corresponds to a logical representation of the type $\alpha$:
 
 \begin{lstlisting}
    type $[\alpha]$ = Var of int | Value of $\alpha$
 \end{lstlisting}
 
-Informally speaking, any value of type $[\alpha]$ is either a value of type $\alpha$, or a free
-logic variable. Note, the constructors of this type cannot be disclosed to an end user, since the only possible way to create a logic variable
-should still be by using the ``\lstinline{fresh}'' construct; thus the logic type is abstract in the interface.
-Now, we may redefine the signature of abstraction, unification and disequality primitives in the
-following manner
+Неформально выражаясь, любое значение типа $[\alpha]$ является либо значением типа $\alpha$, либо свободной логической переменной.
+Обращаем внимание, что конструкторы этого типа не должны быть доступны пользователю, так как единственным способом создания переменных является конструкция \enquote{\lstinline=fresh=}, т.е. тип логических значений является абстрактным.
+Используя этот тип можно определить сигнатуры примитивов унификации, неравенства и создания переменных следующим образом:
+
+% speaking, any value of type $[\alpha]$ is either a value of type $\alpha$, or a free
+%logic variable. Note, the constructors of this type cannot be disclosed to an end user, since the only possible way to create a logic variable
+%should still be by using the \enquote{\lstinline=fresh=} construct; thus the logic type is abstract in the interface.
+%Now, we may redefine the signature of abstraction, unification and disequality primitives in the
+%following manner
 
 \begin{lstlisting}
-   val call_fresh : ($[\alpha]$ -> goal) -> goal
-
    val (===)      : $[\alpha]$ -> $[\alpha]$ -> goal
    val (=/=)      : $[\alpha]$ -> $[\alpha]$ -> goal
+   val call_fresh : ($[\alpha]$ -> goal) -> goal
 \end{lstlisting}
 
-Both unification and disequality constraint would still use the same polymorphic unification; their external, visible type,
-however, is restricted to logical types only.
+\noindent И ограничение унификации, и неравенства использует одну и ту же полиморфную унификацию, но их тип ограничен только логическими значениями.
+%Both unification and disequality constraint would still use the same polymorphic unification; their external, visible type, however, is restricted to logical types only.
 
-Apart from variables, other logical values can be obtained by injection; conversely, sometimes a logical value can be projected to
-a regular one. We supply two basic functions\footnote{In concrete syntax called ``\lstinline|inj|'' and ``\lstinline|prj|''.}
-for these purposes
+Кроме переменных, другие логические значения также могут быть получены с помощью инъекции.
+И наоборот, иногда логические значения могут быть спроецированы в обычные.
+Предоставляется два базовых примитива для этих целей\footnote{В конкретном синтаксисе это \enquote{\lstinline|inj|} and \enquote{\lstinline|prj|}.},
+которые могут быть использованы для \emph{поверхностной} инъекции/проекции. Как и ожидается, инъекция тотальна, а проекция --- частичная функция.
+
+%Apart from variables, other logical values can be obtained by injection; conversely, sometimes a logical value can be projected to
+%a regular one. We supply two basic functions\footnote{In concrete syntax called ``\lstinline|inj|'' and ``\lstinline|prj|''.}
+%for these purposes
 
 \begin{lstlisting}[mathescape=true]
    val ($\uparrow_\forall$) : $\alpha$ -> $[\alpha]$
@@ -87,106 +109,138 @@ for these purposes
    let ($\downarrow_\forall$) = function Value x -> x | _ -> failwith $\mbox{``not a value''}$
 \end{lstlisting}
 
-\noindent which can be used to perform a \emph{shallow} injection/projection. As expected, the injection is total, while the projection is partial.
+%\noindent which can be used to perform a \emph{shallow} injection/projection. As expected, the injection is total, while the projection is partial.
 
-The shallow pair works well for primitive types; to implement injection/projection for arbitrary types we exploit the
-idea of representing regular types as fixed points of functors~\cite{ALaCarte}. For our purposes it is desirable to make
-the functors fully polymorphic~--- thus a type, in which we can place a logical variable into arbitrary position,
-can be easily manufactured. In addition this approach makes it possible to refactor the existing code to use relational
-programming with only minor changes.
+Пара поверхностных функций хорошо работает для примитивных типов, но чтобы реализовать инъекцию/проекцию для произвольных, необходимо воспользоваться
+идеей представления типов в виде неподвижных точек функторов~\cite{ALaCarte}.
+Для наших нужд желательно сделать функторы полностью полиморфными: такими типами, где логические значения можно писать в произвольных позициях.
+К тому же данный подход позволит переиспользовать имеющийся код с меньшим количеством изменений.
 
-To illustrate this approach, we consider an iconic example~--- the list type. Let us have a conventional definition
-for a regular polymorphic list in OCaml:
+%The shallow pair works well for primitive types; to implement injection/projection for arbitrary types we exploit the
+%idea of representing regular types as fixed points of functors~\cite{ALaCarte}. For our purposes it is desirable to make
+%the functors fully polymorphic~--- thus a type, in which we can place a logical variable into arbitrary position,
+%can be easily manufactured. In addition this approach makes it possible to refactor the existing code to use relational
+%programming with only minor changes.
+
+Продемонстрируем этот подход на каноническом пример типа списков. Рассмотрим обычный тип данных OCaml для полиморфных списков:
+
+%To illustrate this approach, we consider an iconic example~--- the list type. Let us have a conventional definition for a regular polymorphic list in OCaml:
 
 \begin{lstlisting}
    type $\alpha$ list = Nil | Cons of $\alpha$ * $\alpha$ list
 \end{lstlisting}
 
-For this type we can only place a logical variable in the position of a list element, but not of the tail, since the tail
-always has the type \lstinline|$\alpha$ list|, fixed in the definition of constructor \lstinline|Cons|. In order to create
-a full-fledged logical representation, we first have to abstract the type into a fully-polymorphic functor:
+В этом типе можно использовать логические переменные только на месте элементов списка, но не вместо хвоста, так как там ожидается значение типа \lstinline|$\alpha$ list|, зафиксированного в конструкторе  \lstinline|Cons|.
+Чтобы получить подходящее логическое представление, вначале абстрагируем тип дл полностью полиморфного функтора:
+
+% For this type we can only place a logical variable in the position of a list element, but not of the tail, since the tail always has the type \lstinline|$\alpha$ list|, fixed in the definition of constructor \lstinline|Cons|.
+%In order to create a full-fledged logical representation, we first have to abstract the type into a fully-polymorphic functor:
 
 \begin{lstlisting}
    type ($\alpha$, $\beta$) $\mathcal L$ = Nil | Cons of $\alpha$ * $\beta$
 \end{lstlisting}
 
-Now, the original type can be expressed as
+\noindent Таким образом, оригинальный тип может быть выражен как
+
+%Now, the original type can be expressed as
 
 \begin{lstlisting}
-   type $\alpha$ list = ($\alpha$, $\alpha$ list) $\mathcal L$
+   type $\alpha$ list = ($\alpha$, $\alpha$ list) $\mathcal L$,
 \end{lstlisting}
 
-\noindent and its logical representation~--- as
+\noindent а его логическое представление как
+%\noindent and its logical representation~--- as
 
 \begin{lstlisting}
    type $\alpha$ list$^o$ = $[$($[\alpha]$, $\alpha$ list$^o$) $\mathcal L]$
 \end{lstlisting}
 
-Moreover, with the aid of conventional functor-specific mapping function
+Более того, с помощью специфичной для функтора функции \lstinline=fmap=
+%Moreover, with the aid of conventional functor-specific mapping function
 
 \begin{lstlisting}
    val fmap$_{\mathcal L}$ : ($\alpha$ -> $\alpha^\prime$) -> ($\beta$ -> $\beta^\prime$) -> ($\alpha$, $\beta$) $\mathcal L$ -> ($\alpha^\prime$, $\beta^\prime$) $\mathcal L$
 \end{lstlisting}
 
-\noindent both the injection and the projection functions can be implemented:
+\noindent можно реализовать инъекцию и проекцию:
+%noindent both the injection and the projection functions can be implemented:
 
 \begin{lstlisting}[mathescape=true]
    let rec $\uparrow_{\mbox{\texttt{list}}}$ l = $\uparrow_{\forall}$(fmap$_{\mathcal L}$ ($\uparrow_\forall$) $\uparrow_{\mbox{\texttt{list}}}$ l)
    let rec $\downarrow_{\mbox{\texttt{list}}}$ l = fmap$_{\mathcal L}$ ($\downarrow_\forall$) $\downarrow_{\mbox{\texttt{list}}}$ ($\downarrow_\forall$ l)
 \end{lstlisting}
 
-As functor-specific mapping functions can be easily written or, better, derived automatically using a number of existing frameworks for
-generic programming for OCaml, one can easily provide injection/projection pair for user-defined data types.
+Специфичные для функторов функции \lstinline=fmap= могут быть легко написаны, и даже получены автоматически с помощью различных методов обобщённого программирования для OCaml. А с помощью \lstinline=fmap= уже будут написаны инъекции и проекции пользовательских типов данных.
 
-We now can address the problem of variable identification during polymorphic unification. As we do not know the types, we cannot discriminate logical
-variables by their tags only and, thus, cannot simply use pattern matching. In our implementation we perform a variable test
-as follows:
+%As functor-specific mapping functions can be easily written or, better, derived automatically using a number of existing frameworks for generic programming for OCaml, one can easily provide injection/projection pair for user-defined data types.
+
+Теперь вернемся к вопросу определения переменных во время полиморфной унификации.
+Так как типы не известны, мы не можем отличать переменные с помощью простого сопоставления с образцом.
+В реализации переменные проверяются следующим способом:
+
+%We now can address the problem of variable identification during polymorphic unification. As we do not know the types, we cannot discriminate logical
+%variables by their tags only and, thus, cannot simply use pattern matching. In our implementation we perform a variable test as follows:
 
 \begin{itemize}
-\item in an environment, we additionally keep some unique boxed value~--- the \emph{anchor}~--- created by \lstinline|run| at the moment of initial
-state generation; the anchor is inherited unchanged in all derived environments during the search session;
-\item we change the logic type definition into
+\item в окружении хранится дополнительное значение-якорь, создаваемое вместе с начальным состоянием; этот якорь не изменяется для всех производных состояний во время запуска \lstinline=run=;
+%\item in an environment, we additionally keep some unique boxed value~--- the \emph{anchor}~--- created by \lstinline|run| at the moment of initial
+%state generation; the anchor is inherited unchanged in all derived environments during the search session;
+\item  в тип логических переменных добавлен якорь, который при берется из окружения и при создании переменных кладется в них.
+%we change the logic type definition into
 
 \begin{lstlisting}
    type $[\alpha]$ = Var of int * anchor | Value of $\alpha$
 \end{lstlisting}
 
-\noindent making it possible to save in each variable the anchor, inherited from the environment, in which the variable was created;
+%\noindent making it possible to save in each variable the anchor, inherited from the environment, in which the variable was created;
 
-\item inside the unification, in order to check if we are dealing with a variable, we test the conjunction of the following properties:
+\item во время унификации, для проверки переменных проверяется конъюнкция следующих свойств:
+%inside the unification, in order to check if we are dealing with a variable, we test the conjunction of the following properties:
 
   \begin{enumerate}
-    \item the scrutinee is boxed;
-    \item the scrutinee's tag and layout correspond to those for variables (i.e. the values, created with the constructor \lstinline|Var| of
-type \lstinline{[$\alpha$]});
-    \item the scrutinee's anchor and the current environment's anchor have equal addresses.
+    \item рассматриваемое значение является boxed;
+    \item тек и раскладка в памяти соответствует переменным, т.е. значениям, построенным с помощью конструктора \lstinline|Var| из типа \lstinline{[$\alpha$]};
+    %the scrutinee's tag and layout correspond to those for variables (i.e. the values, created with the constructor \lstinline|Var| of type \lstinline{[$\alpha$]});
+    \item адрес якоря соответствует адресу якоря в текущем окружении.
+    %the scrutinee's anchor and the current environment's anchor have equal addresses.
   \end{enumerate}
 \end{itemize}
 
-Taking into account that the state type is abstract at the user level, we guarantee that only those variables which were
-created during the current run session would pass the test, since the pointer to the anchor is unique among all pointers to a boxed value
-and could not be disclosed anywhere but in the variable-creation primitive.
+Учитывая, что состояние абстрактно для пользователя, можно гарантировать, что только переменные, созданные в текущем запуске примитива \lstinline=run=, пройдут тест на переменные, так как указатель на якорь уникален среди всех указателей и никак может попасть во вне из-за использования примитива создания переменных.
 
-The only thing to describe now is the implementation of the reification stage. The reification is represented by the following
-function:
+%Taking into account that the state type is abstract at the user level, we guarantee that only those variables which were
+%created during the current run session would pass the test, since the pointer to the anchor is unique among all pointers to a boxed value
+%and could not be disclosed anywhere but in the variable-creation primitive.
+
+Осталось описать фазу реификации, которая может быть представлена с помощью следующей функции:
+%The only thing to describe now is the implementation of the reification stage. The reification is represented by the following function:
 
 \begin{lstlisting}
    val reify : state -> $[\alpha]$ -> $[\alpha]$
 \end{lstlisting}
 
-This function takes a state and a logic value and recursively substitutes all logic variables in that value w.r.t.
-the substitution in the state until no occurrences of bound variables are left. Since in our implementation the type of a substitution is
-not polymorphic, \lstinline|reify| is also implemented in an unsafe manner. However, it is easy to see that \lstinline|reify|
-does not produce ill-typed terms. Indeed, all original types of variables are preserved in a substitution; unification does not
-change unified terms, so all terms bound in a substitution are well-typed. Hence, \lstinline|reify| always substitutes
-some subterms in a well-typed term with other terms of the corresponding types, which preserves the well-typedness.
+Функция принимает состояние и логическое значение, и рекурсивно совершает подстановку всех переменных в логическом значении до тех пор, пока остаются связанные переменные. Так как наша реализация подстановки не является полиморфной, то функция \lstinline|reify| также реализована в небезопасном стиле.
+Но легко показать, что \lstinline|reify| не создает неправильно типизированные термов. Все оригинальные типы переменных не нарушаются при подстановке, унификация также не изменяет унифицированных термов, а все термы в подстановке корректно типизированы.
+Следовательно, \lstinline|reify| всегда подставляет подтермы в правильно типизированном терме, но термы таких же типов, что обуславливает безопасность системы типов.
 
-In addition to performing substitutions, \lstinline|reify| also reifies disequality constraints. Constraint reification
-attaches to each free variable in a reified term a list of reified terms, describing the disequality constraints for that
-free variable. Note, disequality can be established only for equally-typed terms, which justifies the type-safety of reification.
-Note also, additional care has to be taken to avoid infinite looping, since reification of answers and constraints are
-mutually recursive, and the reification of a variable can be potentially invoked from itself due to a chain of disequality
-constraints. In the following example
+%This function takes a state and a logic value and recursively substitutes all logic variables in that value w.r.t.
+%the substitution in the state until no occurrences of bound variables are left. Since in our implementation the type of a substitution is
+%not polymorphic, \lstinline|reify| is also implemented in an unsafe manner. However, it is easy to see that \lstinline|reify|
+%does not produce ill-typed terms. Indeed, all original types of variables are preserved in a substitution; unification does not
+%change unified terms, so all terms bound in a substitution are well-typed. Hence, \lstinline|reify| always substitutes
+%some subterms in a well-typed term with other terms of the corresponding types, which preserves the well-typedness.
+
+Кроме осуществления подстановки функция  \lstinline|reify| также реифицирует ограничения-неравенства.
+При этом к каждой свободной переменной приписывается список реифицированных термов, представляющий ограничения-неравенства для этой свободной переменной.
+Заметим, что ограничения неравенства могут быть созданы только для одинаково типизированных термов, что обосновывает типовую безопасность реификации.
+Обратим также внимание, что нужны дополнительные проверки для избежания зацикливания реификации, так реификация ответов и ограничений взаимно рекурсивны, а реификация ответа может вызвать саму себя по цепочке ограничений-неравенств. В примере ниже
+
+%In addition to performing substitutions, \lstinline|reify| also reifies disequality constraints. Constraint reification
+%attaches to each free variable in a reified term a list of reified terms, describing the disequality constraints for that
+%free variable. Note, disequality can be established only for equally-typed terms, which justifies the type-safety of reification.
+%Note also, additional care has to be taken to avoid infinite looping, since reification of answers and constraints are
+%mutually recursive, and the reification of a variable can be potentially invoked from itself due to a chain of disequality
+%constraints. In the following example
 
 \begin{lstlisting}
    let foo q =
@@ -196,9 +250,9 @@ constraints. In the following example
         (s =/= r)
 \end{lstlisting}
 
-\noindent the answer for the variable $q$ will contain a disequality constraint for the variable $r$; the reification of $r$ will in turn
-lead to the reification of its own constraint, this time the variable $s$; finally, the reification of $s$ will again invoke the
-reification of $r$, etc.
+\noindent ответ для переменной  $q$ будет содержать неравенства для переменной $r$; реификация $r$ приведет ограничения с переменной $s$, которая снова запустит реификацию переменной $r$, и т.д.
+
+%\noindent the answer for the variable $q$ will contain a disequality constraint for the variable $r$; the reification of $r$ will in turn lead to the reification of its own constraint, this time the variable $s$; finally, the reification of $s$ will again invoke the reification of $r$, etc.
 
 After the reification, the content of a logical value can be inspected via the following function:
 
@@ -206,7 +260,7 @@ After the reification, the content of a logical value can be inspected via the f
    val destruct : $[\alpha]$ -> [`Var of int * $[\alpha]$ list | `Value of $\alpha$]
 \end{lstlisting}
 
-Constructor \lstinline{`Var} corresponds to a free variable with unique integer identifier and a list of terms,
+Constructor \lstinline|`Var| corresponds to a free variable with unique integer identifier and a list of terms,
 representing all disequality constraints for this variable.
 
 \subsection{Tagless Logical Values and Type Bookkeeping}
@@ -363,7 +417,7 @@ and, then, we add the reifier to the output signature in all \lstinline|FMap|-li
    val reify: (helper -> $\{\alpha,\;\beta\}$ -> $\beta$) -> helper -> $\{\alpha$ T.t, $[\beta$ T.t$]$ as $\gamma\}$ -> $\gamma$
 \end{lstlisting}
 
-Note, since now \lstinline{reify} is a type-specific and, hence, constructed at the user-level, we refrain from passing
+Note, since now \lstinline|reify| is a type-specific and, hence, constructed at the user-level, we refrain from passing
 it a state (which is inaccessible on the user level). Instead, we wrap all state-specific functionality in
-an abstract \lstinline{helper} data type, which encapsulates all state-dependent functionality needed for \lstinline{reify}
+an abstract \lstinline|helper| data type, which encapsulates all state-dependent functionality needed for \lstinline|reify|
 to work properly.

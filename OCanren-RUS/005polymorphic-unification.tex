@@ -140,46 +140,58 @@ $$
 %substitution can only be acquired from the empty one by a sequence of unifications.
 
 Покажем, что в этих предположения все атрибуты с типами не нужны: они не влияют на исполнение  \lstinline|unify| и могут быть стёрты.
-Единственное место, где невозможно предъявить атрибут явно --- это строка 4, где выозвращается результат применения подстановки.
+Единственное место, где невозможно предъявить атрибут явно --- это строка 4, где возвращается результат применения подстановки.
 \textcolor{red}{walk где описан?}.
+Можно показать по индукции, что любая подстановка обладает следующим свойством: если в  подстановке $s$ определено значение переменной $x^\tau$, то это значение имеет тип $\tau$, и, следовательно,  \lstinline|walk $s$ $t^\tau$| всегда возвращает значения типа  $\tau$.
 
-We are going to show that under these assumptions all type attributes are superfluous~--- they
-do not affect the execution of \lstinline|unify| and can be removed. Note that the only place where we
-were incapable of providing an explicit type attribute was in line 4, where the result of
-substitution application was returned.
-However, we can prove by induction that any substitution respects the following property: if a substitution $s$ is defined for a variable $x^\tau$,
-then $s\;\;x^\tau$ is attributed with the type $\tau$ (and, consequently, \lstinline|walk $s$ $t^\tau$| always returns a term of type $\tau$).
+%We are going to show that under these assumptions all type attributes are superfluous~--- they
+%do not affect the execution of \lstinline|unify| and can be removed. Note that the only place where we
+%were incapable of providing an explicit type attribute was in line 4, where the result of
+%substitution application was returned.
+%However, we can prove by induction that any substitution respects the following property: if a substitution $s$ is defined for a variable $x^\tau$,
+%then $s\;\;x^\tau$ is attributed with the type $\tau$ (and, consequently, \lstinline|walk $s$ $t^\tau$| always returns a term of type $\tau$).
 
-Indeed, this property vacuously holds for the empty substitution. Let $s$ be some substitution, for which the
-property holds. In the 11 we return an unchanged substitution; in line 10 we perform two calls~---
-\lstinline|walk $s$ $t_1^\tau$| and \lstinline|walk $s$ $t_2^\tau$| and match their results. However,
-by our induction hypothesis these results are again attributed to the type $\tau$, which justifies the
-pattern matching. In line 11 we return the substitution unchanged, in lines 12 and 13 we extend the
-existing substitution but preserve the property of interest. Finally, in line 15 we chain a few
-applications of \lstinline|unify|; note that, again, all these calls are performed for terms of equal
-types, starting from a substitution possessing the property of interest.
-A simple induction on the chain length completes the proof.
+Это свойство очевидно выполняется для пустых подстановок.
+Рассмотрим произвольную подстановку $s$, для которой это свойство выполнено. В 10й строке совершаются два вызова ---
+\lstinline|walk $s$ $t_1^\tau$| и \lstinline|walk $s$ $t_2^\tau$| --- и разбираются их результаты.
+По индукционному предположению у них тип $\tau$ и производить сопоставление с образцом в строке 14 можно.
+В сроке 11 подстановка возвращается без изменений, в строках 12 и 13 --- изменяется с сохранением свойства.
+Наконец, в 15й строке осуществляется несколько вызовов \lstinline|unify|, но все они запускаются на термах одинакового типа, а значит, что подстановка обладает интересующим нас свойством. Индукция по структуре терма завершает доказательство.
 
-So, type attributes are inessential~--- they are never analyzed and never restrict pattern matching; hence,
-they can be erased completely.
-We can notice now that for the representation of terms we can use OCaml's native runtime representation.
-It can not be done, however, using regular OCaml~--- we have to utilize the low-level, unsafe interface \lstinline|Obj|.
-Note also, we need some way to identify the occurrences of logical variables inside the terms (in the original \miniKanren{} implementation the ambiguity between variable and non-variable datum representation is resolved by a convention~--- a luxury we cannot afford).
-We postpone the discussion on this subject until the next section.
+%Indeed, this property vacuously holds for the empty substitution. Let $s$ be some substitution, for which the
+%property holds. In the 11 we return an unchanged substitution; in line 10 we perform two calls~---
+%\lstinline|walk $s$ $t_1^\tau$| and \lstinline|walk $s$ $t_2^\tau$| and match their results. However,
+%by our induction hypothesis these results are again attributed to the type $\tau$, which justifies the
+%pattern matching. In line 11 we return the substitution unchanged, in lines 12 and 13 we extend the
+%existing substitution but preserve the property of interest. Finally, in line 15 we chain a few
+%applications of \lstinline|unify|; note that, again, all these calls are performed for terms of equal
+%types, starting from a substitution possessing the property of interest.
+%A simple induction on the chain length completes the proof.
 
+Итак, атрибуты с типами не важны --- они никогда не анализируются и не ограничивают сопоставления с образцом, а значит могут быть полностью стёрты.
+Также стоит обратить внимание, что представлением термов может служить обычное представление среды исполнения OCaml.
+Но это нельзя сделать естественным способом, придется воспользоваться низкоуровневым интерфейсом модуля \lstinline|Obj|.
+Также понадобится некоторый способ отличать вхождения логических переменных в терм, в оригинальной реализации эта проблема решалась с помощью договоренности --- роскошь, которую мы не может себе позволить\footnotetext{\textcolor{red}{как-то коряво}}. Мы вернемся к этому вопросу в следующем разделе.
 
-%the correctness our of implementation is based on
-%the following convention about logical variables: the representation of a logical variable $x^\tau$ must
-%correspond to a representation of some value of type $\tau$. This, in turn, makes it somewhat problematic
-%to detect a variable occurrence in a term. We postpone the discussion on this subject until Section~\ref{sec:injection}.
+%So, type attributes are inessential~--- they are never analyzed and never restrict pattern matching; hence,
+%they can be erased completely.
+%We can notice now that for the representation of terms we can use OCaml's native runtime representation.
+%It can not be done, however, using regular OCaml~--- we have to utilize the low-level, unsafe interface \lstinline|Obj|.
+%Note also, we need some way to identify the occurrences of logical variables inside the terms (in the original \miniKanren{} implementation the ambiguity between variable and non-variable datum representation is resolved by a convention~--- a luxury we cannot afford).
+%We postpone the discussion on this subject until the next section.
 
-We call our implementation \emph{polymorphic}, since at the top level it is defined as
+Реализация унификации называется \emph{полиморфной}, потому что на верхнем уровне можно приписать тип
+%We call our implementation \emph{polymorphic}, since at the top level it is defined as
 
 \begin{lstlisting}
    val unify : $\alpha$ -> $\alpha$ -> subst option -> subst option
 \end{lstlisting}
 
-The type of substitution is not polymorphic, which means that the compiler completely loses the track
-of types of values stored in a substitution. These types are recovered later during the reification-of-answers phase (see Section~\ref{sec:reification}).
-Outside the unification the compiler maintains typing, which means that all terms, subterms, and variables agree in their types
-in all contexts.
+Тип подстановки не является полиморфным, что означает, что компилятор полностью теряет типы значений, хранящихся в подстановке.
+Они восстанавливаются во время реификации ответов (раздел~\ref{sec:reification}).
+Вне унификации компилятор поддерживает типизацию, что означает что все термы, подтермы и логические переменные согласуются по типам во всех контекстах.
+
+%The type of substitution is not polymorphic, which means that the compiler completely loses the track
+%of types of values stored in a substitution. These types are recovered later during the reification-of-answers phase (see Section~\ref{sec:reification}).
+%Outside the unification the compiler maintains typing, which means that all terms, subterms, and variables agree in their types
+%in all contexts.

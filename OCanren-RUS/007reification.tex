@@ -1,35 +1,53 @@
 % !TeX spellcheck = ru_RU
 % !TEX root = main.tex
 
-\section{Reification and Top-Level Primitives}
+\section{Реификация и примитивы верхнего уровня }
 \label{sec:reification}
 
-In Section~\ref{sec:goals} we presented a top-level function \lstinline|run|, which
-runs a goal and returns a stream of states. To acquire answers to the query,
-represented by that goal, its free variables have to be reified in these states, and
-we described the reification primitives in Section~\ref{sec:injection}. However,
-the states keep answers in an untyped form, and the types of answers are
-recovered solely on the basis of the types of variables being reified. So, the
-type safety of the reification critically depends on the requirement to
-reify each variable only in those states, which are descendants (w.r.t. the search tree)
-of the state, in which that variable was created. In this section we describe a set of
-top-level primitives, which enforce this requirement.
 
-We provide a set of top-level combinators, which should be used to surround relational code
-and perform reification in a transparent manner only in correct states.
-We reimplement the top-level primitive \lstinline|run| to take three
-arguments. The exact type of \lstinline|run| is rather complex and non-instructive,
-so we prefer to describe the typical form of its application:
+В разделе~\ref{sec:goals} был упомянут примитив верхнего уровня \lstinline|run|, который позволяет запускать цель и возвращать поток состояний.
+Чтобы получить ответы на запрос, представленный целью, все переменные должны быть реифицированы в соответсвующих состояниях, с использованием примитивов реификации из раздела~\ref{sec:injection}.
+Но состояния содержать ответы в нетипизированном представлении, и типы ответов восстанавливаются только на основе типов реифицируемых переменных.
+Таким образом, корректность типов после реификации критически зависит от требования, чтобы переменные реифицировались только в тех состояниях, которые являеются потомками (в смысле дерева поиска) того состояния, где эти переменные были созданы.
+В этом разделе будет описан набор примитивов, который помогает поддерживать это требование.
+
+%In Section~\ref{sec:goals} we presented a top-level function \lstinline|run|, which
+%runs a goal and returns a stream of states. To acquire answers to the query,
+%represented by that goal, its free variables have to be reified in these states, and
+%we described the reification primitives in Section~\ref{sec:injection}. However,
+%the states keep answers in an untyped form, and the types of answers are
+%recovered solely on the basis of the types of variables being reified. So, the
+%type safety of the reification critically depends on the requirement to
+%reify each variable only in those states, which are descendants (w.r.t. the search tree)
+%of the state, in which that variable was created. In this section we describe a set of
+%top-level primitives, which enforce this requirement.
+
+Ниже представлен набор комбинаторов, которые должны вызывать реляционный код и проводить реификацию только в правильных состояниях.
+Примитив верхнего уровня \lstinline|run| реализован заново, и теперь принимает несколько аргумент.
+Его конкретный тип довольно длинный, и поэтому описан пример его использования этого комбинатора:
+
+%We provide a set of top-level combinators, which should be used to surround relational code
+%and perform reification in a transparent manner only in correct states.
+%We reimplement the top-level primitive \lstinline|run| to take three
+%arguments. The exact type of \lstinline|run| is rather complex and non-instructive,
+%so we prefer to describe the typical form of its application:
 
 \begin{lstlisting}[mathescape=true]
    run $\overline{n}$ (fun $l_1\dots l_n$ -> $\;\;G$) (fun $a_1\dots a_n$ -> $\;\;H$)
 \end{lstlisting}
 
-Here $\overline{n}$ stands for a \emph{numeral}, which describes the number of
-parameters for two other arguments of \lstinline|run|, \mbox{$l_1\dots l_n$}~---
-free logical variables, $G$~--- a goal (which can make use of \mbox{$l_1\dots l_n$}),
-\mbox{$a_1\dots a_n$}~--- reified answers for \mbox{$l_1\dots l_n$}, respectively, and,
-finally, $H$~--- a \emph{handler} (which can make use of \mbox{$a_1\dots a_n$}).
+\noindent Здесь $\overline{n}$ является \emph{нумералом}, который описывает количество аргументов у других параметров \lstinline|run|,
+\mbox{$l_1\dots l_n$}~--- это логические переменные;
+$G$~--- цель, которая может использовать упомянутые логические переменные \mbox{$l_1\dots l_n$};
+\mbox{$a_1\dots a_n$}~---  реифицированные ответы для переменных \mbox{$l_1\dots l_n$} соответственно; и,
+наконец, $H$~--- \emph{обработчик}, который может использовать \mbox{$a_1\dots a_n$}.
+
+
+%Здесь $\overline{n}$ stands for a \emph{numeral}, which describes the number of parameters for two other arguments of \lstinline|run|,
+%\mbox{$l_1\dots l_n$}~--- free logical variables,
+%$G$~--- a goal (which can make use of \mbox{$l_1\dots l_n$}),
+%\mbox{$a_1\dots a_n$}~--- reified answers for \mbox{$l_1\dots l_n$}, respectively, and,
+%finally, $H$~--- a \emph{handler} (which can make use of \mbox{$a_1\dots a_n$}).
 
 The types of \mbox{$l_1\dots l_n$} are inferred from $G$ and always have a form
 
@@ -63,11 +81,18 @@ In other words a user-defined handler takes streams of reified answers for all v
 goal. All streams $a_i$ contain coherent elements, so they all have the same length and $n$-th elements of all
 streams correspond to the $n$-th answer, produced by the goal $G$.
 
-There are a few predefined numerals for one, two, etc. arguments (called, traditionally,
-\lstinline|q|, \lstinline|qr|, \lstinline|qrs| etc.), and a successor function, which
-can be applied to existing numeral to increment the number of expected arguments. The
-implementation technique generally follows~\cite{Unparsing, DoWeNeed}.
+Несколько нумералов (с названиями \lstinline|q|, \lstinline|qr|, \lstinline|qrs|) для 1,2 и 3-аргументных отношений объявлены заранее,
+остальные получаются с помощью применения функции следующего нумерала, которая принимает нумерал и увеличивают количество ожидаемых аргументов на единицу.
+Реализация этой функции сделана на основе работ~\cite{Unparsing, DoWeNeed}.
 
-Thus, the search and reification are tightly coupled; it is simply impossible to perform the reification
-for arbitrarily-taken state and variable. This solution both guarantees the type safety and frees an end
-user from the necessity to call reification primitives manually.
+%There are a few predefined numerals for one, two, etc. arguments (called, traditionally,
+%\lstinline|q|, \lstinline|qr|, \lstinline|qrs| etc.), and a successor function, which
+%can be applied to existing numeral to increment the number of expected arguments.
+%The implementation technique generally follows~\cite{Unparsing, DoWeNeed}.
+
+Итого, поиск и реификация тесно связаны: невозможно выполнить реификацию в произвольном состоянии для произвольной переменной.
+Такое решение гарантирует корректность типов и освобождает программиста от проведения реификации полностью вручную.
+
+%the search and reification are tightly coupled; it is simply impossible to perform the reification
+%for arbitrarily-taken state and variable. This solution both guarantees the type safety and frees an end
+%user from the necessity to call reification primitives manually.

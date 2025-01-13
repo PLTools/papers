@@ -1,11 +1,24 @@
-\section{Related Works}
+% !TeX spellcheck = ru_RU
+% !TEX root = main.tex
+
+\section{Обзор}
 \label{sec:relworks}
 
-There is a predictable difficulty in implementing \miniKanren for a strongly typed language.
-Designed in the metaprogramming-friendly and dynamically typed realm of Scheme/Racket, the original
-\miniKanren implementation pays very little attention to what has a significant importance in (specifically)
-ML or Haskell. In particular, one of the capstone constructs of \miniKanren~--- unification~--- has to work for
-different data structures, which may have types different beyond parametricity.
+При реализации miniKanren в строго статически типизированном языке сложности возникают естественным образом, так как реляционное программирование родилось в среде Scheme/Racket --- динамически типизированной и удобной для метапрограммирования среде.
+Оригинальная реализация miniKanren не обращает внимания на особенности, важные для таких языков как ML и Haskell.
+Например, одна из основных конструкций miniKanren --- унификация --- обязана исполняться для разных данных и одного только параметрического полиморфизма может быть не достаточно.
+
+%There is a predictable difficulty in implementing \miniKanren for a strongly typed language.
+%Designed in the metaprogramming-friendly and dynamically typed realm of Scheme/Racket, the original
+%\miniKanren implementation pays very little attention to what has a significant importance in (specifically)
+%ML or Haskell. In particular, one of the capstone constructs of \miniKanren~--- unification~--- has to work for
+%different data structures, which may have types different beyond parametricity.
+
+Существуют несколько способов преодолеть эту проблема.
+Во-первых, можно повторять нетипизированный подход и предоставить реализацию унификации для некоторого конкретного типа, достаточно богатого, чтобы представить все другие типы данных.
+Некоторые библиотеки~\footnote{\url{https://github.com/JaimieMurdock/HK}, \url{https://github.com/rntz/ukanren}} реляционного программирования для Haskell и предыдущая~\footnote{\url{https://github.com/lightyang/minikanren-ocaml}} реализация для OCaml  пошли по этому пути.
+
+ОСТАНОВИЛСЯ ТУТ
 
 There are a few ways to overcome this problem. The first one is simply to follow the untyped paradigm and
 provide unification for some concrete type, rich enough to represent any reasonable data structures.
@@ -18,7 +31,7 @@ Another approach is to utilize \emph{ad hoc} polymorphism and provide a type-spe
 Some \miniKanren implementations, such as Molog\footnote{\url{https://github.com/acfoltzer/Molog}} and
 MiniKanrenT\footnote{\url{https://github.com/jvranish/MiniKanrenT}}, both for Haskell, can be mentioned as examples.
 While preserving strong typing, this approach requires a lot of ``boilerplate''
-code to be written, so some automation --- for example, using 
+code to be written, so some automation --- for example, using
 Template Haskell~\cite{SheardTMH}~---
 is desirable. In~\cite{TypedLogicalVariables} a separate type class was introduced to both perform the unification
 and detect free logical variables in end-user data structures. The requirement for end user to provide a way to represent
@@ -31,15 +44,15 @@ functors~\cite{InstantGenerics, ALaCarte}. Thus, unification would work for any 
 is provided. We believe that implementing this representation would require less boilerplate code to be written.
 
 As follows from this exposition, a typed embedding of \miniKanren in OCaml can be done with
-a combination of datatype-generic programming~\cite{DGP} and \emph{ad hoc} polymorphism. There are 
+a combination of datatype-generic programming~\cite{DGP} and \emph{ad hoc} polymorphism. There are
 a number of generic frameworks for OCaml (for example,~\cite{Deriving}). On the other hand, the support
 for \emph{ad hoc} polymorphism in OCaml is weak; there is nothing comparable in power to Haskell
 type classes, and even though sometimes the object-oriented layer of the language can be used to mimic
 desirable behavior, the result, as a rule, is far from satisfactory. Existing proposals for \emph{ad hoc} polymorphism (for example,
-modular implicits~\cite{Implicits}) require patching the compiler, which we want to avoid. Therefore, we 
-take a different approach, implementing polymorphic unification once and for all logical types~--- a purely \emph{ad hoc} 
+modular implicits~\cite{Implicits}) require patching the compiler, which we want to avoid. Therefore, we
+take a different approach, implementing polymorphic unification once and for all logical types~--- a purely \emph{ad hoc}
 approach, since the features which would provide a less \emph{ad hoc} solution are not yet well integrated into the language. To deal
-with user-defined types in the relational subsystem, we propose to use their logical representations (see Section~\ref{sec:injection}), 
+with user-defined types in the relational subsystem, we propose to use their logical representations (see Section~\ref{sec:injection}),
 which free an end user from the burden of maintaining logical variables, and we use generic programming to build conversions from and to logical
 representations in a systematic manner.
 

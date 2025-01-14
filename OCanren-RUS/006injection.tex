@@ -265,63 +265,95 @@ representing all disequality constraints for this variable.
 
 \subsection{Tagless Logical Values and Type Bookkeeping}
 
-The solution presented in the previous subsection suffers from the following deficiency: in order to perform unification,
-we inject terms into the logic domain, making them as twice as large. As a result, this implementation loses to the original one in
-terms of performance in many important applications, which compromises the very idea of using OCaml as a host language.
+Решение, предложенное выше, страдает существенным недостатком: чтобы произвести унификацию, необходимо привести термы в логический домен, что сделает их в два раза больше. В результате, эта реализация проиграет по производительности оригинальной.
 
-Here we develop an advanced version, which eliminates this penalty. As a first step, let's try to eliminate the tagging with
-a drastic measure:
+
+
+%The solution presented in the previous subsection suffers from the following deficiency: in order to perform unification,
+%we inject terms into the logic domain, making them as twice as large. As a result, this implementation loses to the original one in
+%terms of performance in many important applications, which compromises the very idea of using OCaml as a host language.
+
+Было разработано другое представление без этого недостатка.
+Идея в том, чтобы хранить данные (не переменные) в памяти без использования тегирования вообще.
+%Here we develop an advanced version, which eliminates this penalty. As a first step, let's try to eliminate the tagging with a drastic measure:
 
 \begin{lstlisting}
    type $[\alpha]$ = $\alpha$
 \end{lstlisting}
 
-What consequences would this have? Of course, we would not be able to create logical variables in a conventional way. However,
-we still could have a separate type of variables
+\noindent Как следствие станет невозможно конструировать данные с переменными внутри путём использованиея конструкторов,
+а придется использовать специальные функции-конструкторы.
+
+%What consequences would this have? Of course, we would not be able to create logical variables in a conventional way. However, we still could have a separate type of variables
 
 \begin{lstlisting}
    type var = Var of int * anchor
 \end{lstlisting}
 
-\noindent and use \emph{the same} variable test procedure. As the type $[\alpha]$ is abstract, this modification does not change the interface.
-As we reuse the variable test, polymorphic unification can continue to work \emph{almost} correctly. The problem is that
-now it can introduce the occurrences of free logic variables in non-logical, tagless, data structures. These free logic variables
-do not get in the way of unification itself (since it can handle them properly, thanks to the variable test), but they can not
-be disclosed to the outer world as is.
+\noindent Так как тип $[\alpha]$ абстрактный, этим модификации не меняют интерфейса взаимодействия с этим данные из реляционного кода.
+Но при этом всё ещё возможно представлять переменные старым способом, и поэтому можно переиспользовать алгоритм проверки на переменные,
+а реализация полиморфный унификации остается \emph{почти} такой же.
+Некоторой проблемой является то, что можно вводить переменные в нелогические и нетеггированные данные.
+Эти свободные переменные не помещают унификации (она сумеет их отличить), но их нельзя оставить для нелогического как они есть.
 
-Our idea is to use this generally unsound representation for all internal actions, and perform tagging only during the reification
-stage. However, this scenario raises the following question: what would the type of \lstinline|reify| be? It can not be simply
+%\noindent and use \emph{the same} variable test procedure. As the type $[\alpha]$ is abstract, this modification does not change the interface.
+%As we reuse the variable test, polymorphic unification can continue to work \emph{almost} correctly. The problem is that
+%now it can introduce the occurrences of free logic variables in non-logical, tagless, data structures. These free logic variables
+%do not get in the way of unification itself (since it can handle them properly, thanks to the variable test), but they can not
+%be disclosed to the outer world as is.
+
+Идея заключается в том, чтобы использовать в общем случае некорректное представление в памяти --- ему нельзя придать тип в языке OCaml --- для внутренних нужд, а применять теггирование только на фазе реификации. Но тогда необходимо решить каким будет тип функции \lstinline|reify|.
+Прямолинейное решение
+
+%Our idea is to use this generally unsound representation for all internal actions, and perform tagging only during the reification
+%stage. However, this scenario raises the following question: what would the type of \lstinline|reify| be? It can not be simply
 
 \begin{lstlisting}
    val reify : state -> $[\alpha]$ -> $[\alpha]$
 \end{lstlisting}
 
-anymore since $[\alpha]$ now equals $\alpha$. We \emph{want}, however, it be something like
+не годится, так как тип аргумента совпадает с типом результата $[\alpha]$. Хотелось бы что-то похожее на
+
+%anymore since $[\alpha]$ now equals $\alpha$. We \emph{want}, however, it be something like
 
 \begin{lstlisting}
    val reify : state -> $[\alpha]$ -> $(\mbox{``tagged'' } [\alpha])$
 \end{lstlisting}
 
-If $\alpha$ is not a parametric type, we can simply test if the value is a variable, and if yes, tag it with the constructor \lstinline|Var|;
-we tag it with \lstinline|Value| otherwise, and we're done. This trick, however, would not work for parametric types. Consider, for example,
-the reification of a value of type \lstinline|$[[$int$]$ list$]$|. The (hypothetical) approach being described would return a value of
-type \lstinline{$(\mbox{``tagged'' }[[$int$]$ list$])$}, i.e. tagged only on the top level; we need to repeat the procedure
-recursively. In other words, we need the following (meta) type for the reification primitive:
+Если $\alpha$ --- тип без параметров, то можно затеггировать результат конструкторами \lstinline|Var| или \lstinline|Value|  в зависимости того переменная это или нет.
+Всё несколько сложнее для типов с параметрами, например, для типа целочисленных списков \lstinline|$[[$int$]$ list$]$|.
+Здесь надо не только теггировать не верхнем уровне, но и запускать реификацию с тегированием рекурсивно для подвыражений внутри.
+Итого, необходим следующий (мета)тип для функции реификации:
+
+%If $\alpha$ is not a parametric type, we can simply test if the value is a variable, and if yes, tag it with the constructor \lstinline|Var|;
+%we tag it with \lstinline|Value| otherwise, and we're done. This trick, however, would not work for parametric types. Consider, for example,
+%the reification of a value of type \lstinline|$[[$int$]$ list$]$|.
+%The (hypothetical) approach being described would return a value of type \lstinline|$(\mbox{``tagged'' }[[$int$]$ list$])$|, i.e. tagged only on the top level; we need to repeat the procedure
+%recursively. In other words, we need the following (meta) type for the reification primitive:
 
 \begin{lstlisting}
    val reify : state -> $[\alpha]$ -> $\mbox{(``tagged''} [\beta])$
 \end{lstlisting}
 
-\noindent where $\beta$ is the result of tagging $\alpha$.
+\noindent где $\beta$ --- тип затеггированного $\alpha$.
+%\noindent where $\beta$ is the result of tagging $\alpha$.
 
-These considerations can be boiled down to the following concrete implementation.
+Эти наблюдения обосновывают выбранную конкретную реализацию.
+%These considerations can be boiled down to the following concrete implementation.
 
-First, we roll back to the initial definition of $[\alpha]$~--- it will play the role of our ``tagged'' type.
-We introduce a new, two-parameter type\footnote{In concrete syntax called ``$(\alpha,\;\beta)\;$\lstinline|injected|''.}
+Оригинальное определение типа $[\alpha]$ будет теггированным представлением.
+Введем дополнительный однопараметрический тип \enquote{$\alpha\;$\lstinline|ilogic|}, %\footnote{В конкретном синтаксисе ``$(\alpha)\;$\lstinline|ilogic|''.}
+представляющий логические значения типа $\alpha$.
+
+%First, we roll back to the initial definition of $[\alpha]$~--- it will play the role of our ``tagged'' type.
+%We introduce a new, two-parameter type\footnote{In concrete syntax called ``$(\alpha,\;\beta)\;$\lstinline|injected|''.}
 
 \begin{lstlisting}
-   type $\{\alpha,\;\beta\}$ = $\alpha$
+   type $\alpha$ ilogic = $\alpha$
+   val inj  : $\alpha$ -> $\alpha$ ilogic
 \end{lstlisting}
+
+\noindent Для пользователя он будет абстрактным, а его значения будут появляться с помощью функции поверхностной инъекции \lstinline=inj=.
 
 Of course, this type is kept abstract at the end-user level. Informally speaking, the type $\{\alpha,\;\beta\}$ designates the
 injection of a tagless type $\alpha$ into a tagged type $\beta$; the value itself is kept in the tagless form, but
@@ -339,8 +371,8 @@ We introduce the following primitives for the type $\{\alpha,\;\beta\}$:
    let inj  x = x
 \end{lstlisting}
 
-The function \lstinline{lift} puts a value into the ``bookkeeping injection'' domain for the first time, while
-\lstinline{inj} plays the role of the injection itself. Their composition is analogous to what was
+The function \lstinline|lift| puts a value into the ``bookkeeping injection'' domain for the first time, while
+\lstinline|inj| plays the role of the injection itself. Their composition is analogous to what was
 called ``$\uparrow_\forall$'' in the previous implementation:
 
 \begin{lstlisting}

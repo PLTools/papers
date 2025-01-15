@@ -9,7 +9,7 @@ small relational library of data structures like lists, numbers, booleans, etc. 
 completely on the user level using techniques described in Section~\ref{sec:injection} with no utilization
 of any unsafe features. The examples given below illustrate the usage of all these elements as well.
 
-\subsection{List Concatenation and Reversing}
+\subsection{Конкатенация и обращение списков}
 
 List concatenation and reversing are usually the first relational programs considered, and we do not wish
 to deviate from this tradition. We've already considered the implementation of \lstinline|append$^o$| in
@@ -48,7 +48,7 @@ standard functional primitives:
   \item ``\lstinline|a %< (b %< (c !< d))|'' corresponds to ``\lstinline|[a; b; c; d]|''.
 \end{itemize}
 
-In our implementation the basic \miniKanren primitive ``\lstinline{conde}'' is implemented as a
+In our implementation the basic \miniKanren primitive ``\lstinline|conde|'' is implemented as a
 disjunction of a list of goals, not as a built-in syntax construct. We also make use of explicit
 conjunction and disjunction infix operators instead of nested bracketed structures which, we
 believe, would look too foreign here.
@@ -137,7 +137,7 @@ Note, for sorting the original list we used exactly the same primitive. Note als
 we requested exactly \lstinline|fact @@ length l| answers; requesting more
 would result in an infinite search for non-existing answers.
 
-\subsection{Type Inference for STLC}
+\subsection{Вывод типов для STLC}
 
 Our final example is a type inference for Simply Typed Lambda Calculus~\cite{Lambda}. The problem and
 solution themselves are rather textbook examples again~\cite{TRS, WillThesis}; however, with this example

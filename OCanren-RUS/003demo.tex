@@ -72,7 +72,7 @@
         (append$^o$ t y ty))]))
 \end{lstlisting}
 
-Отношение \lstinline|append$^o$ x y xy|'' интерпретируется как ``конкатенация  \lstinline|x| и \lstinline|y| даёт \lstinline|xy|''.
+Отношение \enquote{\lstinline|append$^o$ x y xy|} интерпретируется как \enquote{конкатенация  \lstinline|x| и \lstinline|y| даёт \lstinline|xy|}.
 Если список \lstinline|x| пуст (строка 3), то, вне зависимости от содержимого \lstinline|y|, чтобы отношение выполнялось значение \lstinline|xy| должно быть таким же как \lstinline|y|.
 Иначе, \lstinline|x| нужно разделить на голову \lstinline|h| и хвост \lstinline|t|, для этого понадобятся введённые свежие переменные.
 Также понадобится дополнительная переменная \lstinline|ty|, чтобы хранить список, находящий в отношении \lstinline|append$^o$| с \lstinline|t| и \lstinline|y|.

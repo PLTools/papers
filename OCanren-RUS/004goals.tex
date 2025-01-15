@@ -18,7 +18,7 @@
    val bind  : $\alpha$ stream -> ($\alpha$ -> $\beta$ stream) -> $\beta$ stream
 \end{lstlisting}
 
-\noindent Монадические примитивы используются для запуска поиска, низкоуровневые детали могут различаться в  различные вариантах \miniKanren.
+\noindent Монадические примитивы используются для запуска поиска, низкоуровневые детали могут различаться в  различных вариантах \miniKanren.
 
 %\noindent Monadic primitives describe the shape of the search, and their implementations may vary in concrete \miniKanren{} versions.
 Важной компонентой является реализация следующих типов данных:
@@ -31,10 +31,10 @@
 
    type state = env * subst * constraints
 \end{lstlisting}
-Тип состояния \lstinline|state| описывает позицию в лениво стоящимся дереве поиска:
-тип \lstinline|env| соответсвует  \emph{окружению}, содежащему дополнительную информацию (в частности, для создания свежих переменных);
+Тип состояния \lstinline|state| описывает позицию в лениво строящемся дереве поиска:
+тип \lstinline|env| соответствует  \emph{окружению}, содержащему дополнительную информацию (в частности, для создания свежих переменных);
 \lstinline|subst| хранить подстановку, которая содержит отображения некоторых логических переменных;
-ти \lstinline|constraints| представляет ограничения-неравенства, которые надо соблюдать.
+тип \lstinline|constraints| представляет ограничения-неравенства, которые надо соблюдать.
 В самом простом случае \lstinline|env| содержит только номер последней введённой свежей переменной, \lstinline|subst| --- это конечное отображение и \lstinline|constraints| --- просто список подстановок.
 
 %Type \lstinline|state| describes a point in a lazily constructed search tree:
@@ -81,7 +81,7 @@
 %abstract for now. These combinators serve as the bricks for the implementation of conventional
 %\miniKanren constructs and syntax extensions (\lstinline|conde|, \lstinline|fresh|, etc.)
 
-Наконец, существуют два примитива для создания примитивных целей: ограничения унификации и ограничения-неравенства. Тип  $t$ мы также оставим абстрактным и вернемся к нему позже.
+Наконец, существуют два примитива для создания примитивных целей: ограничения унификации и ограничения-неравенства. Тип  $t$  также оставим абстрактным и вернёмся к нему позже.
 %Finally, there are two primitive goal constructors:
 
 \begin{lstlisting}
@@ -92,7 +92,7 @@
 %The first one is a unification, while the other is a disequality constraint. Here, we again left the type of terms $t$ abstract; it will be instantiated later.
 
 \noindent В различных реализациях miniKanren все конструкции можно реализовывать сходным образом.
-Но в случае с OCaml реализация полиморфной унификации потребовало использования нетривиальных решений, которые отсутствуют в оригинальном miniKanren.
+Но в случае с OCaml реализация полиморфной унификации (раздел~\ref{sec:unification}) потребовала использования нетривиальных решений, которые отсутствуют в оригинальном miniKanren.
 
 %In the implementation of \miniKanren both of these goals are implemented using unification~\cite{CKanren}; this
 %is true for us as well. However, due to a drastic difference between the host languages, the implementation of

@@ -261,9 +261,9 @@ After the reification, the content of a logical value can be inspected via the f
 \end{lstlisting}
 
 Constructor \lstinline|`Var| corresponds to a free variable with unique integer identifier and a list of terms,
-representing all disequality constraints for this variable.
+representing all disequality constraints for this variable.\textcolor{red}{выкинуть?}
 
-\subsection{Tagless Logical Values and Type Bookkeeping}
+\subsection{Логические переменные без теггирования. Отслеживание типов}
 
 Решение, предложенное выше, страдает существенным недостатком: чтобы произвести унификацию, необходимо привести термы в логический домен, что сделает их в два раза больше. В результате, эта реализация проиграет по производительности оригинальной.
 
@@ -274,15 +274,15 @@ representing all disequality constraints for this variable.
 %terms of performance in many important applications, which compromises the very idea of using OCaml as a host language.
 
 Было разработано другое представление без этого недостатка.
-Идея в том, чтобы хранить данные (не переменные) в памяти без использования тегирования вообще.
+Идея в том, чтобы хранить данные (не переменные) в памяти без использования теггирования вообще.
 %Here we develop an advanced version, which eliminates this penalty. As a first step, let's try to eliminate the tagging with a drastic measure:
 
 \begin{lstlisting}
    type $[\alpha]$ = $\alpha$
 \end{lstlisting}
 
-\noindent Как следствие станет невозможно конструировать данные с переменными внутри путём использованиея конструкторов,
-а придется использовать специальные функции-конструкторы.
+\noindent Как следствие станет невозможно конструировать данные с переменными внутри путём использования конструкторов,
+а придется использовать специальные функции-конструк\-торы.
 
 %What consequences would this have? Of course, we would not be able to create logical variables in a conventional way. However, we still could have a separate type of variables
 
@@ -290,9 +290,9 @@ representing all disequality constraints for this variable.
    type var = Var of int * anchor
 \end{lstlisting}
 
-\noindent Так как тип $[\alpha]$ абстрактный, этим модификации не меняют интерфейса взаимодействия с этим данные из реляционного кода.
-Но при этом всё ещё возможно представлять переменные старым способом, и поэтому можно переиспользовать алгоритм проверки на переменные,
-а реализация полиморфный унификации остается \emph{почти} такой же.
+\noindent Так как тип $[\alpha]$ абстрактный, эти модификации не меняют интерфейса взаимодействия с данными из реляционного кода.
+Но при этом всё ещё возможно представлять переменные старым способом, переиспользовав алгоритм проверки на переменные,
+а реализация полиморфной унификации остается \emph{почти} такой же.
 Некоторой проблемой является то, что можно вводить переменные в нелогические и нетеггированные данные.
 Эти свободные переменные не помещают унификации (она сумеет их отличить), но их нельзя оставить для нелогического как они есть.
 

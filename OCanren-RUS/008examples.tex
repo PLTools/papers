@@ -1,19 +1,33 @@
+% !TeX spellcheck = ru_RU
+% !TEX root = main.tex
+
 \section{Примеры}
 \label{sec:examples}
 
-In this section we present some examples of a relational specification, written with the aid of our library.
-Besides \miniKanren combinators themselves, our implementation contains two syntax extensions~--- one
-for \lstinline|fresh| construct and another for \emph{inverse-$\eta$-delay}~\cite{MicroKanren}, which is
-sometimes necessary to delay recursive calls in order to prevent infinite looping. In addition, we included a
-small relational library of data structures like lists, numbers, booleans, etc. This library is written
-completely on the user level using techniques described in Section~\ref{sec:injection} with no utilization
-of any unsafe features. The examples given below illustrate the usage of all these elements as well.
+В этом разделе представлены несколько примеров реляционных программ, реализованных с помощью описываемого подхода.
+Кроме комбинаторов miniKanren использованы синтаксические расширения: одно вводит конструкцию \lstinline|fresh|, делая код более похожим на оригинальный miniKanren,
+другое необходимо для порождения необходимых фукнкций-конструкторов и реификаторов.
+Также используется небольшая библиотека структур данных, полезных при написании реляционных программ: списки, числа Пеано, булевы значения и т.п.
+Библиотека реализована полностью на стороне пользователя, методом из раздела~\ref{sec:injection}, без использования никаких небезопасных конструкций компилятора OCaml.
+
+
+%In this section we present some examples of a relational specification, written with the aid of our library.
+%Besides \miniKanren{} combinators themselves, our implementation contains two syntax extensions~--- one
+%for \lstinline|fresh| construct and another for \emph{inverse-$\eta$-delay}~\cite{MicroKanren}, which is
+%sometimes necessary to delay recursive calls in order to prevent infinite looping. In addition, we included a
+%small relational library of data structures like lists, numbers, booleans, etc. This library is written
+%completely on the user level using techniques described in Section~\ref{sec:injection} with no utilization
+%of any unsafe features. The examples given below illustrate the usage of all these elements as well.
 
 \subsection{Конкатенация и обращение списков}
 
-List concatenation and reversing are usually the first relational programs considered, and we do not wish
-to deviate from this tradition. We've already considered the implementation of \lstinline|append$^o$| in
-original \miniKanren in Section~\ref{sec:demo}. In our case, the implementation looks familiar:
+Введение в реляционное программирование обычно излагается с помощью отношений конкатенации и переворота списков, и мы не будет отступать от этой традиции.
+Реализация отношения  \lstinline|append$^o$| на оригинально miniKanren было приведено ранее в разделе~\ref{sec:demo}.
+В случае OCanren реализация выглядит похоже:
+
+%List concatenation and reversing are usually the first relational programs considered, and we do not wish
+%to deviate from this tradition. We've already considered the implementation of \lstinline|append$^o$| in
+%original miniKanren in Section~\ref{sec:demo}. In our case, the implementation looks familiar:
 
 \begin{lstlisting}
    let rec append$^o$ x y xy =
@@ -39,21 +53,25 @@ original \miniKanren in Section~\ref{sec:demo}. In our case, the implementation 
      ]
 \end{lstlisting}
 
-Here we make use of our implementation of relational lists, which provides convenient shortcuts for
-standard functional primitives:
+Выше использовалась реализация реляционных списков, которая предоставляет сокращения для функций-конструкторов:
+%Here we make use of our implementation of relational lists, which provides convenient shortcuts for standard functional primitives:
 
 \begin{itemize}
-  \item ``\lstinline|nil ()|'' corresponds to ``\lstinline|[]|'';
-  \item ``\lstinline|h % t|'' corresponds to ``\lstinline|h::t|'';
-  \item ``\lstinline|a %< (b %< (c !< d))|'' corresponds to ``\lstinline|[a; b; c; d]|''.
+  \item \enquote{\lstinline=nil ()=} соответствует пустому списку \enquote{\lstinline=[]=};
+  \item \enquote{\lstinline[mathescape=false]=h \% t=} --- \enquote{\lstinline[mathescape=false]=h::t=};
+  \item \enquote{\lstinline=a \%< (b \%< (c !< d))=} --- \enquote{\lstinline=[a; b; c; d]=}.
 \end{itemize}
 
-In our implementation the basic \miniKanren primitive ``\lstinline|conde|'' is implemented as a
-disjunction of a list of goals, not as a built-in syntax construct. We also make use of explicit
-conjunction and disjunction infix operators instead of nested bracketed structures which, we
-believe, would look too foreign here.
+В нашей реализации базовый примитив miniKanren \enquote{\lstinline|conde|} реализован как дизъюнкция целей, а не как макрос.
+Также у нас доступны явные конъюнкции и дизъюнкции как инфиксные операторы.
+В оригинальной реализации для Scheme использовались вложенные скобки, но мы считаем, что в OCaml это слишком неестественно.
 
-\subsection{Relational Sorting and Permutations}
+%In our implementation the basic \miniKanren primitive ``\lstinline|conde|'' is implemented as a
+%disjunction of a list of goals, not as a built-in syntax construct. We also make use of explicit
+%conjunction and disjunction infix operators instead of nested bracketed structures which, we
+%believe, would look too foreign here.
+
+\subsection{Реляционная сортировка и перестановки}
 
 For the next example we take list sorting; specifically, we present a sorting for lists of natural numbers
 in Peano form since our library already contains built-in support for them. However, our example can be

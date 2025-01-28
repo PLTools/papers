@@ -16,4 +16,5 @@
 comment.cut 
 *.fmt
 *.txss2
+*.synctex\(busy\)
 

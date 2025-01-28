@@ -52,13 +52,13 @@
      $g_n$),
 \end{lstlisting}
 
-где каждый $g^i_j$ является некоторой целью. Здесь создаются свежие переменные  $x_1\;\;x_2\;\;\dots\;\;x_k$ и
-осуществляется поиск цели, являющейся конъюнкцией подцелей $g_1\;\;g_2\;\;\dots\;\;g_n$, внутри которых могут использоваться только что введенные логические переменные.
+где каждый $g^i_j$ является некоторой целью. Создаются свежие логические переменные  $x_1\;\;x_2\;\;\dots\;\;x_k$ и
+осуществляется поиск цели, являющейся конъюнкцией целей $g_1\;\;g_2\;\;\dots\;\;g_n$, внутри которых могут использоваться только что введенные логические переменные.
 %This form introduces fresh variables $x_1\;\;x_2\;\;\dots\;\;x_k$ and
 %tries to satisfy the conjunction of all subgoals $g_1\;\;g_2\;\;\dots\;\;g_n$ (these subgoals may contain introduced fresh variables).
 \end{itemize}
 
-В качестве примера рассмотрим отношение  \lstinline|append$^o$| для конкатенации списков (по традиции реляционные объекты именуются с суффиксом $^o$).
+В качестве примера рассмотрим отношение  \lstinline|append$^o$| для конкатенации списков (по традиции реляционные объекты именуются с суффиксом$^o$).
 %As an example consider a list concatenation relation; by a well-established tradition, the names
 %of relational objects are superscripted by ``$^o$'', hence \lstinline|append$^o$|:
 
@@ -92,9 +92,9 @@
    run $n$ ($q_1\dots q_k$) $G$
 \end{lstlisting}
 
-\noindent Здесь $n$ --- это число желаемых ответов (для всех ответов используется \enquote{\texttt{*}}); $q_i$ --- свежие искомые переменные; а $G$ --- цель, содержащая эти переменные.
+\noindent Здесь $n$ --- это число желаемых ответов (для всех ответов используется \enquote{\texttt{*}}); $q_i$ --- свежие искомые переменные; а $G$ --- цель, использующая эти переменные.
 %Here $n$ is the number of requested answers (or ``*'' for all answers), $q_i$ are fresh query variables, and $G$ is a goal, which can
-contain these variables.
+%contain these variables.
 
 
 Конструкция \lstinline|run| осуществляет поиск ответов для данной цели, и возвращает потенциально бесконечный список ответов, состоящий из значений искомых переменных, которые хранят ответы на данный запрос. Например
@@ -106,6 +106,6 @@ contain these variables.
 \end{lstlisting}
 
 \noindent возвращает список \lstinline|((1 2))|, который хранит одно значение искомой переменной $q$.
-Процесс реконструирования ответов из внутреннего представления называет \emph{реификацией}~\cite{WillThesis} (англ. reification).
+Процесс реконструирования ответов из внутреннего представления называет \emph{реификацией}\footnote{Реификация (англ. reification) --- превращение чего-то абстрактного (т.е. существующего в виде идеи) во что-то конкретное. Кембриджский словарь. \url{https://dictionary.cambridge.org/dictionary/english/reification} (проверено 28 января 2025 г.)}~\cite{WillThesis}.
 %\noindent returns a list \lstinline|((1 2))|, which constitutes the answer for a query variable $q$. The process of constructing the answers from internal data structures of miniKanren interpreter is called \emph{reification}~\cite{WillThesis}.
 

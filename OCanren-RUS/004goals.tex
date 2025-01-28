@@ -4,8 +4,8 @@
 \section{Потоки, состояния и цели}
 \label{sec:goals}
 
-Этот раздел содержит некоторые детали нашей реализации.
-Не смотря на то, что это почти повторение оригинальной реализации ~\cite{MicroKanren, CKanren} для OCaml, он нужен, чтобы аккуратно ввести некоторые понятия.
+Этот раздел содержит некоторые детали  реализации.
+Несмотря на то, что это почти повторение оригинальной реализации~\cite{MicroKanren, CKanren} для OCaml, он нужен, чтобы аккуратно ввести некоторые понятия.
 %This section describes a top-level framework for our implementation. Even though it contains nothing more than a reiteration of the original implementation~\cite{MicroKanren, CKanren} in OCaml, we still need some notions to be properly established.
 
 Процедура поиска реализована с использованием монады для ленивых потоков с возвратами~\cite{KiselyovBacktracking}:
@@ -35,7 +35,7 @@
 тип \lstinline|env| соответствует  \emph{окружению}, содержащему дополнительную информацию (в частности, для создания свежих переменных);
 \lstinline|subst| хранить подстановку, которая содержит отображения некоторых логических переменных;
 тип \lstinline|constraints| представляет ограничения-неравенства, которые надо соблюдать.
-В самом простом случае \lstinline|env| содержит только номер последней введённой свежей переменной, \lstinline|subst| --- это конечное отображение и \lstinline|constraints| --- просто список подстановок.
+В самом простом случае \lstinline|env| содержит только номер последней введённой свежей переменной, \lstinline|subst| --- это конечное отображение, а \lstinline|constraints| --- просто список подстановок.
 
 %Type \lstinline|state| describes a point in a lazily constructed search tree:
 % type \lstinline|env| corresponds to an \emph{environment}, which contains some supplementary information (in particular, an environment is needed to
@@ -47,14 +47,14 @@
 %In our case, the environment contains some extra information to make it possible to identify variables
 %in a constant time.
 
-Тип целей (\lstinline|goal|) является преобразованием одного состояния в ленивый поток состояний:
+Тип целей \lstinline|goal| является преобразованием одного состояния в ленивый поток состояний:
 %The next cornerstone element is the \emph{goal} type, which is considered as a transformer of a state into a lazy stream of states:
 
 \begin{lstlisting}
    type goal = state -> state stream
 \end{lstlisting}
 
-В терминах поиска выполнение цели соответствует одному шагу поиска: для конкретного узла дерева поиска вычисляются его непосредственные потомки.
+\noindent В терминах поиска выполнение цели соответствует одному шагу поиска: для конкретного узла дерева поиска вычисляются его непосредственные потомки.
 Со стороны пользователя тип \lstinline|goal| является абстрактным и все состояния полностью скрыты.
 %\noindent In terms of the search, a goal nondeterministically performs one step of the search: for a given node in a search tree it produces its immediate descendants. On the user level the type \lstinline|goal| is abstract, and states are completely hidden.
 
@@ -71,7 +71,7 @@
 Конъюнкция \enquote{\lstinline=&&&=} объединяет результаты своих целей-аргументов с помощью \lstinline|bind|,
 дизъюнкция \enquote{\lstinline=|||=} конкатенирует результаты с помощью \lstinline|mplus|,
 примитив \lstinline|call_fresh| принимает абстрагированную цель и применяет её к только что созданной свежей переменной.
-Тип $v$ соответствует типу свежей логической переменной, детали которого мы обсудим позже.
+Тип $v$ соответствует типу свежей логической переменной, детали которого мы обсудим позже (раздел~\ref{sec:injection}).
 Эти комбинаторы являются базовыми для реализации более удобных конструкций реляционного программирования (\lstinline|conde|, \lstinline|fresh| и т.д.)
 
 %Conjunction ``\lstinline|&&&|'' combines the results of its argument goals using \lstinline|bind|,
@@ -81,7 +81,7 @@
 %abstract for now. These combinators serve as the bricks for the implementation of conventional
 %\miniKanren constructs and syntax extensions (\lstinline|conde|, \lstinline|fresh|, etc.)
 
-Наконец, существуют два примитива для создания примитивных целей: ограничения унификации и ограничения-неравенства. Тип  $t$  также оставим абстрактным и вернёмся к нему позже.
+Наконец, существуют два примитива для создания примитивных целей: ограничения унификации и ограничения-неравенства. Тип термов  $t$  также оставим абстрактным и вернёмся к нему позже.
 %Finally, there are two primitive goal constructors:
 
 \begin{lstlisting}

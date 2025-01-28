@@ -73,17 +73,23 @@
 
 \subsection{Реляционная сортировка и перестановки}
 
-For the next example we take list sorting; specifically, we present a sorting for lists of natural numbers
-in Peano form since our library already contains built-in support for them. However, our example can be
-easily extended for arbitrary (but linearly ordered) types.
+В следующем примере рассматривается сортировка списков.
+В качестве элементов используются натуральные числа в виде Пеано, потому что библиотека OCanren их поддерживает, но любые другие типы данных, оснащенные отношением линейного порядка, тоже подойдут.
+%For the next example we take list sorting; specifically, we present a sorting for lists of natural numbers
+%in Peano form since our library already contains built-in support for them. However, our example can be
+%easily extended for arbitrary (but linearly ordered) types.
 
-List sorting can be implemented in \miniKanren in a variety of ways~--- virtually any existing algorithm can
-be rewritten relationally. We, however, try to be as declarative as possible to demonstrate the
-advantages of the relational approach. From this standpoint, we can claim that the sorted version of an empty list is an
-empty list, and the sorted version of a non-empty list is its smallest element, concatenated with a sorted
-version of the list containing all its remaining elements.
+Сортировку чисел на miniKanren можно реализовывать по-разному, потому что любой алгоритм сортировки списков может быть переписан реляционно.
+Ниже же будем реализовывать максимально декларативно, чтобы продемонстрировать преимущества реляционного подхода.
+Будем утверждать, что все пустые списки являются сортированными, и что сортированный непустой список является конкатенацией минимального элемента с сортированным списком из всех оставшихся элементов. Реляционная спецификация ниже реализует сортировку по определению выше:
 
-The following snippet literally implements this definition:
+%List sorting can be implemented in \miniKanren in a variety of ways~--- virtually any existing algorithm can
+%be rewritten relationally. We, however, try to be as declarative as possible to demonstrate the
+%advantages of the relational approach. From this standpoint, we can claim that the sorted version of an empty list is an
+%empty list, and the sorted version of a non-empty list is its smallest element, concatenated with a sorted
+%version of the list containing all its remaining elements.
+
+%The following snippet literally implements this definition:
 
 \begin{lstlisting}
    let rec sort$^o$ x y =
@@ -96,8 +102,11 @@ The following snippet literally implements this definition:
      ]
 \end{lstlisting}
 
-The meaning of the expression ``\lstinline|smallest$^o$ x s xs|'' is ``\lstinline|s| is the smallest element of a (non-empty) list \lstinline|x|, and \lstinline|xs| is the
-list of all its remaining elements''. Now, \lstinline|smallest$^o$| can be implemented using a case analysis (note, ``\lstinline|l|'' here is a non-empty list):
+Выражение \enquote{\lstinline|smallest$^o$ x s xs|} означает, что \enquote{\lstinline|s|} является наименьшим элементов списка \enquote{\lstinline|xs|}, а в  \enquote{\lstinline|xs|} хранятся все оставшиеся элементы.
+Отношение \enquote{\lstinline|smallest$^o$|} можно реализовать путём разбора случаев.
+
+%The meaning of the expression \enquote{\lstinline|smallest$^o$ x s xs|} is \enquote{\lstinline|s|} is the smallest element of a (non-empty) list \enquote{\lstinline|x|}, and \enquote{\lstinline|xs|} is the list of all its remaining elements''.
+Now, \enquote{\lstinline|smallest$^o$|} can be implemented using a case analysis (note, \enquote{\lstinline|l|} here is a non-empty list):
 
 \begin{lstlisting}
    let rec smallest$^o$ l s l' =
@@ -111,8 +120,8 @@ list of all its remaining elements''. Now, \lstinline|smallest$^o$| can be imple
      ]
 \end{lstlisting}
 
-Finally, we implement a relational minimum-maximum calculation
-primitive:
+Также необходимо реализовать отношение для минимума и максимума, используя встроенные в OCanren отношения \enquote{\lstinline|le$^o$|} и \enquote{\lstinline|gt$^o$|} для сравнения чисел Пеано:
+%Finally, we implement a relational minimum-maximum calculation primitive:
 
 \begin{lstlisting}
    let minmax$^o$ a b min max =
@@ -122,97 +131,109 @@ primitive:
      ]
 \end{lstlisting}
 
-Here ``\lstinline|le$^o$|'' and ``\lstinline|gt$^o$|'' are built-in comparison goals for natural numbers in Peano form.
 
-Having relational \lstinline|sort$^o$|, we can implement sorting for regular integer lists:
+%Here \enquote{\lstinline|le$^o$|} and \enquote{\lstinline|gt$^o$|} are built-in comparison goals for natural numbers in Peano form.
+С помощью реляционной сортировки можно реализовать обычную сортировку целых чисел:
+%Having relational \lstinline|sort$^o$|, we can implement sorting for regular integer lists:
 
 \begin{lstlisting}
    let sort l =
-     run q (sort$^o$ (inj_nat_list l))
-           (fun qs -> from_nat_list ((Stream.hd qs)#prj) )
+     run q (sort$^o$ (inj_nat_list l)) (fun q -> q#reify from_nat_list_reifier)
+     |> Stream.take
 \end{lstlisting}
 
-Here \lstinline|Stream.hd| is a function which takes a head from a lazy stream of answers,
-\lstinline|inj_nat_list|~--- an injection from regular integer lists into logical lists of logical Peano numbers,
-\lstinline|from_nat_list|~--- a projection from lists of Peano numbers to lists of integers.
+Функция \lstinline|Stream.take| преобразует ленивую последовательность ответов в список,
+\lstinline|inj_nat_list|~--- это инъекция списка целых в логический список натуральных,
+\lstinline|from_nat_list|~--- проекция обратно.
 
-It is interesting, that since \lstinline|sort$^o$| is
-relational, it can be used to calculate a list of all \emph{permutations}
-for a given list. Indeed, sorting each permutation results in the same list.
-So, the problem of finding all permutations can be relationally reformulated into
-the problem of finding all lists which are converted by sorting into the given one:
+%Here \lstinline|Stream.hd| is a function which takes a head from a lazy stream of answers,
+%\lstinline|inj_nat_list|~--- an injection from regular integer lists into logical lists of logical Peano numbers,
+%\lstinline|from_nat_list|~--- a projection from lists of Peano numbers to lists of integers.
+
+За счет реляционного программирования можно воспользоваться тем же отношением \lstinline|sort$^o$|, чтобы посчитать все \emph{перестановки}  данного списка.
+Каждая перестановка сортируется в один и тот же список.
+Поэтому задача поиска всех перестановок может быть реляционно переформулирована как поиск всех списков, сортирующихся в данный:
+
+%It is interesting, that since \lstinline|sort$^o$| is
+%relational, it can be used to calculate a list of all \emph{permutations}
+%for a given list. Indeed, sorting each permutation results in the same list.
+%So, the problem of finding all permutations can be relationally reformulated into
+%the problem of finding all lists which are converted by sorting into the given one:
 
 \begin{lstlisting}
-let perm l = map (fun a -> from_nat_list a#prj)
-  (run q (fun q -> fresh (r)
+let perm l =
+  run q (fun q -> fresh (r)
                      (sort$^o$ (inj_nat_list l) r)
-                     (sort$^o$ q r)
-         )
-         (Stream.take ~n:(fact (length l))))
+                     (sort$^o$ q r))
+    (fun rez -> rez#reify from_nat_list)
+  |> Stream.take ~n:(fact (length l))
 \end{lstlisting}
 
-Note, for sorting the original list we used exactly the same primitive. Note also,
-we requested exactly \lstinline|fact @@ length l| answers; requesting more
-would result in an infinite search for non-existing answers.
+\noindent Заметим, что сортировку списка мы сделали упомянутым выше способом. Также мы запросили ровно факториал длины ответов, потому что большие значения могут привести к расхождению программы.
+
+%Note, for sorting the original list we used exactly the same primitive. Note also,
+%we requested exactly \lstinline|fact @@ length l| answers; requesting more
+%would result in an infinite search for non-existing answers.
 
 \subsection{Вывод типов для STLC}
 
-Our final example is a type inference for Simply Typed Lambda Calculus~\cite{Lambda}. The problem and
-solution themselves are rather textbook examples again~\cite{TRS, WillThesis}; however, with this example
-we show once again the utilization of generic programming techniques we described in Section~\ref{sec:injection}.
-As a supplementary generic programming library here we used object-oriented generic transformers~\cite{?}\footnote{\url{https://github.com/PLTools/GT}};
-we presume, however, that any other framework could equally be used.
+В качестве последнего примера продемонстрируем вывод типов в просто типизированном лямбда-исчислении (STLC).
+Решение задачи достаточно просто, чтобы попасть в учебники~\cite{TRS, WillThesis}, но в нём будет продемонстрировано использование синтаксических расширений для получения инъекций из раздела~\ref{sec:injection}.
+В качестве подхода к обобщенному программированию у нас используется библиотека GT~\cite{GT2021}, но любая другая тоже подойдет.
 
-We first describe the type of lambda terms and their logic representation:
+%Our final example is a type inference for Simply Typed Lambda Calculus~\cite{Lambda}. The problem and
+%solution themselves are rather textbook examples again~\cite{TRS, WillThesis}; however, with this example
+%we show once again the utilization of generic programming techniques we described in Section~\ref{sec:injection}.
+%As a supplementary generic programming library here we used object-oriented generic transformers~\cite{?}\footnote{\url{https://github.com/PLTools/GT}};
+%we presume, however, that any other framework could equally be used.
+
+В начале опишем тип для представления $\lambda$-выражений:
+%We first describe the type of lambda terms and their logic representation:
 
 \begin{lstlisting}
-   module Term = struct
-     module T = struct
-       @type ('varname, 'self) t =
+   module Term : sig
+     type nonrec ('varname, 'self) t =
+     | V   of 'varname
+     | App of 'self    * 'self
+     | Abs of 'varname * 'self
+     ...
+     type 'v injected = ('v, 'v injected) t ilogic
+     val v: 'v -> 'v injected
+     val app: 'v injected -> 'v injected -> 'v injected
+     val abs: 'v -> 'v injected -> 'v injected
+   end = struct
+     [@@ocanren_inject
+       type nonrec ('varname, 'self) t =
        | V   of 'varname
        | App of 'self    * 'self
-       | Abs of 'varname * 'self
-       with gmap
-
-       let fmap f g x = gmap(t) f g x
-     end
-
-     include T
-     include FMap2(T)
-
-     let v   s   = inj (distrib (V s))
-     let app x y = inj (distrib (App (x, y)))
-     let abs x y = inj (distrib (Abs (x, y)))
+       | Abs of 'varname * 'self [@@deriving show, fmap]]
    end
 \end{lstlisting}
 
-Now we have to repeat the work for the type of simple types:
+Эту же работу надо повторить для объявлений типов:
 
 \begin{lstlisting}
-     module Type = struct
-       module T = struct
-         @type ('a, 'b) t =
+     module Type: sig
+       type nonrec ('a, 'b) t =
          | P   of 'a
          | Arr of 'b * 'b
-         with gmap
-
-         let fmap f g x = gmap(t) f g x
-       end
-
-       include T
-       include FMap2(T)
-
-       let p   s   = inj (distrib (P s))
-       let arr x y = inj (distrib (Arr (x, y)))
+       ...
+       type 'a injected = ('a, 'a injected) t ilogic
+       val o : 'a -> 'a injected
+       val arr : 'a injected -> 'a injected
+     end = struct
+         [@@ocanren_inject
+         type nonrec ('a, 'b) t =
+         | P   of 'a
+         | Arr of 'b * 'b [@@deriving show, fmap]]
      end
 \end{lstlisting}
 
-Note, the ``relational'' part is trivial, boilerplate and short (and could even be generated
-using a more advanced framework).
+%Note, the ``relational'' part is trivial, boilerplate and short (and could even be generated using a more advanced framework).
 
-The relational type inferencer itself rather resembles the original implementation. The only
-difference (besides the syntax) is that instead of data constructors we use their logic
-counterparts:
+Реляционная проверка типов напоминает оригинальную реализацию на Scheme: кроме немного другого синтаксиса, вместо конструкторов типов данных используются их логические аналоги:
+%The relational type inferencer itself rather resembles the original implementation.
+%The only difference (besides the syntax) is that instead of data constructors we use their logic counterparts:
 
 \begin{lstlisting}
    let rec lookup$^o$ a g t =

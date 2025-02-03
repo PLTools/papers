@@ -4,3 +4,28 @@
 
 \section{Ограничения-неравенства}
 \label{sec:diseq}
+
+\begin{lstlisting}
+let rec rembero1 x xs out =
+  conde
+    [ xs === Std.nil () &&& (xs === out)
+    ; fresh (h tl) (xs === Std.List.cons h tl) (h === x) (tl === out)
+    ; fresh (h tl res)
+        (xs === Std.List.cons h tl)
+        (out === Std.List.cons h res)
+        (rembero1 x tl res)
+    ]
+\end{lstlisting}
+\begin{lstlisting}
+let rec rembero2 x xs out =
+  conde
+    [ xs === Std.nil () &&& (xs === out)
+    ; fresh (h tl) (xs === Std.List.cons h tl) (h === x) (tl === out)
+    ; fresh
+        (h tl res)
+        (xs === Std.List.cons h tl)
+        (h =/= x)
+        (out === Std.List.cons h res)
+        (rembero2 x tl res)
+    ]
+\end{lstlisting}

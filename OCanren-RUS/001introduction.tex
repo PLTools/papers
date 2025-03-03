@@ -24,7 +24,7 @@
 %Many logic programming languages, such as Prolog, Mercury~\cite{MercuryFirstPaper}, or Curry~\cite{CurryFirstPaper} to some extent can be considered relational.
 Нами был выбран \miniKanren\footnote{\url{http://minikanren.org}} как модельный язык, потому что он был специально спроектирован как предметно-ориенти\-рованный язык, встраиваемый в Scheme/Racket.
 %We have chosen \miniKanren\footnote{\url{http://minikanren.org}} as a model language, because it was specifically designed as a relational DSL, embedded in Scheme/Racket.
-Он довольно минималистичен --- может быть реализован с помощью малого количества структур данных и комбинаторов~\cite{MicroKanren, MuKanrenNew} --- и поэтому, он уже встроен во многие другие языки программирования общего назначения, включая Scala, Haskell and Standard ML.
+Он довольно минималистичен --- может быть реализован с помощью малого количества структур данных и комбинаторов~\cite{MicroKanren, MuKanrenNew} --- и поэтому можно найти реализации, где его уже реализовали для других языков программирования общего назначения, включая Scala, Haskell and Standard ML.
 %Being rather a minimalistic language, which can be implemented with just a few data structures and combinators~\cite{MicroKanren, MuKanrenNew}, \miniKanren{} found its way into dozens of host languages, including Scala, Haskell and Standard ML.
 Парадигму в основе miniKanren можно описать как \enquote{легковесное логическое программирование}\footnote{Детальное сравнение miniKanren и Prolog можно найти здесь: \url{http://minikanren.org/minikanren-and-prolog.html} (проверено: \DTMDate{2025-01-10}).}.
 %The paradigm behind \miniKanren can be described as ``lightweight logic programming''\footnote{An in-depth comparison of \miniKanren and Prolog can be found here: \url{http://minikanren.org/minikanren-and-prolog.html}}.
@@ -60,7 +60,7 @@
 %to expect better performance of a statically-typed implementation.
 
 В работе представлена реализация\footnote{\url{https://github.com/PLTools/OCanren}} реляционных комбинаторов и синтаксических расширений для языка OCaml под названием OCanren,
-которая в том числе поддерживает ограничения-неравенства~\cite{CKanren}, и поддерживает оптимизации faster-miniKanren\footnote{\url{TODO}}.
+которая в том числе поддерживает ограничения-неравенства~\cite{CKanren} и  оптимизации faster-miniKanren\footnote{\url{https://github.com/michaelballantyne/faster-minikanren}}.
 %We present an implementation of a set of relational combinators and syntax extensions for
 %OCaml\footnote{The source code of our implementation is accessible from \url{https://github.com/dboulytchev/OCanren}.},
 %which, technically speaking, corresponds to $\mu$Kanren~\cite{MicroKanren} with disequality
@@ -73,9 +73,9 @@ The contribution of our work is as follows:
 %specifications; in particular, all type errors are reported at compile time and the types for
 %all logical variables are inferred from the context.
 
-\item Реализация основана на полиморфной унификации, которая также как и полиморфное сравнение, может использоваться для произвольных типов.
+\item Реализация основана на полиморфной унификации, которая также как и полиморфное сравнение языка OCaml, может использоваться для произвольных типов.
 Реализация полиморфной унификации использует небезопасные возможности компилятора OCaml и полагается на специфичные особенности представления значений в памяти.
-При этом можно доказать, что это не нарушает корректность типов.
+При этом доказано, что корректность типов не нарушается.
 %Our implementation is based on the \emph{polymorphic unification}, which, like the polymorphic comparison,
 %can be used for arbitrary types. The implementation of polymorphic unification uses unsafe features and
 %relies on the intrinsic knowledge of the runtime representation of values; we show, however, that this does not
@@ -87,16 +87,24 @@ generic feature (``\lstinline|Functor|'') is needed, and thus virtually any gene
 framework for OCaml can be used. Although being rather a pragmatic observation, this pattern, we
 believe, would lead to a more regular and easy way to maintain relational specifications.
 
-\item We provide a simplified way to integrate relational and functional code. Our approach utilizes
-a well-known pattern~\cite{Unparsing, DoWeNeed} for variadic function implementation and makes it
-possible to hide the reification\footnote{First mention, explain what it is} of the answers phase from an end user.
+\item Представлен упрощенный способ интеграции реляционного и функционального кода.
+Они основан на известном метода~\cite{Unparsing, DoWeNeed}  реализации поливариадических функций, и позволяет скрыть процессе реификации (глава \ref{sec:reification}) от программиста-пользователя.
+%Our approach utilizes
+%a well-known pattern~\cite{Unparsing, DoWeNeed} for variadic function implementation and makes it
+%possible to hide the reification\footnote{First mention, explain what it is} of the answers phase from an end user.
 \end{enumerate}
 
-The rest of the paper is organized as follows: in the next section we provide a short overview of the related
-works. Then we briefly introduce \miniKanren in
-its original form to establish some notions; we do not intend to describe the language in its full bloom (interested readers can
-refer to~\cite{TRS}). In Section~\ref{sec:goals} we describe some basic constructs behind a \miniKanren implementation, this time
-in OCaml. In Section~\ref{sec:unification} we discuss polymorphic unification, and show that unification with
+В главе\ref{sec:relworks} представлен обзор.
+Затем мы кратко излагаем miniKanren в его оригинальном виде и вводим некоторые понятия реляционного программирования. Изложения языка со всеми деталями не предполагается, интересующиеся читатели могут обратиться к книге~\cite{TRS} по реляционному программированию.
+В разделе~\ref{sec:goals} описываются необходимые конструкции для реализации реляционного языка, в это раз в контексте OCaml.
+\textcolor{red}{SPJ вообще говорил, что это не надо писать . TODO}
+%Оставшаяся часть работы структурирована следуюз
+%The rest of the paper is organized as follows: in the next section we provide a short overview of the related
+%works. Then we briefly introduce \miniKanren in
+%its original form to establish some notions; we do not intend to describe the language in its full bloom (interested readers can
+%refer to~\cite{TRS}). In Section~\ref{sec:goals} we describe some basic constructs behind a \miniKanren implementation, this time
+%in OCaml.
+In Section~\ref{sec:unification} we discuss polymorphic unification, and show that unification with
 triangular substitution respects typing. Then we present our approach to handle user-defined types by injecting them
 into the logic domain, and describe a convenient generic programming pattern, which can be used to implement the conversions from/to logic
 domain. We also consider a simple approach and a more elaborate and efficient tagless variant (see Section~\ref{sec:injection}).

@@ -33,9 +33,9 @@
 \end{lstlisting}
 Тип состояния \lstinline|state| описывает позицию в лениво строящемся дереве поиска:
 тип \lstinline|env| соответствует  \emph{окружению}, содержащему дополнительную информацию (в частности, для создания свежих переменных);
-\lstinline|subst| хранить подстановку, которая содержит отображения некоторых логических переменных;
-тип \lstinline|constraints| представляет ограничения-неравенства, которые надо соблюдать.
-В самом простом случае \lstinline|env| содержит только номер последней введённой свежей переменной, \lstinline|subst| --- это конечное отображение, а \lstinline|constraints| --- просто список подстановок.
+\lstinline|subst| хранит подстановку, которая содержит отображения некоторых логических переменных;
+тип \lstinline|constraints| представляет ограничения-неравенства, которые надо соблюдать (раздел~\ref{sec:diseq}).
+В самом простом случае \lstinline|env| содержит только номер последней введённой свежей переменной, \lstinline|subst| --- это конечное отображение, а \lstinline|constraints|~--- просто список подстановок.
 
 %Type \lstinline|state| describes a point in a lazily constructed search tree:
 % type \lstinline|env| corresponds to an \emph{environment}, which contains some supplementary information (in particular, an environment is needed to

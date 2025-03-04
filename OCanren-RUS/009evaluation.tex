@@ -8,27 +8,32 @@
 %\label{eval:second}
 %\end{figure}
 
-\section{Performance Evaluation}
+\section{Оценка производительности}
 \label{sec:evaluation}
 
-One of our initial goals was to evaluate what performance impact would choosing OCaml as a host language makes. In addition we spent some
-effort in order to implement \miniKanren in an efficient, tagless manner, and, of course, the outcome of this decision also has to be
-measured. For comparison we took faster-miniKanren\footnote{\url{https://github.com/webyrd/faster-miniKanren}}~--- a full-fledged
-\miniKanren implementation for Scheme/Racket. It turned out that faster-miniKanren implements a number of optimizations~\cite{WillThesis, Optimizations}
-to speed up the search; moreover, the search order in our implementation initially was a little bit different. In order to make the comparison
-fair, we additionally implemented all these optimizations and adjusted the search order to exactly coincide with
-what faster-miniKanren does.
+Изначально, с помощью тестирования производительности мы хотели оценить, какое влияние оказывает выбор языка OCaml для реляционного программирования.
+В дополнении к этому, реляцонное программирование было реализовано эффективно с помощью отказа от тегирования, и влияние этого решения тоже должно быть оценено.
+Для сравнения был выбрана реализация faster-miniKanren\footnote{\url{https://github.com/michaelballantyne/faster-minikanren}} для Scheme/Racket.
+В OCanren были реализованы оптимизации~\cite{WillThesis, Optimizations}, которые применяются в faster-miniKanren.
+Также была проведена работа по обходу дерева поиска одинаковым образом.
+%
+%One of our initial goals was to evaluate what performance impact would choosing OCaml as a host language makes.
+%In addition we spent some effort in order to implement \miniKanren in an efficient, tagless manner, and, of course, the outcome of this decision also has to be
+%measured. For comparison we took faster-miniKanren\footnote{\url{https://github.com/michaelballantyne/faster-minikanren}}~--- a full-fledged \miniKanren{} implementation for Scheme/Racket.
+%It turned out that faster-miniKanren implements a number of optimizations~\cite{WillThesis, Optimizations} to speed up the search; moreover, the search order in our implementation initially was a little bit different.
+%In order to make the comparison fair, we additionally implemented all these optimizations and adjusted the search order to exactly coincide with
+%what faster-miniKanren does.
 
 \begin{figure}[t]
 \centering
-\includegraphics[scale=0.4]{graph.png}
-\caption{The Results of the Performance Evaluation}
+\includegraphics[scale=0.8]{graph.png}
+\caption{Результаты оценки производительности}
 \label{eval}
 \end{figure}
 
 \FloatBarrier
 
-Для набора бенчмарков были выбраны следующие задачи:
+Для набора бенчмарков\footnote{\textcolor{red}{или как по-русски?}} были выбраны следующие задачи:
 %For the set of benchmarks we took the following problems:
 
 \begin{itemize}
@@ -46,16 +51,22 @@ what faster-miniKanren does.
 %split all benchmarks into two sets.
 
 Вычисления производились на компьютере с процессором Intel Core i7-4790K CPU @ 4.00GHz и 16GB памяти.
-For OCanren \texttt{ocaml-4.04.0+frame\_pointer+flambda} was used,
-for faster-miniKanren~--- Chez~Scheme~9.4.1.
-All benchmarks were executed in the natively compiled mode ten times, then average user time was taken. The results of the evaluation
-are shown on Figure~\ref{eval}. The whole evaluation repository with all scripts and detailed description is accessible
-from \lstinline|GitHub|\footnote{\url{https://github.com/Kakadu/ocanren-perf/tree/ispras-paper2025}}.
+Для OCanren использовался компилятор \texttt{OCaml-4.14.2+flambda}, для faster-miniKanren~--- Chez~Scheme~9.5.8.
+Все бенчмарки компилировались в нативный код и вычислялось среднее время за 40 испытаний.
+Результаты представлены на рисунке~\ref{eval}.
+Репозиторий с кодом и инструкции по воспроизведению эксперимента доступны на GitHub\footnote{\url{https://github.com/Kakadu/ocanren-perf/tree/ispras-paper2025}}.
+%All benchmarks were executed in the natively compiled mode ten times, then average user time was taken. The results of the evaluation
+%are shown on Figure~\ref{eval}. The whole evaluation repository with all scripts and detailed description is accessible
+%from \lstinline|GitHub|\footnote{\url{https://github.com/Kakadu/ocanren-perf/tree/ispras-paper2025}}.
 
-The first conclusion, which is rather easy to derive from the results, is that the tagless approach indeed matters. Our initial
-implementation did not show essential speedup in comparison even with $\mu$Kanren (and was even \emph{slower} on the logarithm
-and permutations benchmarks). The situation was improved drastically, however, when we switched to the tagless version.
+Наблюдения показывают, что важность нетегированного представления варьируется от задачи.
+В зависимости от видов термов, участвующих в унификации, прирост производительности будет разниться.
+Действительно, если термы являются копиями друг друга, то унификации нужно совершить полный обход термов. Если же термы не равны, то унификация может завершиться раньше, без полного обхода термов.
+%The first conclusion, which is rather easy to derive from the results, is that the tagless approach indeed matters. Our initial
+%implementation did not show essential speedup in comparison even with $\mu$Kanren (and was even \emph{slower} on the logarithm
+%and permutations benchmarks). The situation was improved drastically, however, when we switched to the tagless version.
 
-Yet, in comparison with faster-miniKanren, our implementation is still lagging behind. We can conclude that the optimizations
-used in the Scheme/Racket version, have a different impact in the OCaml case; we save this problem for future research.
+Также стоит отметить, что реализация на OCaml отстаёт по сравнению с реализацией для Chez Scheme. Вероятно, это связано с особенностями хранения данных~\cite{BIBOP94} в реализации компилятора. Детальное исследование различий сред исполнения OCaml и Scheme оставлено на будущее.
+%Yet, in comparison with faster-miniKanren, our implementation is still lagging behind. We can conclude that the optimizNfr;tations
+%used in the Scheme/Racket version, have a different impact in the OCaml case; we save this problem for future research.
 

@@ -20,7 +20,7 @@
 %an interpreter (capable of generating ``quines''~--- programs producing themselves as a result)~\cite{Untagged},
 %list sorting (capable of producing all permutations), etc.
 
-Многие языки логического программирования (например, Prolog, Mercury~\cite{MercuryFirstPaper} или Curry~\cite{CurryFirstPaper}) в некоторой степени могут считаться реляционными.
+Многие языки логического программирования (например, Prolog, Mercury~\cite{MercuryFirstPaper} или Curry~\cite{CurryFirstPaper}\footnote{\textcolor{red}{Это надо потом перегонять в Word, так что давайте не придираться к мелким косякам}}) в некоторой степени могут считаться реляционными.
 %Many logic programming languages, such as Prolog, Mercury~\cite{MercuryFirstPaper}, or Curry~\cite{CurryFirstPaper} to some extent can be considered relational.
 Нами был выбран \miniKanren\footnote{\url{http://minikanren.org}} как модельный язык, потому что он был специально спроектирован как предметно-ориенти\-рованный язык, встраиваемый в Scheme/Racket.
 %We have chosen \miniKanren\footnote{\url{http://minikanren.org}} as a model language, because it was specifically designed as a relational DSL, embedded in Scheme/Racket.
@@ -80,15 +80,16 @@ The contribution of our work is as follows:
 %can be used for arbitrary types. The implementation of polymorphic unification uses unsafe features and
 %relies on the intrinsic knowledge of the runtime representation of values; we show, however, that this does not
 %compromise type safety.
+\item Описан масштабируемый подход (глава~\ref{sec:examples}) к использованию типов при написании реляционных спецификаций, которые позволяет конвертировать данные из реляционного домена и в него. Подход основан на обобщённом программировании и позволяет более кратко и единообразно писать реляционные спецификации.
 
-\item We describe a uniform and scalable pattern for using types for relational programming, which
-helps in converting typed data to and from the relational domain. With this pattern, only one
-generic feature (``\lstinline|Functor|'') is needed, and thus virtually any generic
-framework for OCaml can be used. Although being rather a pragmatic observation, this pattern, we
-believe, would lead to a more regular and easy way to maintain relational specifications.
+%\item We describe a uniform and scalable pattern for using types for relational programming, which
+%helps in converting typed data to and from the relational domain. With this pattern, only one
+%generic feature (``\lstinline|Functor|'') is needed, and thus virtually any generic
+%framework for OCaml can be used. Although being rather a pragmatic observation, this pattern, we
+%believe, would lead to a more regular and easy way to maintain relational specifications.
 
 \item Представлен упрощенный способ интеграции реляционного и функционального кода.
-Они основан на известном метода~\cite{Unparsing, DoWeNeed}  реализации поливариадических функций, и позволяет скрыть процессе реификации (глава \ref{sec:reification}) от программиста-пользователя.
+Он основан на известном методе~\cite{Unparsing, DoWeNeed}  реализации поливариадических функций, и позволяет скрыть процессе реификации (глава \ref{sec:reification}) от программиста-пользователя.
 %Our approach utilizes
 %a well-known pattern~\cite{Unparsing, DoWeNeed} for variadic function implementation and makes it
 %possible to hide the reification\footnote{First mention, explain what it is} of the answers phase from an end user.

@@ -1,5 +1,5 @@
 MAIN=main
-ENGINE ?= pdflatex
+ENGINE ?= xelatex
 
 .PHONY: $(MAIN).pdf clean
 
@@ -22,5 +22,5 @@ $(MAIN).pdf: $(MAIN).fmt $(OCANREN_TEX)
 endif
 
 clean:
-	$(RM) *.aux *.bak *.bbl *.blg *.log *.out *.pag *.synctex.gz
+	$(RM) *.aux *.bak *.bbl *.blg *.fmt *.log *.out *.pag *.synctex.gz
 

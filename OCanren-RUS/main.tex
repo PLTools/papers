@@ -1,9 +1,9 @@
-  % !TEX TS-program = xelatex
+% !TEX TS-program = xelatex
 % !TeX spellcheck = ru_RU
 % !TEX root = main.tex
 
 
-\documentclass[acmsmall, language=english, language=russian
+\documentclass[acmsmall%, language=english, language=russian
   %, review
   %, xcolor
   %, hyperref={colorlinks=true}
@@ -11,7 +11,7 @@
 
 \input{preamble.tex}
 \input{preamble_listings.tex}
-
+\usepackage{cmap}
 %%
 %% \BibTeX command to typeset BibTeX logo in the docs
 \AtBeginDocument{%
@@ -200,7 +200,8 @@
 %%
 %% The next two lines define the bibliography style to be used, and
 %% the bibliography file.
-\bibliographystyle{ACM-Reference-Format}
+%\bibliographystyle[sorting=none]{ACM-Reference-Format}
+\bibliographystyle{unsrt}
 \bibliography{ocanren}
 
 

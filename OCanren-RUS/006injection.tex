@@ -7,7 +7,7 @@
 Полиморфная унификация из предыдущего раздела работает для значений произвольных типов, при условии, что можно отличать логические переменные от других термов.
 Это предположение зависит  от вида представления термов.
 В оригинальной реализации на языке Scheme все термы были обычными s-выражениями, а логические переменные (в простом случае) --- одноэлементными векторами.
-Пользователь обязан выполнять это соглашение и воздерживать от работы с пользовательскими значениями, состоящими из векторов.
+Пользователь обязан выполнять это соглашение и воздерживаться от работы с пользовательскими значениями, состоящими из векторов.
 
 %Polymorphic unification, considered in the previous section, works for the values of any type under the assumption that we
 %are capable of identifying logical variables. The latter depends on the term representation. In the original
@@ -41,7 +41,8 @@
 %\noindent  The type $\rho_t$ repeats the structure of $t$, but can contain logic variables. So, the injection is total, while the projection is partial.
 
 Важно спроектировать представление значений следуя некоторой обобщённой схеме, иначе комбинаторы miniKanren будет невозможно правильно протипизировать.
-Также желательно представить обобщённый способ получения пар инъекции/проекции (а ещё лучше, автоматизировать), чтобы снять с программиста груз ответственности о правильной их реализации. Наконец, представление должно представлять надежный способ отличать логические переменные.
+Также желательно представить обобщённый способ получения пар инъекции/проекции (а ещё лучше, автоматизировать), чтобы снять с программиста груз ответственности за правильную их реализацию.
+Наконец, представление должно позволять надежным образом отличать логические переменные от других значений.
 
 %It is important to design representations as instances of some generic scheme (otherwise, miniKanren combinators
 %could not be properly typed). In addition it is desirable to provide a generic way to build
@@ -52,7 +53,7 @@
 В этом разделе рассмотрен два способа реализовать логические представленя.
 Первый достаточно просто реализовать, но к сожалению реализация будет показывать низкую производительность на практически значимых примерах.
 Чтобы исправить этот недостаток, был разработан другой способ представления значений, который переиспользует некоторые компоненты первого.
-\textcolor{red}{В разделе~\ref{sec:evaluation} представлены результаты экспериментального сравнения производительности.}
+В разделе~\ref{sec:evaluation} представлены результаты экспериментального сравнения производительности.
 
 %In this part we consider two approaches to implementing logical representations.  The first is rather easy to
 %develop and implement; unfortunately, the implementation demonstrates a poor performance for a number of
@@ -60,7 +61,7 @@
 %nevertheless reuses some components from the previous one. In Section~\ref{sec:evaluation}
 %we present the results of performance evaluation for both approaches.
 
-\subsection{Теггированные логические значения}
+\subsection{Тегированные логические значения}
 
 Наиболее естественным решением будет тегированное логическое представление.
 Вводится полиморфный тип $[\alpha]$\footnote{В конкретном синтаксисе ``$\alpha\;$\lstinline|logic|''}, который соответствует логическому представлению типа $\alpha$.
@@ -95,7 +96,7 @@
 Кроме переменных, другие логические значения также могут быть получены с помощью инъекции.
 И наоборот, иногда логические значения могут быть спроецированы в обычные.
 Для этого предоставляются два базовых примитива\footnote{В конкретном синтаксисе это \enquote{\lstinline|inj|} and \enquote{\lstinline|prj|}.},
-которые могут быть использованы для \emph{поверхностной} инъекции/проекции. Как и ожидается, инъекция тотальна, а проекция --- частичная функция.
+которые могут быть использованы для \emph{поверхностной} инъекции/проекции. Как и ожидается, инъекция тотальная, а проекция --- частичная функция.
 
 %Apart from variables, other logical values can be obtained by injection; conversely, sometimes a logical value can be projected to
 %a regular one. We supply two basic functions\footnote{In concrete syntax called ``\lstinline|inj|'' and ``\lstinline|prj|''.}
@@ -130,8 +131,8 @@
    type $\alpha$ list = Nil | Cons of $\alpha$ * $\alpha$ list
 \end{lstlisting}
 
-В этом типе можно использовать логические переменные только на месте элементов списка, но не вместо хвоста, так как там ожидается значение типа \lstinline|$\alpha$ list|, зафиксированного в конструкторе  \lstinline|Cons|.
-Чтобы получить подходящее логическое представление, вначале абстрагируем тип дл полностью полиморфного функтора:
+В этом типе можно использовать логические переменные только на месте элементов списка, но не вместо \enquote{хвоста}, так как там ожидается значение типа \lstinline|$\alpha$ list|, зафиксированного в конструкторе  \lstinline|Cons|.
+Чтобы получить подходящее логическое представление, вначале абстрагируем тип полностью полиморфного функтора:
 
 % For this type we can only place a logical variable in the position of a list element, but not of the tail, since the tail always has the type \lstinline|$\alpha$ list|, fixed in the definition of constructor \lstinline|Cons|.
 %In order to create a full-fledged logical representation, we first have to abstract the type into a fully-polymorphic functor:
@@ -182,10 +183,10 @@
 %variables by their tags only and, thus, cannot simply use pattern matching. In our implementation we perform a variable test as follows:
 
 \begin{itemize}
-\item в окружении хранится дополнительное значение-якорь, создаваемое вместе с начальным состоянием; этот якорь не изменяется для всех производных состояний во время запуска \lstinline=run=;
+\item в окружении хранится дополнительное значение-\enquote{якорь}, создаваемое вместе с начальным состоянием; этот \enquote{якорь} не изменяется для всех производных состояний во время запуска \lstinline=run=;
 %\item in an environment, we additionally keep some unique boxed value~--- the \emph{anchor}~--- created by \lstinline|run| at the moment of initial
 %state generation; the anchor is inherited unchanged in all derived environments during the search session;
-\item  в тип логических переменных добавлен якорь, который при берется из окружения и при создании переменных кладется в них.
+\item  в тип логических переменных добавлен \enquote{якорь}, который при берется из окружения и при создании переменных кладется в них.
 %we change the logic type definition into
 
 \begin{lstlisting}
@@ -199,7 +200,7 @@
 
   \begin{enumerate}
     \item рассматриваемое значение является boxed;
-    \item тек и раскладка в памяти соответствует переменным, т.е. значениям, построенным с помощью конструктора \lstinline|Var| из типа \lstinline{[$\alpha$]};
+    \item тег и раскладка в памяти соответствует переменным, т.е. значениям, построенным с помощью конструктора \lstinline|Var| из типа \lstinline{[$\alpha$]};
     %the scrutinee's tag and layout correspond to those for variables (i.e. the values, created with the constructor \lstinline|Var| of type \lstinline{[$\alpha$]});
     \item адрес якоря соответствует адресу якоря в текущем окружении.
     %the scrutinee's anchor and the current environment's anchor have equal addresses.
@@ -220,8 +221,9 @@
 \end{lstlisting}
 
 Функция принимает состояние и логическое значение, и рекурсивно совершает подстановку всех переменных в логическом значении до тех пор, пока остаются связанные переменные. Так как наша реализация подстановки не является полиморфной, то функция \lstinline|reify| также реализована в небезопасном стиле.
-Но легко показать, что \lstinline|reify| не создает неправильно типизированные термов. Все оригинальные типы переменных не нарушаются при подстановке, унификация также не изменяет унифицированных термов, а все термы в подстановке корректно типизированы.
-Следовательно, \lstinline|reify| всегда подставляет подтермы в правильно типизированном терме, но термы таких же типов, что обуславливает безопасность системы типов.
+Но легко показать, что \lstinline|reify| не создает неправильно типизированных термов.
+Все термы в подстановке корректно типизированы, подстановка осуществляет замену переменных на термы такого же типа, а унификация не изменяет типы унифицируемых термов.
+Следовательно, \lstinline|reify| всегда подставляет в правильно типизированном терме подтермы на термы таких же типов, что обуславливает безопасность системы типов.
 
 %This function takes a state and a logic value and recursively substitutes all logic variables in that value w.r.t.
 %the substitution in the state until no occurrences of bound variables are left. Since in our implementation the type of a substitution is
@@ -233,7 +235,7 @@
 Кроме осуществления подстановки функция  \lstinline|reify| также реифицирует ограничения-неравенства.
 При этом к каждой свободной переменной приписывается список реифицированных термов, представляющий ограничения-неравенства для этой свободной переменной.
 Заметим, что ограничения неравенства могут быть созданы только для одинаково типизированных термов, что обосновывает типовую безопасность реификации.
-Обратим также внимание, что нужны дополнительные проверки для избежания зацикливания реификации, так реификация ответов и ограничений взаимно рекурсивны, а реификация ответа может вызвать саму себя по цепочке ограничений-неравенств. В примере ниже
+Обратим также внимание, что нужны дополнительные проверки для избежания зацикливания реификации, так как реификация ответов и ограничений взаимно рекурсивны, а реификация ответа может вызвать саму себя по цепочке ограничений-неравенств. В примере ниже
 
 %In addition to performing substitutions, \lstinline|reify| also reifies disequality constraints. Constraint reification
 %attaches to each free variable in a reified term a list of reified terms, describing the disequality constraints for that
@@ -265,7 +267,7 @@
 
 \subsection{Логические переменные без тегирования. Отслеживание типов}
 
-Решение, предложенное выше, страдает существенным недостатком: чтобы произвести унификацию, необходимо привести термы в логический домен, что сделает их в два раза больше. В результате, эта реализация проиграет по производительности оригинальной.
+Решение, предложенное выше, страдает существенным недостатком: чтобы произвести унификацию, необходимо погрузить термы в логический домен, что сделает их в два раза больше. В результате, эта реализация проиграет по производительности оригинальной.
 
 
 
@@ -281,16 +283,12 @@
    type $[\alpha]$ = $\alpha$
 \end{lstlisting}
 
+%\begin{lstlisting}
+%   type var = Var of int * anchor
+%\end{lstlisting}
 \noindent Как следствие станет невозможно конструировать данные с переменными внутри путём использования конструкторов,
 а придется использовать специальные функции-конструк\-торы.
-
-%What consequences would this have? Of course, we would not be able to create logical variables in a conventional way. However, we still could have a separate type of variables
-
-\begin{lstlisting}
-   type var = Var of int * anchor
-\end{lstlisting}
-
-\noindent Так как тип $[\alpha]$ абстрактный, эти модификации не меняют интерфейса взаимодействия с данными из реляционного кода.
+В нашей реализации тип $[\alpha]$ абстрактный, поэтому эти модификации не меняют интерфейса взаимодействия с данными из реляционного кода.
 Но при этом всё ещё возможно представлять переменные старым способом, переиспользовав алгоритм проверки на переменные,
 а реализация полиморфной унификации остается \emph{почти} такой же.
 Некоторой проблемой является то, что можно вводить переменные в нелогические и нетегированные данные.
@@ -310,18 +308,17 @@
 %   val reify : state -> $[\alpha]$ -> $[\alpha]$,
 %\end{lstlisting}
 не годится, так как тип аргумента совпадает с типом результата $[\alpha]$.
-Хотелось бы что-то похожее на \lstinline|val reify : state -> $[\alpha]$ -> $(\mbox{``tagged'' } [\alpha])$|.
-
+Хотелось бы что-то похожее на
+\begin{lstlisting}
+  val reify : state -> $[\alpha]$ -> $(\mbox{``tagged'' } [\alpha])$|.
+\end{lstlisting}
 %anymore since $[\alpha]$ now equals $\alpha$. We \emph{want}, however, it be something like
 %
-%\begin{lstlisting}
-%   val reify : state -> $[\alpha]$ -> $(\mbox{``tagged'' } [\alpha])$
-%\end{lstlisting}
 
 Если $\alpha$ --- тип без параметров, то можно затегировать результат конструкторами \lstinline|Var| или \lstinline|Value|  в зависимости того переменная это или нет.
 Всё несколько сложнее для типов с параметрами, например, для типа целочисленных списков \lstinline|$[[$int$]$ list$]$|.
 Здесь надо не только тегировать не верхнем уровне, но и запускать реификацию с тегированием рекурсивно для подвыражений внутри.
-Итого, необходим следующий (мета)тип для функции реификации: \lstinline|val reify : state -> $[\alpha]$ -> $\mbox{(``tagged''} [\beta])$|,
+Итого, необходим следующий (мета)тип для функции реификации, где $\beta$ --- тип затегированного $\alpha$: %\lstinline|val reify : state -> $[\alpha]$ -> $\mbox{(``tagged''} [\beta])$|,
 %
 %If $\alpha$ is not a parametric type, we can simply test if the value is a variable, and if yes, tag it with the constructor \lstinline|Var|;
 %we tag it with \lstinline|Value| otherwise, and we're done. This trick, however, would not work for parametric types. Consider, for example,
@@ -329,11 +326,11 @@
 %The (hypothetical) approach being described would return a value of type \lstinline|$(\mbox{``tagged'' }[[$int$]$ list$])$|, i.e. tagged only on the top level; we need to repeat the procedure
 %recursively. In other words, we need the following (meta) type for the reification primitive:
 %
-%\begin{lstlisting}
-%   val reify : state -> $[\alpha]$ -> $\mbox{(``tagged''} [\beta])$
-%\end{lstlisting}
+\begin{lstlisting}
+  val reify : state -> $[\alpha]$ -> $\mbox{(``tagged''} [\beta])$.
+\end{lstlisting}
 %
-где $\beta$ --- тип затегированного $\alpha$.
+
 %\noindent where $\beta$ is the result of tagging $\alpha$.
 
 Эти наблюдения обосновывают выбранную конкретную реализацию.
@@ -373,6 +370,12 @@
 Все реификаторы являются двупараметрическими типами, инкапсулирущими преобразование из логического домена в некоторый кодомен.
 Например, для списков необходимо получить реификатор с типом \lstinline=(int ilogic injected, [int] list$^o$) reifier=.
 
+Вот пример реификатора для списков, который можно построить, предъявив реификатор \lstinline=ra= для элементов списка.
+Сами реификаторы по сути являются монадами Reader, которые хранят в себе информацию для определения переменных в терме.
+Типы реификаторов абстрактные, чтобы пользователь не смог провести реификацию переменных, созданных не в том состоянии.
+При реализации реификации используется интерфейс аппликативных функторов с операциями \lstinline=pure=  и \lstinline=<*>=.
+Также используются комбинатороы неподвижных точек для реификаторов (\lstinline=Reifier.fix=) и для call-by-value языков (\lstinline=Reifier.zed=),
+а ещё специальная функция \lstinline=chain=. Примитив \lstinline=reify= проводит поверхностную реификацию, а функция \lstinline=rework= рекурсивно запускает реификацию для подвыражений и ограничений-неравенств, если таковые присутствуют.
 \begin{lstlisting}
   val chain:  ('a reifier -> 'b reifier) -> ('a -> 'b) reifier
 
@@ -386,15 +389,11 @@
              (Reifier.rework ~fv:(fmapt ra self)) ) )
 \end{lstlisting}
 
-\noindent Выше пример кода с реификатором для списков, который можно построить, предъявив реификатор \lstinline=ra= для элементов списка.
-Сами реификаторы по сути являются монадами Reader, которые хранят в себе информацию для определения переменных в терме.
-Типы реификаторов абстрактные, чтобы пользователь не смог провести реификацию переменных, созданных не в том состоянии.
-При реализации реификации используется интерфейс аппликативных функторов с операциями \lstinline=pure=  и \lstinline=<*>=.
-Также используются комбинатороы неподвижных точек для реификаторов (\lstinline=Reifier.fix=) и для call-by-value языков (\lstinline=Reifier.zed=),
-а ещё специальная функция \lstinline=chain=. Примитив \lstinline=reify= проводит поверхностную реификацию, а функция \lstinline=rework= рекурсивно запускает реификацию для подвыражений и ограничений-неравенств, если таковые присутствуют.
 
-Функции \lstinline=chain=, \lstinline=OCanren.reify= и комбинаторы неподвижной точки определены один раз для всех типов, и пользователю для своего типа данных необходимо реализовать только \lstinline=fmapt=, \lstinline=reify= и функции конструкторы, упомянутые выше.
-Для облегчения этого было разработано синтаксическое расширение, которое по объявлению типа порождает всё необходимое во время компиляции. Пример его использования можно найте в разделе~\ref{sec:examples}.
+
+Функции \lstinline=chain=, \lstinline=OCanren.reify= и комбинаторы неподвижной точки определены один раз для всех типов, и пользователю для своего типа данных необходимо реализовать только \lstinline=fmapt=, \lstinline=reify= и функции-конструкторы, упомянутые выше.
+Для облегчения этого было разработано синтаксическое расширение, которое по объявлению типа порождает всё необходимое во время компиляции.
+Пример его использования можно найти в разделе~\ref{sec:examples}.
 
 \begin{comment}
 

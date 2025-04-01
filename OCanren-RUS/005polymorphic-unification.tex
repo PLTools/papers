@@ -49,7 +49,7 @@
 \begin{array}{rcl}
   \tau,\dots&\text{---}&\mbox{типы;}\\
   x^\tau,\dots&\text{---}&\mbox{типизированные логические переменные;}\\
-  C_k^{\tau_1\times\tau_2\times\dots\times\tau_k\to\tau} (k\ge 0),\dots&\text{---}&\mbox{конструкторы типов.}
+  C_k^{\tau_1\times\tau_2\times\dots\times\tau_k\to\tau} (k\geqslant 0),\dots&\text{---}&\mbox{конструкторы типов.}
 \end{array}
 \]
 
@@ -79,8 +79,8 @@ $$
 $$
 \end{comment}
 
-В данном изложении   не рассматриваем произвольные структуры над множеством типов, содержащие что-то кроме операции равенства.
-Также   считаем, что всем термам во время исполнения соответствует некоторый тип.
+%В данном изложении   не рассматриваем произвольные структуры над множеством типов, содержащие что-то кроме операции равенства.
+Мы считаем, что всем термам во время компиляции соответствует некоторый тип.
 Воспользуется этим свойством чтобы реализовать алгоритм унификации на OCaml, используя некоторые представления для термов и типов:
 %In this formulation we do not consider any structure over the set of types besides type equality, and we assume all terms are explicitly
 %attributed to their types at runtime. We employ this property to implement a unification algorithm in regular OCaml, using some
@@ -92,7 +92,7 @@ $$
 
 \noindent где \enquote{\lstinline=term=} соответствует типу представления типизированных термов, а \enquote{\lstinline=subst=} --- это подставнока (частичное отображение переменных в термы).
 Унификация может закончиться неуспешно (поэтому в типе результат присутствует \enquote{\lstinline=option=}),
-выполняется в контексте некоторой подстановки (поэтому \enquote{\lstinline=subst=} в третьем аргументе) и может запускать по цепочке (для этого
+выполняется в контексте некоторой подстановки (поэтому \enquote{\lstinline=subst=} в третьем аргументе) и может запускаться по цепочке (для этого
 \enquote{\lstinline=option=} в третьем аргументе).
 
 %\noindent where \enquote{\lstinline=term=} stands for the type representing typed terms, and \enquote{\lstinline=subst=} stands for the type of
@@ -132,7 +132,7 @@ $$
 
 \noindent Напоминаем читателю, что в верхних индексах указаны типы, которые мы считаем частью значений.
 Например, в строке 1 имеется в виду, что мы запускаем \lstinline|unify|
-от термов $t_1$ и $t_2$, у которых один и тот же тип $\tau$. Предположим, что самый первый запуск унификации происходит от термов одного типа, и что любая подстановка может быть получена только с помощью одной или последовательности унификаций.
+от термов $t_1$ и $t_2$, у которых один и тот же тип $\tau$. Предположим, что самый первый запуск унификации происходит от термов одного типа, и что любая подстановка может быть получена только с помощью одной или нескольких унификаций.
 
 %We remind the reader that all superscripts correspond to type attributes, which we consider here as
 %parts of values being manipulated. For example, line 1 means that we apply \lstinline|unify|
@@ -172,8 +172,9 @@ $$
 Итак, атрибуты с типами не важны --- они никогда не анализируются и не ограничивают сопоставления с образцом, а значит могут быть полностью стёрты.
 Также стоит обратить внимание, что представлением термов может служить обычное представление среды исполнения OCaml.
 Но это нельзя сделать естественным способом, придется воспользоваться низкоуровневым интерфейсом модуля \lstinline|Obj|\footnote{\url{https://ocaml.org/manual/5.3/api/Obj.html}~(проверено 28 января 2025 г.)}.
-Также понадобится некоторый способ отличать вхождения логических переменных в терм, в оригинальной реализации эта проблема решалась с помощью договоренности --- роскошь, которую мы не может себе позволить\footnote{\textcolor{red}{как-то коряво}}.
-Вернемся к этому вопросу в следующем разделе.
+Также понадобится некоторый способ отличать вхождения логических переменных в терм, в оригинальной реализации эта проблема решалась с помощью договоренности --- роскошь, которую мы не может себе позволить.
+%\footnote{\textcolor{red}{как-то коряво}}.
+Мы вернемся к этому вопросу в следующем разделе.
 
 %So, type attributes are inessential~--- they are never analyzed and never restrict pattern matching; hence,
 %they can be erased completely.
@@ -182,7 +183,7 @@ $$
 %Note also, we need some way to identify the occurrences of logical variables inside the terms (in the original \miniKanren{} implementation the ambiguity between variable and non-variable datum representation is resolved by a convention~--- a luxury we cannot afford).
 %We postpone the discussion on this subject until the next section.
 
-Реализация унификации называется \emph{полиморфной}, потому что на верхнем уровне можно приписать тип
+Реализация унификации называется \emph{полиморфной}, потому что на верхнем уровне ей можно приписать тип
 %We call our implementation \emph{polymorphic}, since at the top level it is defined as
 
 \begin{lstlisting}

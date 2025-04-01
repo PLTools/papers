@@ -11,9 +11,9 @@
 Это интересно не только с теоретической точки зрения, но обладает и практической ценностью: некоторые задачи выглядят проще, если их рассматривать как запросы к некоторой реляционной спецификации~\cite{WillThesis}.
 %Apart from being interesting from a purely theoretical standpoint, this approach may have a practical value: some problems look much simpler when considered as queries to some relational specification~\cite{WillThesis}.
 Можно назвать некоторое количество примеров, которые подтверждают это наблюдение:
-алгоритм проверки типов для просто типизированного $\lambda$-исчисления (и в то же время алгоритм вывода типов и проверки населенности термов);
+алгоритм проверки типов для просто типизированного $\lambda$-исчисления (и в то же время алгоритм вывода типов и проверки населенности типов);
 интерпретатор, способный синтезировать \enquote{квайны}~--- программы, вычисляющиеся в самих себя;
-сортировка списков, способная породить все перестановки; т.п.
+сортировка списков, способная породить все перестановки, т.п.
 %There are a number of appealing examples confirming this observation:
 %a type checker for simply typed lambda calculus (and, at the same time,
 %a type inferencer and solver for the inhabitation problem),
@@ -24,7 +24,7 @@
 %Many logic programming languages, such as Prolog, Mercury~\cite{MercuryFirstPaper}, or Curry~\cite{CurryFirstPaper} to some extent can be considered relational.
 Нами был выбран \miniKanren\footnote{\url{http://minikanren.org}} как модельный язык, потому что он был специально спроектирован как предметно-ориенти\-рованный язык, встраиваемый в Scheme/Racket.
 %We have chosen \miniKanren\footnote{\url{http://minikanren.org}} as a model language, because it was specifically designed as a relational DSL, embedded in Scheme/Racket.
-Он довольно минималистичен --- может быть реализован с помощью малого количества структур данных и комбинаторов~\cite{MicroKanren, MuKanrenNew} --- и поэтому можно найти реализации, где его уже реализовали для других языков программирования общего назначения, включая Scala, Haskell and Standard ML.
+Он довольно минималистичен --- может быть реализован с помощью малого количества структур данных и комбинаторов~\cite{MicroKanren, MuKanrenNew} --- и поэтому можно найти реализации, где его уже реализовали для других языков программирования общего назначения, включая Scala, Haskell и Standard ML.
 %Being rather a minimalistic language, which can be implemented with just a few data structures and combinators~\cite{MicroKanren, MuKanrenNew}, \miniKanren{} found its way into dozens of host languages, including Scala, Haskell and Standard ML.
 Парадигму в основе miniKanren можно описать как \enquote{легковесное логическое программирование}\footnote{Детальное сравнение miniKanren и Prolog можно найти здесь: \url{http://minikanren.org/minikanren-and-prolog.html} (проверено: \DTMDate{2025-01-10}).}.
 %The paradigm behind \miniKanren can be described as ``lightweight logic programming''\footnote{An in-depth comparison of \miniKanren and Prolog can be found here: \url{http://minikanren.org/minikanren-and-prolog.html}}.
@@ -34,10 +34,10 @@
 Во-первых, типизация даёт некоторый уровень корректности, отсеивая патологические программы, выдающие патологические результаты.
 В контексте реляционного программирования типизация также помогает интерпретировать результаты запросов.
 Часто ответы на реляционные запросы содержат свободные переменные, которые можно заменять на произвольные значения.
-В типизированном случае эти переменные становятся типизированными, что упрощая понимание ответов, особенно с большим количеством свободных переменных.
+В типизированном случае эти переменные становятся типизированными, что упрощает понимание ответов, особенно с большим количеством свободных переменных.
 Во-вторых, некоторые программы на \miniKanren{} требуют реализации и использования специальных ограничений.
-В слабо типизированном случае, где всё может быть чем угодно, некоторые символы и структуры данных могут просачиваться в нежелательные места~\cite{Untagged}.
-Чтобы это предотвращать в miniKanren для Scheme были добавление дополнительные ограничения (``\lstinline|absent$^o$|``, ``\lstinline|symbol$^o$|'').
+В слабо типизированном случае, где всё может быть чем угодно, некоторые символы и структуры данных могут \enquote{просачиваться} в нежелательные места~\cite{Untagged}.
+Чтобы это предотвращать в miniKanren для Scheme были добавлены дополнительные ограничения (``\lstinline|absent$^o$|``, ``\lstinline|symbol$^o$|'').
 Эти ограничения важны для слабых динамических систем типов, так как они отсекают ответы во время исполнения.
 В статически типизированных языках эта работа может быть переложена на систему типов (при условии, что программист реализует их правильно), что не только улучшит производительность, но и уменьшит количество примитивов miniKanren, которые требуется реализовать.
 
@@ -60,12 +60,13 @@
 %to expect better performance of a statically-typed implementation.
 
 В работе представлена реализация\footnote{\url{https://github.com/PLTools/OCanren}} реляционных комбинаторов и синтаксических расширений для языка OCaml под названием OCanren,
-которая в том числе поддерживает ограничения-неравенства~\cite{CKanren} и  оптимизации faster-miniKanren\footnote{\url{https://github.com/michaelballantyne/faster-minikanren}}.
+которая в том числе поддерживает ограничения-неравенства~\cite{CKanren} и  оптимизации faster-miniKanren\footnote{\url{https://github.com/michaelballantyne/faster-minikanren}},
+которые применяются в наиболее полных реализациях.
 %We present an implementation of a set of relational combinators and syntax extensions for
 %OCaml\footnote{The source code of our implementation is accessible from \url{https://github.com/dboulytchev/OCanren}.},
 %which, technically speaking, corresponds to $\mu$Kanren~\cite{MicroKanren} with disequality
 %constraints~\cite{CKanren}.
-The contribution of our work is as follows:
+\textcolor{red}{The contribution of our work is as follows}:
 
 \begin{enumerate}
 \item Реализованное встраивание позволяет программисту использовать статическую типизацию и вывод типов в реляционных спецификациях. В частности, ошибки типизации находятся во время компиляции и типы логических переменных выводятся из контекста.
@@ -95,8 +96,8 @@ The contribution of our work is as follows:
 %possible to hide the reification\footnote{First mention, explain what it is} of the answers phase from an end user.
 \end{enumerate}
 
-В главе\ref{sec:relworks} представлен обзор.
-Затем мы кратко излагаем miniKanren в его оригинальном виде и вводим некоторые понятия реляционного программирования. Изложения языка со всеми деталями не предполагается, интересующиеся читатели могут обратиться к книге~\cite{TRS} по реляционному программированию.
+В главе~\ref{sec:relworks} представлен обзор.
+Затем мы кратко описываем основные конструкции miniKanren в его оригинальном виде и вводим некоторые понятия реляционного программирования. Изложения языка со всеми деталями не предполагается, интересующиеся читатели могут обратиться к книге~\cite{TRS} по реляционному программированию.
 В разделе~\ref{sec:goals} описываются необходимые конструкции для реализации реляционного языка, в это раз в контексте OCaml.
 \textcolor{red}{SPJ вообще говорил, что это не надо писать . TODO}
 %Оставшаяся часть работы структурирована следуюз
@@ -105,17 +106,21 @@ The contribution of our work is as follows:
 %its original form to establish some notions; we do not intend to describe the language in its full bloom (interested readers can
 %refer to~\cite{TRS}). In Section~\ref{sec:goals} we describe some basic constructs behind a \miniKanren implementation, this time
 %in OCaml.
-In Section~\ref{sec:unification} we discuss polymorphic unification, and show that unification with
-triangular substitution respects typing. Then we present our approach to handle user-defined types by injecting them
-into the logic domain, and describe a convenient generic programming pattern, which can be used to implement the conversions from/to logic
-domain. We also consider a simple approach and a more elaborate and efficient tagless variant (see Section~\ref{sec:injection}).
-Section~\ref{sec:reification} describes top-level primitives and addresses the problem of relational and functional code integration.
-Then, in Section~\ref{sec:examples} we present a set of relational examples, written with the aid of our
-library. Section~\ref{sec:evaluation} contains the results of a performance evaluation and a comparison of our implementations
-with existing implementation for Scheme. The final section concludes.
+В разделе~\ref{sec:unification} вводится полиморфная унификация,  а также показано, что этот алгоритм унификации с использованием треугольной подстановки не нарушает корректности типов.
+Затем представлены возможности по поддержке пользовательских типов данных путём их инъекции в логический домен, а также шаблон обобщённого программирования, который позволяет реализовывать преобразования в логический домен и обратно.
+%Then we present our approach to handle user-defined types by injecting them into the logic domain, and describe a convenient generic programming pattern, which can be used to implement the conversions from/to logic domain.
+Также представлен (раздел~\ref{sec:injection}) более сложный подход, где данные представляются без тегирования ради эффективности.
+%We also consider a simple approach and a more elaborate and efficient tagless variant (see Section~\ref{sec:injection}).
+В разделе~\ref{sec:reification} описаны конструкции верхнего уровня и обсуждается задача интеграции функционального и реляционного кода.
+%top-level primitives and addresses the problem of relational and functional code integration.
+Затем представлены несколько примеров (раздел~~\ref{sec:examples}) написания реляционных программ, с помощью нашей библиотеки.
+%in Section~\ref{sec:examples} we present a set of relational examples, written with the aid of our library.
+В разделе~\ref{sec:evaluation} приведены результаты оценки производительности нашего подхода и реализаций miniKanren на языке Scheme.
+%Section~\ref{sec:evaluation} contains the results of a performance evaluation and a comparison of our implementations with existing implementation for Scheme.
+%The final section concludes.
 
-The authors would like to express a deep gratitude to the anonymous rewievers for their numerous constructive comments, Michael Ballantyne, Greg Rosenblatt,
-and the other attendees of the miniKanren Google Hangouts, who helped the authors in understanding the subtleties of the original miniKanren
-implementation, Daniel Friedman for his remarks on the preliminary version of the paper, and William Byrd for all his help and support, which cannot be
-overestimated.
+%The authors would like to express a deep gratitude to the anonymous rewievers for their numerous constructive comments, Michael Ballantyne, Greg Rosenblatt,
+%and the other attendees of the miniKanren Google Hangouts, who helped the authors in understanding the subtleties of the original miniKanren
+%implementation, Daniel Friedman for his remarks on the preliminary version of the paper, and William Byrd for all his help and support, which cannot be
+%overestimated.
 

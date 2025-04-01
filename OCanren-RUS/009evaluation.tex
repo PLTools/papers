@@ -15,7 +15,7 @@
 В дополнении к этому, реляцонное программирование было реализовано эффективно с помощью отказа от тегирования, и влияние этого решения тоже должно быть оценено.
 Для сравнения был выбрана реализация faster-miniKanren\footnote{\url{https://github.com/michaelballantyne/faster-minikanren}} для Scheme/Racket.
 В OCanren были реализованы оптимизации~\cite{WillThesis, Optimizations}, которые применяются в faster-miniKanren.
-Также была проведена работа по обходу дерева поиска одинаковым образом.
+Также была проведена работа по обеспечению обхода дерева поиска одинаковым образом.
 %
 %One of our initial goals was to evaluate what performance impact would choosing OCaml as a host language makes.
 %In addition we spent some effort in order to implement \miniKanren in an efficient, tagless manner, and, of course, the outcome of this decision also has to be
@@ -33,7 +33,7 @@
 
 \FloatBarrier
 
-Для набора бенчмарков\footnote{\textcolor{red}{или как по-русски?}} были выбраны следующие задачи:
+Для набора тестов были выбраны следующие задачи:
 %For the set of benchmarks we took the following problems:
 
 \begin{itemize}

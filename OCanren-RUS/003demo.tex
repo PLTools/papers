@@ -5,7 +5,7 @@
 \label{sec:demo}
 
 В этом разделе miniKanren будет кратко описан в его оригинальном виде на основе канонических примеров.
-Предметно-ориентированный язык организован как набор комбинаторов и макросов для Scheme/Racket, которые должны описывать поиск некоторой \enquote{цели} (англ. goal).
+Предметно-ориентированный язык организован как набор комбинаторов и макросов для Scheme/Racket, которые должны описывать поиск решения для некоторой \enquote{цели} (англ. goal).
 Ядро языка состоит из четырех реляционных конструкции для создания целей:
 %In this section we briefly describe miniKanren in its original form, using a canonical example.
 %\miniKanren is organized as a set of combinators and macros for Scheme/Racket, designated to describe
@@ -42,7 +42,7 @@
 %conjunction of all $g^i_j$) and tries to satisfy each of them independently~--- in other words, operates on them
 %as a disjunction.
 
-\item Создание новых (англ. fresh) логических переменных осуществляется с помощью
+\item Создание новых (англ. fresh) логических переменных осуществляется с помощью конструкции
 
 \begin{lstlisting}[language=scheme]
    (fresh ($x_1\;\;x_2\;\;\dots\;\;x_k$)

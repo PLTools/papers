@@ -14,7 +14,10 @@
 Изначально, с помощью тестирования производительности мы хотели оценить, какое влияние оказывает выбор языка OCaml для реляционного программирования.
 В дополнении к этому, реляцонное программирование было реализовано эффективно с помощью отказа от тегирования, и влияние этого решения тоже должно быть оценено.
 Для сравнения был выбрана реализация faster-miniKanren\footnote{\url{https://github.com/michaelballantyne/faster-minikanren}} для Scheme/Racket.
-В OCanren были реализованы оптимизации~\cite{WillThesis, Optimizations}, которые применяются в faster-miniKanren.
+В OCanren были реализованы
+оптимизации~\cite{WillThesis},% Выпилен Personal Communications по причине шаблона ИСП РАН
+%оптимизации~\cite{WillThesis, Optimizations},
+которые применяются в faster-miniKanren.
 Также была проведена работа по обеспечению обхода дерева поиска одинаковым образом.
 %
 %One of our initial goals was to evaluate what performance impact would choosing OCaml as a host language makes.

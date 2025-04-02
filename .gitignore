@@ -1,5 +1,9 @@
 *.aux
+*.bbl
+*.blg
 *.brf
+*.fdb_latexmk
+*.fls
 *.log
 *.nav 
 *.out
@@ -7,11 +11,9 @@
 *.synctex.gz
 *.toc
 *.vrb
-*.bbl
-*.blg
-
 *.pdf
 .aspell.*
+*.xdv
 
 comment.cut 
 *.fmt

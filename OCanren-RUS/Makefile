@@ -6,10 +6,12 @@ ENGINE ?= xelatex
 all: $(MAIN).pdf
 
 OCANREN_TEX=$(shell ls *.tex)
-$(info $(OCANREN_TEX))
+#$(info $(OCANREN_TEX))
 
-ifeq ("$$(ENGINE)","xelatex")
-
+ifeq ("$(ENGINE)","xelatex")
+$(MAIN).pdf: $(OCANREN_TEX)
+	#/usr/bin/time -f "%U" $(ENGINE) -synctex=1 $(MAIN).tex
+	latexmk -$(ENGINE) -synctex=1 -interaction=nonstopmode -file-line-error -shell-escape $(MAIN).tex
 else
 $(MAIN).fmt: $(OCANREN_TEX)
 	$(ENGINE) -synctex=1 -ini -jobname="$(@:.fmt=)" "&$(ENGINE)" mylatexformat.ltx $(MAIN).tex

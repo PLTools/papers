@@ -24,5 +24,5 @@ $(MAIN).pdf: $(MAIN).fmt $(OCANREN_TEX)
 endif
 
 clean:
-	$(RM) *.aux *.bak *.bbl *.blg *.fmt *.log *.out *.pag *.synctex.gz
+	$(RM) *.aux *.bak *.bbl *.blg *.fdb *.fdb_latexmk *.fls *.fmt *.log *.out *.pag *.synctex.gz *.xdv
 

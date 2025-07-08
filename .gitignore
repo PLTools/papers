@@ -19,3 +19,6 @@ comment.cut
 *.txss2
 *.synctex\(busy\)
 
+# Word temporary files
+\~*.docx
+

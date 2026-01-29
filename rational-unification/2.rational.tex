@@ -1,0 +1,142 @@
+\section{Rational Terms}
+
+In this section we introduce rational terms and substitutions, and discuss their properties.
+
+First, we define the set of variables $x, y, z, ... \in \V$ and the set of constructors $\C$ as countably infinite sets. Also, we assume there is a function $arity : \C \rightarrow \N$ which defines the arities of constructors and denote constructors as $f^n, g^m, ... \in \C$, where $f \in \C$ is a constructor and $n = arity(f)$ is its arity. In examples we omit the arity since it's obvious.
+
+
+\subsection{Syntax}
+
+In order to define terms and infinite terms we firstly define endofunctor $F : \text{Set} \rightarrow \text{Set}$:
+\[F(X) = \V \cup \{ f^n(t_1, ..., t_n) \mid f^n \in \C, t_i \in X \}.\]
+
+We define the set of terms $T$\inRocq{term} as the least fixed point of $F$: $T = \mu F$. It corresponds to the following syntactic definition:
+\[T ::= \V \mid \C^n(T_1, ..., T_n).\]
+
+On the other hand, we define the set of (possibly) infinite terms $T^\infty$\inRocq{inf_term} as the \textit{greatest}~\cite{simon2006coinductive} fixed point of $F$: $T^\infty = \nu F$. As a result, $T$ consists of all finite Herbrand trees and $T^\infty$ consists of all possibly infinite Herbrand trees, thus $T \subset T^\infty$\inRocq{term_to_inf_inj}. 
+
+For convenience, further we sometimes use pattern-matching-like style definitions distinguishing between $x$ and $f^n(t_1, ..., t_n)$ as a term. The first is always implies $x \in \V$ in contrast with an arbitrary term named $x$. For example, see the definition of the substitution application.
+
+We define the set of a term subterms $\subterms : T^\infty \rightarrow 2^{T^\infty}$\inRocq{inf_subterm} in a conventional way inductively:
+\begin{itemize}
+    \item $t \in \subterms(t)$;
+    \item $t \in \subterms(t_i) \implies t \in \subterms(f^n(..., t_i, ...))$.
+\end{itemize}
+
+We say that possibly infinite term $t \in T^\infty$ is rational\inRocq{is_rational_term} iff their set of subterms is finite~\cite{colmerauer1982prolog}. Now we can define the set of rational terms: $T^R = \{ t \in T^\infty \mid t \text{ is rational}\}$.
+
+For example, $f(f(f(...)))$ is a rational term since it has a single subterm (itself) but $f_1(f_2(f_3(...)))$ where the ellipsis stands for the sequence of different constructor applications is not a rational term. Obviously, any finite term is rational, thus $T \subset T^R$\inRocq{term_to_inf_rational}.
+
+
+\subsection{Substitution}
+
+We define variable substitution in a conventional way and denote the substitution of all free occurrences of a variable $x$ in a term $t \in T$ with a term $t' \in T$ as $t [x \mapsto t']$. The substitution naturally extends for possibly infinite trees.
+
+More precisely, we define substitution $\sigma \in \Sigma$\inRocq{inf_subst} as a partial mapping $\Sigma \subset \V \rightharpoonup T^\infty$ with finite (and decidable) domain. Further we mostly consider substitutions as total functions\inRocq{inf_image} fulfilled with the trivial mappings $y \mapsto y$ for every non-substituting variable $y$.
+
+The most trivial examples of substitutions are empty substitution $[]$\inRocq{inf_subst_empty} and singleton substitution $[x \mapsto t]$\inRocq{inf_subst_singleton}.
+
+We define substitution domain $dom : \Sigma \rightarrow 2^\V$\inRocq{inf_subst_dom} as a set of variables that the substitution maps to another term:
+\[dom(\sigma) = \{ x \in \V \mid \sigma(x) \neq x \}.\]
+
+For example, $dom([]) = \emptyset$, $dom([x \mapsto x]) = \emptyset$ and $dom([x \mapsto t]) = \{ x \}$ if $t \neq x$.
+
+The substitution application $T^\infty \times \Sigma \rightarrow T^\infty$\inRocq{inf_subst_apply} denoted in postfix manner as $t \sigma$ is just a homomorphic extension of the application as function:
+\begin{equation*}
+    \begin{array}{r@{{}={}}l}
+        x\sigma & \sigma(x) \\
+        f^n(t_1, ..., t_n) \sigma & f^n(t_1\sigma, ..., t_n \sigma) \\
+    \end{array}
+\end{equation*}
+
+We say that substitution $\sigma$ is rational\inRocq{is_rational_subst}\footnote{Actually, in \Rocq we define this slightly different requiring decidability of the supersets of subterms for each variable.} iff its image is rational for every variable: $\forall x \in \V. ~ \sigma(x) \text{ is rational}$. It's obvious that the application of a rational substitution to a rational term gives a rational term\inRocq{inf_subst_apply_rational}.
+
+Consider now a substitution $\sigma$ that unifies the variable $x$ with the term $t$, i.~e. $\sigma(x) = t \sigma$. In a finite case we clearly know that $x \not\in \subterms(t)$ or $t = x$. But in an infinite case we have more general fact.
+For example, let $\sigma = [x \mapsto f(f(...))]$. We may see that
+\[\sigma(x) = f(f(...)) = ... = f(f(x)) \sigma = f(x) \sigma.\]
+
+\begin{rocqlemma}[Recursive unifier]{inf_subst_recursive_unifier}
+    Given a substitution $\sigma$, a variable $x$ and a possibly infinite term $t \neq x$. If $\sigma(x) = t \sigma$, then $\sigma(x) = t' \sigma$ where $t' = t [x \mapsto t']$.
+    \label{lemma:recursive-unifier}
+\end{rocqlemma}
+\begin{proof}
+    If $x \not\in \subterms(t)$, it's obvious since $t' = t [x \mapsto t'] = t$.
+
+    Otherwise, we may see that $t \sigma$ form a term where in place of the variable $x$ occurrences we already face the term $t \sigma$. Descending recursively we will face $t \sigma$ over and over again infinitely. Therefore, actually $\sigma(x)$ is not only the $t \sigma$ but also the $t [x \mapsto t] \sigma$ and moreover $t [x \mapsto t] ... [x \mapsto t] \sigma$.
+
+    Since after the first substitution of $x$ we have eliminated the all its occurrences except in $t$, $t [x \mapsto t] [x \mapsto t] = t [x \mapsto t [x \mapsto t]]$. Finally:
+
+    \begin{equation*}
+        \begin{array}{r@{{}={}}l}
+            \sigma(x) & t [x \mapsto t] ... [x \mapsto t] \sigma \\
+            & t [x \mapsto t [x \mapsto t]] [x \mapsto t] ... [x \mapsto t] \sigma \\
+            ... & t [x \mapsto t [x \mapsto t [x \mapsto ...]]] \sigma \\
+            & t' \sigma, \\
+            t' & t [x \mapsto t']. \\
+        \end{array}
+    \end{equation*}
+\end{proof}
+
+We define a substitution composition $\sigma_1 \diamond \sigma_2$\inRocq{inf_subst_compose} as the substitution with the following universal property\inRocq{inf_subst_compose_spec}:
+\[t \sigma_1 \sigma_2 = t (\sigma_2 \diamond \sigma_1).\]
+
+In other words, we consider substitution composition as function composition w.~r.~t. the substitution application. As for functions, substitutions form a monoidal structure over the composition\inRocq{inf_subst_compose_empty_l, inf_subst_compose_empty_r, inf_subst_compose_assoc}.
+
+% We say that substitution $\sigma$ is ``triangular''\inRocq{inf_subst_triangular} iff its application completely removes any variable from its domain:
+% \[x \in dom(\sigma) \implies x \not\in \subterms(\sigma(y)).\]
+% 
+% The main property of triangular substitutions is idempotence under the composition\inRocq{inf_subst_triangular_prop}: $\sigma \diamond \sigma = \sigma$. It's obvious since the second application doesn't change the term.
+
+
+\subsection{Unification Properties}
+
+We say that substitution $\sigma$ is unifier\inRocq{inf_unifier} of the terms $t_1, t_2 \in T^\infty$ iff its application on the both terms gives equal results: $t_1 \sigma = t_2 \sigma$.
+
+Also, for some substitution $\sigma$ we may consider a ``set of unified terms'':
+\[\{ (t_1, t_2) \in T^\infty \times T^\infty \mid t_1 \sigma = t_2 \sigma \}.\]
+
+We define a preorder ``more general''\inRocq{inf_subst_more_general} relation $\sigma_1 \preceq \sigma_2$\footnote{A reader may be confused of the used ``less or equal'' notation in contrast with the pronunciation ``more general'' but actually ``more general'' substitution have less or equal set of unified terms.} between substitutions in a conventional~\cite{baader2001unification} manner:
+\[\exists \sigma \in \Sigma. ~ \sigma_2 = \sigma \diamond \sigma_1.\]
+
+Since it's obvious that the relation is reflexive\inRocq{inf_subst_more_general_refl}, transitive\inRocq{inf_subst_more_general_trans} and not symmetric, it's also not antisymmetric.
+
+For example\inRocq{inf_subst_more_general_not_antisym} consider $\sigma_1 = [x \mapsto y]$ and $\sigma_2 = [y \mapsto x]$. We have $\sigma_2 = [y \mapsto x] \diamond \sigma_1$ so $\sigma_1 \preceq \sigma_2$ and $\sigma_1 = [x \mapsto y] \diamond \sigma_2$ so $\sigma_2 \preceq \sigma_1$. But $\sigma_1 \neq \sigma_2$.
+
+We may note an important connection between generality of substitutions and its' unifying properties. If $\sigma_1$ unifies the terms $t_1, t_2 \in T^\infty$ then any $\sigma_2$ so that $\sigma_1 \preceq \sigma_2$ unifies them too. Obviously\inRocq{inf_unifier_more_general}:
+\[t_1 \sigma_2 = t_1 (\sigma \diamond \sigma_1) = t_1 \sigma_1 \sigma = t_2 \sigma_1 \sigma = t_2 (\sigma \diamond \sigma_1) = t_2 \sigma_2.\]
+
+Taking it into account, we may see that $\preceq$ is a partial order w.~r.~t. sets of unified terms. Actually, if some $\sigma_1 \preceq \sigma_2$ and $\sigma_2 \preceq \sigma_1$, we may see that they unifies the same pairs of terms so its' sets of unified terms are equal.
+
+We say that for the given terms $t_1, t_2 \in T^\infty$ substitution $\sigma'$ is a ``unifying extension'' of the substitution $\sigma$ iff it's a unifier of $t_1, t_2$ and $\sigma \preceq \sigma'$.
+
+Since we have the preorder structure on substitutions, we may consider a ``minimal''\inRocq{inf_min_subst} substitution satisfying some property $P(\sigma)$:
+\[P(\sigma) \land \forall \sigma' \in \Sigma. ~ P(\sigma') \implies \sigma \preceq \sigma'.\]
+
+Especially, instantiating the previous notion of minimal substitution with the unifier property, we get most general unifier (MGU) property for the terms $t_1, t_2 \in T^\infty$\inRocq{inf_mgu}:
+\[t_1 \sigma = t_2 \sigma \land \forall \sigma' \in \Sigma. ~ 
+t_1 \sigma' = t_2 \sigma' \implies \sigma \preceq \sigma'.\]
+
+Additionally, we may consider ``minimal extension''\inRocq{inf_min_subst_extension} of the substitution $\sigma$ and its minimal unifying extension $\sigma_1$\inRocq{inf_min_unifying_extension} for the terms $t_1, t_2 \in T^\infty$:
+\[\sigma \preceq \sigma_1 \land t_1 \sigma_1 = t_2 \sigma_1 \land \forall \sigma_2 \in \Sigma. ~ \sigma \preceq \sigma_2 \land t_1 \sigma_2 = t_2 \sigma_2 \implies \sigma_1 \preceq \sigma_2.\]
+
+Obviously:
+\begin{itemize}
+    \item a minimal unifying extension is just a unifying extension too \\
+    \inRocq{inf_unifying_extension_min};
+    \item if the some $\sigma$ already unifies the $t_1, t_2 \in T^\infty$ it's already the itself minimal unifying extension\inRocq{inf_min_unifying_extension_same};
+    \item the minimal unifying extension of the empty substitution is MGU \\ \inRocq{inf_min_unifying_extension_empty}.
+\end{itemize}
+
+As a corollary of \autoref{lemma:recursive-unifier} we may form a minimal unifying extension for any unbound variable in a generic way.
+
+\begin{rocqlemma}{inf_min_unifying_extension_unbound}
+    Given a substitution $\sigma$, a variable $x$ and a term $t \in T^\infty$ so that $x \not\in dom(\sigma)$ and $t \sigma \neq x$. $\sigma' = [x \mapsto t \sigma'] \diamond \sigma$ is a minimal unifying extension of $\sigma$ for $x$ and $t$.
+    \label{lemma:unbound-unifier}
+\end{rocqlemma}
+\begin{proof} ~
+    \begin{itemize}
+        \item By the definition, $\sigma \preceq \sigma'$.
+        \item $\sigma'(x) = \sigma(x) [x \mapsto t \sigma'] = t \sigma'$.
+        \item If there is substitution $\sigma_1$ so that $\sigma \preceq \sigma_1$ and $\sigma_1(x) = t \sigma_1$, we also have $\sigma_1'$ so that $\sigma_1 = \sigma_1' \diamond \sigma$. In order to proof that $\sigma' \preceq \sigma_1$, show that $\sigma_1 = \sigma_1' \diamond \sigma'$ by \autoref{lemma:recursive-unifier}. 
+    \end{itemize}
+\end{proof}

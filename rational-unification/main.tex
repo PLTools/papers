@@ -1,0 +1,149 @@
+\documentclass[acmsmall,screen]{acmart}
+% \setcopyright{none}
+% \copyrightyear{2025}
+% \acmYear{2025}
+% \acmISBN{}
+% \acmDOI{}
+
+\usepackage{fancyhdr}
+
+\usepackage{xspace,amsmath,stmaryrd,subcaption,array,tikz,algpseudocodex,bussproofs,minted}
+
+\def\emptyset{\varnothing}
+\def\phi{\varphi}
+\def\psi{\varpsi}
+
+\def\N{\mathbb{N}}
+\def\V{\mathbb{V}}
+\def\C{\mathbb{C}}
+\def\E{\mathcal{E}}
+\def\T{\mathcal{T}}
+
+\def\Rocq{\textsc{Rocq}\xspace}
+\def\OCaml{\textsc{OCaml}\xspace}
+
+\newcommand{\textfn}[1]{\textsf{\slshape #1}}
+\def\subterms{\textfn{subterms}\xspace}
+\def\lhs{\textfn{lhs}\xspace}
+\def\repr{\textfn{repr}\xspace}
+\def\rhs{\textfn{rhs}\xspace}
+\def\walk{\textfn{walk}\xspace}
+\def\union{\textfn{union}\xspace}
+\def\commonpart{\textfn{common\_part}\xspace}
+\def\unify{\textfn{unify}\xspace}
+\def\roots{\textfn{roots}\xspace}
+\def\vars{\textfn{vars}\xspace}
+\def\size{\textfn{size}\xspace}
+\def\income{\textfn{income}\xspace}
+
+\newcommand{\reccall}[1][X]{\mathrel{\overset{#1}{\rightsquigarrow}}}
+
+\newcolumntype{L}{>$l<$}
+
+\newcommand{\inRocq}[2][ ]{~(\Rocq:#1\texttt{\detokenize{#2}})}
+
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{theorem}{Theorem}[section]
+
+\def\lemmaautorefname{Lemma}
+\def\theoremautorefname{Theorem}
+
+\newenvironment{rocqlemma}[2][]{\begin{lemma}[\if\relax\detokenize{#1}\relax\else#1, \fi\Rocq: \texttt{\detokenize{#2}}]}{\end{lemma}}
+\newenvironment{rocqtheorem}[2][]{\begin{theorem}[\if\relax\detokenize{#1}\relax\else#1, \fi\Rocq: \texttt{\detokenize{#2}}]}{\end{theorem}}
+
+\makeatletter
+\newcommand{\RuleName}[1]{\xdef\RuleName@value{#1}\RightLabel{(#1)}}
+\newcommand{\RuleCaption}{\begingroup\edef\tmp{\endgroup\noexpand\captionlistentry{(\RuleName@value)}}\tmp}
+\makeatother
+
+% https://tex.stackexchange.com/a/255198
+\makeatletter
+\newcommand\setitemnumber[1]{\setcounter{enum\romannumeral\@enumdepth}{\numexpr#1-1\relax}}
+\makeatother
+
+
+\title{A Practical-efficient Rational Unification, Certified}
+
+\author{Eridan Domoratskiy}
+%<!acmcp>\authornote{Both authors contributed equally to this research.}
+\email{eridan200@mail.ru}
+\orcid{0009-0005-9020-3403}
+
+\author{Dmitry Boulytchev}
+%<!acmcp>\authornotemark[1]
+\email{dboulytchev@math.spbu.ru}
+\orcid{0000-0001-8363-7143}
+
+\affiliation{%
+  \institution{St.~Petersburg State University}
+  \city{St.~Petersburg}  
+  \country{Russia}
+}
+
+% \begin{CCSXML}
+% <ccs2012>
+%    <concept>
+%        <concept_id>10003752.10003790.10003795</concept_id>
+%        <concept_desc>Theory of computation~Constraint and logic programming</concept_desc>
+%        <concept_significance>500</concept_significance>
+%        </concept>
+%    <concept>
+%        <concept_id>10003752.10010124.10010131</concept_id>
+%        <concept_desc>Theory of computation~Program semantics</concept_desc>
+%        <concept_significance>500</concept_significance>
+%        </concept>
+%    <concept>
+%        <concept_id>10011007.10011006.10011050.10011017</concept_id>
+%        <concept_desc>Software and its engineering~Domain specific languages</concept_desc>
+%        <concept_significance>500</concept_significance>
+%        </concept>
+%  </ccs2012>
+% \end{CCSXML}
+% 
+% \ccsdesc[500]{Theory of computation~Constraint and logic programming}
+% \ccsdesc[500]{Theory of computation~Program semantics}
+% \ccsdesc[500]{Software and its engineering~Domain specific languages}
+
+\keywords{unification, rational tree, regular tree, certified semantics, Rocq}
+
+\begin{document}
+
+% \settopmatter{printacmref=false}
+% \settopmatter{printfolios=true}
+% \renewcommand\footnotetextcopyrightpermission[1]{}
+% \pagestyle{fancy}
+% \fancyfoot{}
+% \fancyfoot[R]{miniKanren'25}
+% \fancypagestyle{firstfancy}{
+%   \fancyhead{}
+%   \fancyhead[R]{miniKanren'25}
+%   \fancyfoot{}
+% }
+% \makeatletter
+% \let\@authorsaddresses\@empty
+% \makeatother
+
+\begin{abstract}
+% We present a study of unification for rational trees in the context of \textsc{miniKanren}. 
+% We give the definition of rational trees, specify the unification algorithm and prove some
+% of its properties. We also introduce a number of heuristic optimizations and evaluate them
+% for a number of relevant benchmarks. Finally we discuss the relations between rational
+% and conventional unification algorithms and possible scenarios of their coexistence
+% in the context of relational programming.
+\end{abstract}
+
+\maketitle
+% \thispagestyle{firstfancy}
+% \input{1.intro}
+\newpage
+\input{2.rational}
+\input{3.unification}
+% \input{4.implementation}
+% \input{5.evaluation}
+% \input{6.related}
+% \input{7.conclusion}
+
+\bibliographystyle{plain}
+\bibliography{main}
+
+\end{document}

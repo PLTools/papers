@@ -8,7 +8,7 @@ publisher = {Springer-Verlag},
 address = {Berlin, Heidelberg},
 url = {https://doi.org/10.1007/978-3-030-64437-6_9},
 doi = {10.1007/978-3-030-64437-6_9},
-abstract = {We present a formal study of semantics for the relational programming language miniKanren. First, we formulate a denotational semantics which corresponds to the minimal Herbrand model for definite logic programs. Second, we present operational semantics which models interleaving, the distinctive feature of miniKanren implementation, and prove its soundness and completeness w.r.t. the denotational semantics. Our development is supported by a Coq specification, from which a reference interpreter can be extracted. We also derive from our main result a certified semantics (and a reference interpreter) for SLD resolution with cut and prove its soundness.},
+abstract = {We present a formal study of semantics for the relational programming language {miniKanren}. First, we formulate a denotational semantics which corresponds to the minimal Herbrand model for definite logic programs. Second, we present operational semantics which models interleaving, the distinctive feature of {miniKanren} implementation, and prove its soundness and completeness w.r.t. the denotational semantics. Our development is supported by a Coq specification, from which a reference interpreter can be extracted. We also derive from our main result a certified semantics (and a reference interpreter) for SLD resolution with cut and prove its soundness.},
 booktitle = {Programming Languages and Systems: 18th Asian Symposium, APLAS 2020, Fukuoka, Japan, November 30 – December 2, 2020, Proceedings},
 pages = {167–185},
 numpages = {19},
@@ -86,20 +86,16 @@ numpages = {5}
 }
 
 @InProceedings{simon2006coinductive,
-author="Simon, Luke
-and Mallya, Ajay
-and Bansal, Ajay
-and Gupta, Gopal",
-editor="Etalle, Sandro
-and Truszczy{\'{n}}ski, Miros{\l}aw",
-title="Coinductive Logic Programming",
-booktitle="Logic Programming",
-year="2006",
-publisher="Springer Berlin Heidelberg",
-address="Berlin, Heidelberg",
-pages="330--345",
-abstract="We extend logic programming's semantics with the semantic dual of traditional Herbrand semantics by using greatest fixed-points in place of least fixed-points. Executing a logic program then involves using coinduction to check inclusion in the greatest fixed-point. The resulting coinductive logic programming language is syntactically identical to, yet semantically subsumes logic programming with rational terms and lazy evaluation. We present a novel formal operational semantics that is based on synthesizing a coinductive hypothesis for this coinductive logic programming language. We prove that this new operational semantics is equivalent to the declarative semantics. Our operational semantics lends itself to an elegant and efficient goal directed proof search in the presence of rational terms and proofs. We describe a prototype implementation of this operational semantics along with applications of coinductive logic programming.",
-isbn="978-3-540-36636-2"
+    author={Simon, Luke and Mallya, Ajay and Bansal, Ajay and Gupta, Gopal},
+    editor={Etalle, Sandro and Truszczy{\'{n}}ski, Miros{\l}aw},
+    title="Coinductive Logic Programming",
+    booktitle="Logic Programming",
+    year="2006",
+    publisher="Springer Berlin Heidelberg",
+    address="Berlin, Heidelberg",
+    pages="330--345",
+    abstract="We extend logic programming's semantics with the semantic dual of traditional Herbrand semantics by using greatest fixed-points in place of least fixed-points. Executing a logic program then involves using coinduction to check inclusion in the greatest fixed-point. The resulting coinductive logic programming language is syntactically identical to, yet semantically subsumes logic programming with rational terms and lazy evaluation. We present a novel formal operational semantics that is based on synthesizing a coinductive hypothesis for this coinductive logic programming language. We prove that this new operational semantics is equivalent to the declarative semantics. Our operational semantics lends itself to an elegant and efficient goal directed proof search in the presence of rational terms and proofs. We describe a prototype implementation of this operational semantics along with applications of coinductive logic programming.",
+    isbn="978-3-540-36636-2",
 }
 
 @inproceedings{simon2006coinductive_,
@@ -111,8 +107,6 @@ isbn="978-3-540-36636-2"
     isbn = {978-3-540-36635-5},
     doi = {10.1007/11799573_25},
 }
-
-
 
 @phdthesis{huet1976resolution,
     author = {Huet, Gérard},
@@ -161,4 +155,58 @@ isbn="978-3-540-36636-2"
     volume={1},
     pages={445--532},
     year={2001},
+}
+
+@article{kosarev2018typed,
+    title={Typed Embedding of a Relational Language in {\OCaml}},
+    volume={285},
+    ISSN={2075-2180},
+    url={http://dx.doi.org/10.4204/EPTCS.285.1},
+    DOI={10.4204/eptcs.285.1},
+    journal={Electronic Proceedings in Theoretical Computer Science},
+    publisher={Open Publishing Association},
+    author={Kosarev, Dmitrii and Boulytchev, Dmitry},
+    year={2018},
+    month=dec,
+    pages={1–22},
+}
+
+@misc{domoratskiy2025empirical,
+     title={An Empirical Study of Rational Tree Unification for {miniKanren}}, 
+     author={Domoratskiy, Eridan and Kosarev, Dmitrii and Boulytchev, Dmitry},
+     year={2025},
+     eprint={2510.03789},
+     archivePrefix={arXiv},
+     primaryClass={cs.LO},
+     url={https://arxiv.org/abs/2510.03789}, 
+}
+
+@inproceedings{mannila1986complexity,
+    title={On the complexity of unification sequences},
+    author={Mannila, Heikki and Ukkonen, Esko},
+    booktitle={International Conference on Logic Programming},
+    pages={122--133},
+    year={1986},
+    organization={Springer},
+}
+
+@article{comon1991disuni,
+    title={Disunification: a survey},
+    author={Comon, Hubert},
+    journal={Computational Logic. MIT Press, Cambridge, MA},
+    year={1991},
+}
+
+@inproceedings{friedman2009relational,
+    title={Relational programming in minikanren: techniques, applications, and implementations},
+    author={Daniel P. Friedman and William E. Byrd},
+    year={2009},
+    url={https://api.semanticscholar.org/CorpusID:61507010},
+}
+
+@misc{kiselyov-ocaml,
+    title={How {\OCaml} type checker works -- or what polymorphism and garbage collection have in common},
+    author={Kiselyov, Oleg},
+    url={https://okmij.org/ftp/ML/generalization.html},
+    urldate={05-02-2026},
 }

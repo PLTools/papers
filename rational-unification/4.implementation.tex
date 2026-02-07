@@ -1,0 +1,387 @@
+\section{Implementation}
+
+In this section we present various implementations of the algorithm and discuss possible optimizations and integrations. In order to avoid overcomplication, we use \OCaml since it provides a great balance between expressivity and low-levelness to write as simple as effective code.
+
+We will consider both persistent and ephemeral (i.~e., non-persistent) variants of the algorithm but firstly focus on the former.
+
+
+\subsection{Term}
+
+First of all, we represent terms as follows:
+\begin{minted}{OCaml}
+type t =
+| Var of int
+| Con of int * t array
+\end{minted}
+
+This definition not so much optimized as could be~\cite{kosarev2018typed} but allows us to write the rest code in a most straightforward way.
+
+
+\subsection{Common Part}
+
+Straightforwardly, we may define \commonpart similarly to the theoretical definition:
+\begin{minted}{OCaml}
+exception No_common_part
+let rec common_part x y = match x, y with
+| Var _, _ -> x
+| _, Var _ -> y
+| Con (f, ts1), Con (g, ts2)
+when f == g && Array.length ts1 == Array.length ts2 ->
+    Con (f, Array.map2 common_part ts1 ts2)
+| _ -> raise No_common_part
+\end{minted}
+
+Of course, in \OCaml we use exceptions to signal a failure since they allow fast stack unwinding in recursion. But there is a way to optimize also the memory consumption and moreover guarantee ``physical equality'' of the \commonpart result and one of its arguments in some cases to optimize further equality checks.
+
+We only need to use the fact that $\commonpart(x, y)$ could be either $x$ or $y$ for any variables $x, y$. Therefore, the implementation may dynamically prefer any of them in some cases. To achieve this, we firstly define the simple lattice named ``side'' (\autoref{fig:side-lattice}) with the conventional lower bound operation (in the code, ``\texttt{<+>}''):
+
+\begin{figure}
+    \centering
+    \begin{tikzpicture}
+        \node(both) at (0, 1) {$\top$};
+        \node(left) at (-1, 0) {$\leftarrow$};
+        \node(right) at (1, 0) {$\rightarrow$};
+        \node(aside) at (0, -1) {$\bot$};
+        \draw[<-] (left) -- (both);
+        \draw[<-] (right) -- (both);
+        \draw[<-] (aside) -- (left);
+        \draw[<-] (aside) -- (right);
+    \end{tikzpicture}
+    \caption{``Side'' lattice}
+    \label{fig:side-lattice}
+\end{figure}
+
+\begin{minted}{OCaml}
+module CommonPart = struct
+    type side = Aside | Right | Left | Both
+    let (<+>) x y = match x, y with
+    | Both, _ -> y
+    | _, Both -> x
+    | Left, Left -> Left
+    | Right, Right -> Right
+    | _ -> Aside
+\end{minted}
+
+Now we may use ``side'' to manage the result simply folding ``sides'' of the recursive call results by the lower bound operation:
+
+\begin{minted}{OCaml}
+    let rec common_part x y = match x, y with
+    | Var _, Var _ -> Both, x
+    | Var _, _ -> Left, x
+    | _, Var _ -> Right, y
+    | Con (f, ts1), Con (g, ts2)
+    when f == g && Array.length ts1 == Array.length ts2 ->
+        let n = Array.length ts1 in
+        let ts = Array.make n (Var 0) in
+        let rec hlp i acc = if i == n then acc else
+            let side, ti = common_part ts1.(i) ts2.(i) in
+            ts.(i) <- ti ;
+            hlp (i + 1) @@ acc <+> side
+        in
+        begin match hlp 0 Both with
+        | Aside -> Aside, Con (f, ts)
+        | Right -> Right, y
+        | side -> side, x
+        end
+    | _ -> raise No_common_part
+end
+let common_part x y = snd @@ CommonPart.common_part x y
+\end{minted}
+
+As we may see, in cases when the one of arguments is already a common part, this implementation will return it instead of constructing a new term.
+
+
+\subsection{Equation System}
+
+We represent equation system as a mapping from variable numbers to terms:
+\begin{minted}{OCaml}
+module M = Map.Make(Int)
+type t = Term.t M.t
+let empty = M.empty
+let rec walk s x = match M.find x s with
+| exception Not_found -> x, Term.Var x
+| Term.Var x -> walk s x
+| t -> x, t
+\end{minted}
+
+Actually, the whole representation is just a persistent union-find backed by a binary search tree where \walk acts like ``find''. Comparing with the theoretical definition, \walk doesn't return an equation now but a representing variable that allows us to identify the according equation in the system. We may also consider some optimizations like path compression and union-find rank heuristic but we considered them ineffective in a persistent case according to~\cite{domoratskiy2025empirical}.
+
+Since using binary search tree multiplies time complexity of the algorithm by $\O(\log n)$, one may prefer to back the implementation by some kind of persistent union-find data structure like~\cite{conchon2007persistent}. The actual affecting of this isn't covered by this work because of irrelevance to the algorithm itself since it depends on the usage, and for simplicity we decided to use the simplest possible representation.
+
+Also we define \union operation similarly to the theoretical definition:
+\begin{minted}{OCaml}
+let union s x y =
+    let x, xt = walk s x in
+    let y, yt = walk s y in
+    if x == y then s, None
+    else begin
+        let x, y, xt, yt =
+            if x > y
+            then x, y, xt, yt
+            else y, x, yt, xt
+        in
+        match xt, yt with
+        | Var _, Var _ -> M.add x yt s, None
+        | Var _, _ -> M.add x (Term.Var y) s, None
+        | _, Var _ ->
+            let s = M.add y xt s in
+            M.add x yt s, None
+        | _, _ -> M.add x (Term.Var y) s, Some (xt, yt)
+    end
+\end{minted}
+
+The only difference is the forcing of variable number decreasing ordering that acts much like rank heuristic but gives cheaper income in efficiency~\cite{domoratskiy2025empirical, mannila1986complexity} in real-world applications when variable introduction performs gradually. In other cases it may have sense to omit this optimization and rely on a random distribution of the variable numbers (like in the theoretical definition):
+\begin{minted}{OCaml}
+    else begin match xt, yt with
+    | Var _, Var _ -> M.add x yt s, None
+    | Var _, _ -> M.add x (Term.Var y) s, None
+    | _, Var _ -> M.add y (Term.Var x) s, None
+    | _, _ -> M.add x (Term.Var y) s, Some (xt, yt)
+    end
+\end{minted}
+
+In real applications we may also consider a scope-based optimization for the equation system extension. To achieve this, we only need to introduce a helping function instead of just ``\mintinline{OCaml}|M.add|'' that allows us to deal with scopes.
+
+Also, we may obtain a \commonpart of ``\mintinline{OCaml}|xt|'' and ``\mintinline{OCaml}|yt|'' and ``\mintinline{OCaml}|M.add|'' it instead of any of them. It must add some small overhead but increase failure detection speed in some cases. For example, given $f(x, h()) = f(..., g())$ the our algorithm firstly unify $x$ with $...$ that can lead to a complex work but with \commonpart it will eagerly realize that $h() \neq g()$. Additionally, it may reduce the \rhs size of the equation for a future work:
+\begin{minted}{OCaml}
+        | _, _ ->
+            let s = M.add y (Term.common_part xt yt) s in
+            M.add x (Term.Var y) s, Some (xt, yt)
+\end{minted}
+
+The crucial part of the \union implementation is the actual \textit{unioning} of variables. In other words, we must do ``\mintinline{OCaml}|M.add x (Term.Var y)|'' instead of ``\mintinline{OCaml}|M.add x yt|'' to avoid infinite looping. We are paying attention for it because of simplicity of the mistaking. Moreover, it could be proven that this mistake doesn't affect MGU property of the whole algorithm.
+
+
+\subsection{Unification}
+
+For convenience, we firstly define unification of a variable and a term as a separated function:
+\begin{minted}{OCaml}
+let rec unify_vt s x yt =
+    let x, xt = walk s x in
+    begin match xt with
+    | Term.Var _ -> M.add x yt s
+    | _ ->
+        let t = Term.common_part xt yt in
+        let s = if t == xt then s else M.add x t s in
+        unify s xt yt
+    end
+\end{minted}
+
+This function allows us to simplify the \unify implementation and avoid the extra recursive call that swaps arguments:
+\begin{minted}{OCaml}
+and unify s xt yt =
+    if xt == yt then s
+    else match xt, yt with
+    | Term.Var x, Term.Var y ->
+        begin match union s x y with
+        | s, None -> s
+        | s, Some (xt, yt) -> unify s xt yt
+        end
+    | Term.Var x, _ -> unify_vt s x yt
+    | _, Term.Var y -> unify_vt s y xt
+    | Term.Con (f, ts1), Term.Con (g, ts2)
+    when f == g && Array.length ts1 == Array.length ts2 ->
+        let n = Array.length ts1 in
+        let rec hlp i s =
+            if i == n then s
+            else hlp (i + 1) @@ unify s ts1.(i) ts2.(i)
+        in
+        hlp 0 s
+    | _ -> raise Term.No_common_part
+\end{minted}
+
+The \unify definition itself mostly repeats the theoretical definition except the first shortcut checking for physical equality and the avoiding of the extra recursive call as was mentioned before. This extra call is actually crucial because of double pattern-matching that is trivial to see by profiling.
+
+
+\subsection{Disunification}
+
+It is trivially derivable from the correctness and completeness properties of the given unification algorithm that it could be used to implement a disequality constraint solver (also mentioned as ``disunification'') in the canonical way~\cite{comon1991disuni,friedman2009relational}.
+
+To check a disequality constraint of the form $t_1 \not\equiv t_2$ we are needed to be able to distinguish between the three cases (w.~r.~t. the current equation system $\xi$):
+\begin{itemize}
+    \item $t_1 \llbracket \xi \rrbracket = t_2 \llbracket \xi \rrbracket$ --- disequality cannot be hold for any $\xi'$ such that $\llbracket \xi \rrbracket \preceq \llbracket \xi' \rrbracket$.
+    \item $\commonpart(t_1 \llbracket \xi \rrbracket, t_2 \llbracket \xi \rrbracket) = \bot$ --- disequality holds for any $\xi'$ such that $\llbracket \xi \rrbracket \preceq \llbracket \xi' \rrbracket$.
+    \item Otherwise, disequality may be hold for some $\xi'$ such that $\llbracket \xi \rrbracket \preceq \llbracket \xi' \rrbracket$.
+\end{itemize}
+
+Using the given definition of the algorithm, we may only check the second case but not distinguish between the others. Even if we extend the algorithm to report about ``triviality'' of the term equivalence, we won't be able to \textit{solve} the constraint. In this case we may just check that after some unification all constraints still hold.
+
+To improve the our algorithm, recall the disequality constraint solving algorithm. We call a term pair $t_1 \not\equiv t_2$ a disequality constraint between $t_1, t_2 \in T$. Once a disequality constraint stated we need to solve it, i.~e. to derive its solved form. We call a disjunction of disequality constraints $\bigvee_{i} x_i \not\equiv t_i$ between $x_i \in \V$ and $t_i \in T$ a solved form if $\forall i. ~ x_i \llbracket \xi \rrbracket = x_i$ (in other words, $\walk(\xi, x_i) = (x_i, x_i)$) and $\forall i. ~ t_i = y_i \in \V \implies \walk(\xi, y_i) = (y_i, y_i)$. Also we say that the solved form of a disequality constraint $l \not\equiv r$ is a such solved form so:
+\[l \not\equiv r \Leftrightarrow \bigvee_{i} x_i \not\equiv t_i.\]
+
+When we record a conjunction of solved forms (named a constraint store) instead of initial disequalities, we able to:
+\begin{itemize}
+    \item Recheck them more granular, i.~e. a one disequality of the solved form at a time instead of rechecking the initial disequality.
+    \item Recheck only affected solved forms. In other words, when $\unify(\xi, t_1', t_2') = \xi', \xi' \neq \bot$ we only need to check the solved forms such that $\walk(\xi', x_i) \neq (x_i, x_i)$.
+\end{itemize}
+
+The latter is not true only for disequalities of the form $x_i \not\equiv y_i, x_i, y_i \in \V$ since they could be also violated when $\walk(\xi', y_i) = (x_i, x_i)$ (not only when $\walk(\xi', x_i) = (y_i, y_i)$).
+
+Also, note that a solved form may be violated iff every its disequality violated. It means that we may pick any variable from a solved form and recheck it only when the picked variable affected by unification. If any other variable have been affected, it temporarily makes the solved form invalid (since there is a variable $x_i$ such that $\walk(\xi, x_i) \neq (x_i, x_i)$) but cannot lead to the whole constraint violation. This allows us to reduce time consumption and memory allocations.
+
+Using these notions, we may implement disunification solver supporting a constraint store $C$ as a finite mapping from variables to solved forms\footnote{Actually, $C$ is a non-deterministic mapping, i.~e. for any $x$ there could be several values $C(x)$ for different constraints and not only zero or one.} such that for all $C(x) = \bigvee_i x_i \not\equiv t_i$, $\exists i, x = x_i$ holds. After every successful unification $\unify(\xi, t_1, t_2) = \xi'$, we need to recheck every $C(x)$ where $\walk(\xi', x) \neq (x, x)$ and $C(y)$ where $\walk(\xi', x) = (y, y)$ (if $\walk(\xi, x) = (x, x)$). Since sometimes solved forms are being invalid, we must recheck all disjuncts instead of only the affected ones (or all that was affected previously).
+
+To obtain the solved form of a disequality $l \not\equiv r$ we only need to note that for any $l, r \in T^\infty$ and $\sigma \in \Sigma$ have:
+\[l \sigma' = r \sigma' \Leftrightarrow \bigwedge_i \sigma'(x_i) = t_i \sigma',\]
+where $\sigma' = [x_i \mapsto t_i \sigma'] \diamond \sigma$ is the minimal unifying extension of $\sigma$ for $l, r$.
+
+Actually, the right-to-left statement is just the unifier property of $\sigma'$ while the left-to-right --- is the most generality. In other words, to unify $l$ with $r$ we must somehow unify $x_i$ with $t_i$ and there is no unnecessary mappings that aren't needed to unify them.
+
+Negation of this statement gives us the main solved form property. We call the list of $(x_i, t_i)$ pairs a ``unification prefix''~\cite{friedman2009relational}. To obtain the unification prefix we need to extend the implementation. Moreover, the unification prefix isn't only allows us to simplify disequality constraints but also obtain information about affected variables.
+
+In the \union implementation we need to distinguish between the three possible results:
+\begin{minted}{OCaml}
+type union_outcome =
+| Same
+| Extend of int * Term.t
+| Unify of Term.t * Term.t
+\end{minted}
+
+The first one is used when ``\mintinline{OCaml}|x == y|'' and the rest in the other cases:
+\begin{minted}{OCaml}
+let union s x y =
+    let x, xt = walk s x in
+    let y, yt = walk s y in
+    if x == y then s, Same
+    else begin
+        let x, y, xt, yt =
+            if x > y
+            then x, y, xt, yt
+            else y, x, yt, xt
+        in
+        match xt, yt with
+        | Var _, Var _ -> M.add x yt s, Extend (x, yt)
+        | Var _, _ -> M.add x (Term.Var y) s, Extend (x, yt)
+        | _, Var _ ->
+            let s = M.add y xt s in
+            M.add x yt s, Extend (y, xt)
+        | _, _ -> M.add x (Term.Var y) s, Unify (xt, yt)
+    end
+\end{minted}
+
+We represent unification prefix as a list of variable-term pairs: \mintinline{OCaml}|(int * Term.t) list|. Now we able to complete the \unify implementation:
+\begin{minted}{OCaml}
+type prefix = (int * Term.t) list
+
+let rec unify_vt s acc x yt =
+    let x, xt = walk s x in
+    begin match xt with
+    | Term.Var _ -> M.add x yt s, (x, yt)::acc
+    | _ ->
+        let t = Term.common_part xt yt in
+        let s = if t == xt then s else M.add x t s in
+        unify s acc xt yt
+    end
+
+and unify s acc xt yt =
+    if xt == yt then s, acc
+    else match xt, yt with
+    | Term.Var x, Term.Var y ->
+        begin match union s x y with
+        | s, Same -> s, acc
+        | s, Extend (x, yt) -> s, (x, yt)::acc
+        | s, Unify (xt, yt) -> unify s acc xt yt
+        end
+    | Term.Var x, _ -> unify_vt s acc x yt
+    | _, Term.Var y -> unify_vt s acc y xt
+    | Term.Con (f, ts1), Term.Con (g, ts2)
+    when f == g && Array.length ts1 == Array.length ts2 ->
+        let n = Array.length ts1 in
+        let rec hlp i (s, acc) =
+            if i == n then s, acc
+            else hlp (i + 1) @@ unify s acc ts1.(i) ts2.(i)
+        in
+        hlp 0 (s, acc)
+    | _ -> raise Term.No_common_part
+
+let unify s x y = unify s [] x y
+
+let unify_prefix s p =
+    let xs = Array.of_list @@ List.map (fun (x, _) -> Term.Var x) p in
+    let ys = Array.of_list @@ List.map snd p in
+    unify s (Term.Con (0, xs)) (Term.Con (0, ys))
+\end{minted}
+
+The main principle of the prefix constructing is just adding the new mappings and omitting auxiliary changes that operate on already bound variables. This works since all auxiliary changes doesn't change the behavior of the equation system interpreted as a substitution if the whole unification succeeds.
+
+It is not difficult to prove that the resulting unification prefix is correct w.~r.~t. the resulting equation system. Therefore we may distinguish between three cases:
+\begin{itemize}
+    \item Unification failed --- given terms are already disunified.
+    \item Unification succeeded with the empty prefix --- given terms are already unified.
+    \item Unification succeeded with a non-empty prefix --- given terms disunify iff some mapping from the prefix does.
+\end{itemize}
+
+As an exemplary usage, let:
+\begin{minted}{OCaml}
+module M = Map.Make(Int)
+type store = Eqsys.prefix list M.t
+type state = { s: Eqsys.t; c: store; }
+exception Disunification_violated
+let record_constraint st x p = { st with c = M.add_to_list x p st.c }
+\end{minted}
+
+To recheck one solved form, we just need to recheck all its disequalities in batch:
+\begin{minted}{OCaml}
+let recheck_constraint st p = match Eqsys.unify_prefix st.s p with
+| _, ((x, _)::_ as p) -> record_constraint st x p
+| _, [] -> raise Disunification_violated
+| exception Term.No_common_part -> st
+\end{minted}
+
+To recheck all solved forms of a variable, we need to recheck all its solved forms:
+\begin{minted}{OCaml}
+let recheck st x = match M.find x st.c with
+| c -> List.fold_left recheck_constraint { st with c = M.remove x st.c } c
+| exception Not_found -> st
+\end{minted}
+
+To recheck all affected variables, we need to traverse a unification prefix:
+\begin{minted}{OCaml}
+let recheck_prefix = List.fold_left @@ fun st (x, t) ->
+    let st = recheck st x in
+    match t with Term.Var y -> recheck st y | _ -> st
+\end{minted}
+
+After a successful unification, we need to recheck the unification prefix:
+\begin{minted}{OCaml}
+let unify st x y =
+    let s, p = Eqsys.unify st.s x y in
+    recheck_prefix { st with s } p
+\end{minted}
+
+Finally, to state a disequality we need to obtain its solved form and record it:
+\begin{minted}{OCaml}
+let disunify st x y = match Eqsys.unify st.s x y with
+| _, ((x, _)::_ as p) -> record_constraint st x p
+| _, [] -> raise Disunification_violated
+| exception Term.No_common_part -> st
+\end{minted}
+
+Note that this example isn't as optimal as could be since while we recheck a unification prefix, we modify it simultaneously. In presence of more complex constraints than disequality, it's even an incorrect behavior since we may recheck one constraint twice. The right way to do it is to recheck only the previous constraints removing staled and after that add the new. Also, with an ephemeral unification algorithm we must use backtracking to avoid the state corruption.
+
+As a final word, we may note that it seems to be unnecessary to recheck right-hand side variables of unification prefix in presence of variable ordering in union. Naturally, when unification prefixes guarantee that for any $(x, y)$ in the prefix $x > y$ holds, there is no way to get them swapped. But this is extremely fragile optimization and must be applied carefully:
+\begin{minted}{OCaml}
+let recheck_prefix = List.fold_left @@ fun st (x, _) -> recheck st x
+\end{minted}
+
+
+\subsection{Unification with Finite Terms}
+
+Obviously, there are several ways to obtain a unification algorithm for finite terms from the our algorithm:
+\begin{itemize}
+    \item Using the conventional ``occurs check''.
+    \item Counting occurrences of variables~\cite{martelli1984efficient}.
+    \item Supporting corresponding directed acyclic graph~\cite{pearce2007dynamic}.
+\end{itemize}
+
+According to~\cite{domoratskiy2025empirical}, we consider any lazy approaches non-efficient in real-world non-deterministic use cases. On the other hand, for deterministic usages it should be enough to detect cycles lazily that is already done in real-world applications like \OCaml compiler~\cite{kiselyov-ocaml}.
+
+To achieve a similar behavior while the unification process only, we are suggesting to implement some algorithm based on deferred computations (e.~g. to calculate maximal outgoing path length and check that it doesn't reaching the number of equations).
+
+In this work, we prefer the conventional ``occurs check'' way to achieve finite term unification and leave the further research to the future work. Since it doesn't diffs from conventional unification algorithms, we leave this subsection without a concrete implementation.
+
+
+\subsection{Mixing Finite and Rational Terms}
+
+
+\subsection{Non-persistent Unification}

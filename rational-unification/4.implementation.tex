@@ -140,7 +140,7 @@ The only difference is the forcing of variable number decreasing ordering that a
     end
 \end{minted}
 
-In real applications we may also consider a scope-based optimization for the equation system extension. To achieve this, we only need to introduce a helping function instead of just ``\mintinline{OCaml}|M.add|'' that allows us to deal with scopes.
+In real applications we may also consider a scope-based optimization~\cite{friedman2009relational} for the equation system extension\footnote{This also allows to implement both persistent and ephemeral variants of the algorithm in a generic way.}. To achieve this, we only need to introduce a helping function instead of just ``\mintinline{OCaml}|M.add|'' that allows us to deal with scopes. But there is the caveat: since \union sometimes replaces right-hand sides of equations, even with the optimization we must prefer bindings from the mapping that reduces the performance income of this optimization since it rely on perpetual bindings.
 
 Also, we may obtain a \commonpart of ``\mintinline{OCaml}|xt|'' and ``\mintinline{OCaml}|yt|'' and ``\mintinline{OCaml}|M.add|'' it instead of any of them. It must add some small overhead but increase failure detection speed in some cases. For example, given $f(x, h()) = f(..., g())$ the our algorithm firstly unify $x$ with $...$ that can lead to a complex work but with \commonpart it will eagerly realize that $h() \neq g()$. Additionally, it may reduce the \rhs size of the equation for a future work:
 \begin{minted}{OCaml}
@@ -174,8 +174,8 @@ and unify s xt yt =
     else match xt, yt with
     | Term.Var x, Term.Var y ->
         begin match union s x y with
-        | s, None -> s
         | s, Some (xt, yt) -> unify s xt yt
+        | s, None -> s
         end
     | Term.Var x, _ -> unify_vt s x yt
     | _, Term.Var y -> unify_vt s y xt
@@ -278,9 +278,9 @@ and unify s acc xt yt =
     else match xt, yt with
     | Term.Var x, Term.Var y ->
         begin match union s x y with
-        | s, Same -> s, acc
-        | s, Extend (x, yt) -> s, (x, yt)::acc
         | s, Unify (xt, yt) -> unify s acc xt yt
+        | s, Extend (x, yt) -> s, (x, yt)::acc
+        | s, Same -> s, acc
         end
     | Term.Var x, _ -> unify_vt s acc x yt
     | _, Term.Var y -> unify_vt s acc y xt
@@ -496,4 +496,16 @@ The first change is the additional variable ordering for cases when finiteness o
 The \unify implementation is changing trivially, replacing ``\mintinline{OCaml}|M.add|'' with ``\mintinline{OCaml}|extend|''.
 
 
-\subsection{Non-persistent Unification}
+\subsection{Ephemeral Unification}
+
+Conventionally, in the ephemeral implementation we encode current equation system immediately in terms:
+\begin{minted}[extrakeywordstype=option]{OCaml}
+type var = { n: int; mutable s: t option; }
+and t =
+| Var of var
+| Con of int * t array
+\end{minted}
+
+Note that it doesn't imply implicit equation system application as a substitution in standard utility functions since may lead to an infinite looping. Also, we may omit ``\mintinline[extrakeywordstype=option]{OCaml}|option|'' replacing the empty value with some special value to reduce memory allocations.
+
+In the other functions we just replace ``\mintinline{OCaml}|M.add|'' with the assignment to the field ``\mintinline{OCaml}|Term.s|'' so we don't provide them here. The our implementation doesn't use backtracking so every assignment is leaving untracked.

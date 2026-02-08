@@ -383,5 +383,117 @@ In this work, we prefer the conventional ``occurs check'' way to achieve finite 
 
 \subsection{Mixing Finite and Rational Terms}
 
+From the theoretical point of view, a finite term is a rational too. Therefore, we may want to force some terms to be finite manually like in \Rocq where we able to define some types to be \mintinline{Coq}|Inductive| or \mintinline{Coq}|CoInductive|. We present a possible way to implement similar behavior in a unification algorithm.
+
+The cornerstone for the user is a decision about the place where we store the information about term finiteness. The our approach is to sort the variables into finite and rational ones. If the target language supports variable typing, it could be attached to a type of a variable --- this way have no any compromises in the implementation. However, in an untyped case we must decide (as a language designer) what to do while the unification of finite and rational variables. To allow polymorphism, in the presented implementation we decided to treat finite variables finiteness-polymorphic, i.~e. any variable unified with a rational variable becomes rational too:
+\begin{table}[H]
+    \centering
+    \begin{tabular}{c|cc}
+        Variable & Finite & Rational \\
+        \hline
+        Finite & Finite & Rational \\
+        Rational & Rational & Rational \\
+    \end{tabular}
+\end{table}
+
+To be predictable to the user, this matrix must be symmetric. Of course, this decision mostly doesn't affect the whole implementation so it could be reused with other possible decisions.
+
+First of all, we modify the definition of term to persist the rationality flag:
+\begin{minted}{OCaml}
+type var = { n: int; r: bool; }
+type t =
+| Var of var
+| Con of int * t array
+\end{minted}
+
+For convenience, we abstract equation system extending in a separated function:
+\begin{minted}{OCaml}
+let extend_no_check s x y = M.add x.Term.n y s
+\end{minted}
+
+To restrict finite terms, implement a trivial ``occurs check'':
+\begin{minted}{OCaml}
+exception Occurs
+let rec occurs s x = function
+| Term.Var y ->
+    begin match walk s y with
+    | y, _ when y.Term.r -> ()
+    | y, _ when x.Term.n == y.Term.n -> raise Occurs
+    | _, Term.Var _ -> ()
+    | _, y -> occurs s x y
+    end
+| Term.Con (_, ts) -> Array.iter (occurs s x) ts
+\end{minted}
+
+The provided implementation distinguish between rational and finite variables, ignoring the former. It saves us from infinite looping while rational term traversing. This is legal because of the trivial observation: even if a finite term occurs recursively inside a rational one, we may say that it's actually the rational occurs. For example, let the red terms to be finite:
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}
+        \node[text=red] (left_f) at (-2, 0) {$f$};
+        \node[text=red] (left_t1) at (-2.5, -0.5) {$\dots$};
+        \node (left_g) at (-1.5, -0.5) {$g$};
+        \node[text=red] (left_t2) at (-2, -1) {$\dots$};
+
+        \draw[draw=red] (left_f) -- (left_t1);
+        \draw (left_f) -- (left_g);
+        \draw[draw=red] (left_g) -- (left_t2);
+        \draw[draw=red,->] (left_g) to[out=-45,in=45,looseness=2] (left_f);
+
+        \node at (0, -0.5) {\huge$\approx$};
+
+        \node[text=red] (right_f) at (2, 0) {$f$};
+        \node[text=red] (right_t1) at (1.5, -0.5) {$\dots$};
+        \node (right_g) at (2.5, -0.5) {$g$};
+        \node[text=red] (right_t2) at (2, -1) {$\dots$};
+        \node[text=red] (right_f1) at (3, -1) {$f$};
+        \node[text=red] (right_t3) at (2.5, -1.5) {$\dots$};
+
+        \draw[draw=red] (right_f) -- (right_t1);
+        \draw (right_f) -- (right_g);
+        \draw[draw=red] (right_g) -- (right_t2);
+        \draw[draw=red] (right_g) -- (right_f1);
+        \draw[draw=red] (right_f1) -- (right_t3);
+        \draw[->] (right_f1) to[out=-45,in=45,looseness=2] (right_g);
+    \end{tikzpicture}
+\end{figure}
+
+Also, the our ``occurs check'' even checks already bound variables. This is required because \union sometimes replaces existing right-hand sides and we need to be able to check them properly. Another important note is that the parameter ``\mintinline{OCaml}|x|'' of ``\mintinline{OCaml}|occurs|'' must be a representing variable since only that variables are being checked.
+
+For convenience, add an extending function with built-in ``occurs check'':
+\begin{minted}{OCaml}
+let extend s x y =
+    if not x.Term.r then occurs s x y ;
+    extend_no_check s x y
+\end{minted}
+
+Now we able to adjust the \union implementation, applying the discussed before behavior of variables unification:
+\begin{minted}{OCaml}
+let union s x y =
+    let x, xt = walk s x in
+    let y, yt = walk s y in
+    if x.Term.n == y.Term.n then s, None
+    else begin
+        let x, y, xt, yt =
+            if
+                if x.Term.r != y.Term.r
+                then y.Term.r
+                else x.Term.n > y.Term.n
+            then x, y, xt, yt
+            else y, x, yt, xt
+        in
+        match xt, yt with
+        | Var _, Var _ -> extend_no_check s x yt, None
+        | Var _, _ -> extend s x @@ Term.Var y, None
+        | _, Var _ ->
+            let s = extend s y xt in
+            extend_no_check s x yt, None
+        | _, _ -> extend s x @@ Term.Var y, Some (xt, yt)
+    end
+\end{minted}
+
+The first change is the additional variable ordering for cases when finiteness of variables diffs. In fact, we just order rational variables before finite to achieve the discussed behavior. The second is the replacing of ``\mintinline{OCaml}|M.add|'' with the new extending functions.
+
+The \unify implementation is changing trivially, replacing ``\mintinline{OCaml}|M.add|'' with ``\mintinline{OCaml}|extend|''.
+
 
 \subsection{Non-persistent Unification}

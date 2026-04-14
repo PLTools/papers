@@ -17,15 +17,15 @@ On the other hand, we define the set of (possibly) infinite terms $T^\infty$\inR
 
 For convenience, further we sometimes use pattern-matching-like style definitions distinguishing between $x$ and $f^n(t_1, ..., t_n)$ as a term. The first is always implies $x \in \V$ in contrast with an arbitrary term named $x$. For example, see the definition of the substitution application.
 
-We define the set of a term subterms $\subterms : T^\infty \rightarrow 2^{T^\infty}$\inRocq{inf_subterm} in a conventional way inductively:
+We define the set of term subterms $\subterms : T^\infty \rightarrow 2^{T^\infty}$\inRocq{inf_subterm} in a conventional way inductively:
 \begin{itemize}
     \item $t \in \subterms(t)$;
     \item $t \in \subterms(t_i) \implies t \in \subterms(f^n(..., t_i, ...))$.
 \end{itemize}
 
-We say that possibly infinite term $t \in T^\infty$ is rational\inRocq{is_rational_term} iff their set of subterms is finite~\cite{colmerauer1982prolog}. Now we can define the set of rational terms: $T^R = \{ t \in T^\infty \mid t \text{ is rational}\}$.
+We say that possibly infinite term $t \in T^\infty$ is rational\inRocq{is_rational_term} iff their set of subterms is finite~\cite{colmerauer1982prolog}. Now we can define the set of rational terms: $T^R = \{ t \in T^\infty \mid \subterms(t) \text{ finite}\}$.
 
-For example, $f(f(f(...)))$ is a rational term since it has a single subterm (itself) but $f_1(f_2(f_3(...)))$ where the ellipsis stands for the sequence of different constructor applications is not a rational term. Obviously, any finite term is rational, thus $T \subset T^R$\inRocq{term_to_inf_rational}.
+For example, $f(f(f(...)))$ is rational term since it has a single subterm (itself) but $f_1(f_2(f_3(...)))$ where the ellipsis stands for the sequence of different constructor applications is not rational term. Obviously, any finite term is rational, thus $T \subset T^R$\inRocq{term_to_inf_rational}.
 
 
 \subsection{Substitution}
@@ -62,7 +62,7 @@ For example, let $\sigma = [x \mapsto f(f(...))]$. We may see that
 \begin{proof}
     If $x \not\in \subterms(t)$, it's obvious since $t' = t [x \mapsto t'] = t$.
 
-    Otherwise, we may see that $t \sigma$ form a term where in place of the variable $x$ occurrences we already face the term $t \sigma$. Descending recursively we will face $t \sigma$ over and over again infinitely. Therefore, actually $\sigma(x)$ is not only the $t \sigma$ but also the $t [x \mapsto t] \sigma$ and moreover $t [x \mapsto t] ... [x \mapsto t] \sigma$.
+    Otherwise, we may see that $t \sigma$ form a term where in place of the variable $x$ occurrences we already face the term $t \sigma$. Descending recursively, we will face $t \sigma$ over and over again infinitely. Therefore, actually $\sigma(x)$ is not only the $t \sigma$ but also the $t [x \mapsto t] \sigma$ and moreover $t [x \mapsto t] ... [x \mapsto t] \sigma$.
 
     Since after the first substitution of $x$ we have eliminated the all its occurrences except in $t$, $t [x \mapsto t] [x \mapsto t] = t [x \mapsto t [x \mapsto t]]$. Finally:
 

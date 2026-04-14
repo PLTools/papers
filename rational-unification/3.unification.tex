@@ -37,8 +37,8 @@ The main operation defined on equation systems is $\walk : \Xi \times \V \righta
 \begin{equation*}
     \walk(\xi, x) = \left\{
     \begin{array}{lL}
-         (\underline{x} \equiv \bot, x) & if no such $e \in \Xi$ so $x \in lhs(e)$, \\
-         (e, repr(e)) & if $e \in \Xi, x \in \lhs(e)$ and $rhs(e) = \bot$, \\
+         (\underline{x} \equiv \bot, x) & if no such $e \in \xi$ so $x \in lhs(e)$, \\
+         (e, repr(e)) & if $e \in \xi, x \in \lhs(e)$ and $rhs(e) = \bot$, \\
          (e, rhs(e)) & otherwise. \\
     \end{array}
     \right.
@@ -106,7 +106,7 @@ Under the equation system application we may consider equation systems as a spec
     Given equation system $\xi \in \Xi$, $\llbracket\xi\rrbracket$ is rational substitution.
 \end{rocqtheorem}
 \begin{proof}
-    Given variable $x$ we may state that any subterm of $x \llbracket\xi\rrbracket$ is either $x$ itself or a some of $\xi$ equation subterms under the application of $\llbracket\xi\rrbracket$. Here we consider equation $e \in \E$ subterms as $\repr(e) \cup \subterms(\rhs(e))$ where $\subterms(\bot) = \emptyset$. Since $\xi$ is finite and $\subterms(t)$ for any $t \in T$ too, the set of the possible subterms is finite too.
+    Given variable $x$ we may state that any subterm of $x \llbracket\xi\rrbracket$ is either $x$ itself or a some of $\xi$ equation subterms under the application of $\llbracket\xi\rrbracket$. Here we consider equation $e \in \E$ subterms as $\{ \repr(e) \} \cup \subterms(\rhs(e))$ where $\subterms(\bot) = \emptyset$. Since $\xi$ is finite and $\subterms(t)$ for any $t \in T$ too, the set of the possible subterms is finite too.
 \end{proof}
 
 The second key operation of equation systems is $\union : \Xi \times \V \times \V \rightarrow \Xi \times (T \times T)^?$\inRocq{wf_eqsys_union}. Given two variables $x, y$ and equation system $\xi$ this operation makes a new equation system from $\xi$ so that $x, y$ lay in the same equation. More formally:
@@ -135,9 +135,8 @@ When we add a new equation at lines 7-14 we may choose as a representing variabl
 
 We consider the following properties of \union and left them without a human-readable proof\inRocq[\break]{wf_eqsys_union_prop}:
 \begin{itemize}
-    \item if $\union(\xi, x, y) = (\xi', \bot)$ then $\xi'$ is a minimal unifying extension of $\xi$ for $x, y$ (mostly by \autoref{lemma:unbound-unifier});
-    \item if $\union(\xi, x, y) = (\xi_1, (t_1, t_2))$ and $\xi_2$ is a minimal unifying extension of $\xi_1$ for $t_1, t_2$ then $\xi_2$ is a minimal unifying extension of $\xi$ for $x, y$ too;
-    \item if $\union(\xi, x, y) = (\xi_1, (t_1, t_2))$ and $\xi_2$ is a minimal unifying extension of $\xi$ for $x, y$ then $\xi_2$ is a minimal unifying extension of $\xi_1$ for $t_1, t_2$ too.
+    \item if $\union(\xi, x, y) = (\xi', \bot)$ then $\llbracket \xi' \rrbracket$ is a minimal unifying extension of $\llbracket \xi \rrbracket$ for $x, y$ (mostly by \autoref{lemma:unbound-unifier});
+    \item if $\union(\xi, x, y) = (\xi_1, (t_1, t_2))$ then $\llbracket \xi_2 \rrbracket$ is a minimal unifying extension of $\llbracket \xi \rrbracket$ for $x, y$ iff $\llbracket \xi_2 \rrbracket$ is a minimal unifying extension of $\xi_1$ for $t_1, t_2$.
 \end{itemize}
 
 These properties are required for the unification algorithm correctness and completeness and some other properties required for the termination will be discussed below.
@@ -296,22 +295,22 @@ We also consider the non-variable size of an equation system $\xi$ as a sum of n
 \[\size(\xi) = \sum_{\substack{e \in \xi \\ \rhs(e) \neq \bot}} \size(\rhs(e)).\]
 
 
-\subsubsection{Income}
+\subsubsection{Cost}
 
-We define ``income'' of two terms $\income : T \times T \rightarrow \N$ as a recursively defined function\inRocq{rational_unification_income}:
+We define ``cost'' of two terms $\cost : T \times T \rightarrow \N$ as a recursively defined function\inRocq{rational_unification_cost}:
 \begin{equation*}
     \begin{array}{r@{{}={}}l}
-        \income(x, t_2) & \size(t_2) \\
-        \income(t_1, y) & \size(t_1) \\
-        \income(f^n(l_1, ..., l_n), g^m(r_1, ..., r_m)) & 1 + \sum_{i = 1}^{\min(n, m)} \income(l_i, r_i) \\
+        \cost(x, t_2) & \size(t_2) \\
+        \cost(t_1, y) & \size(t_1) \\
+        \cost(f^n(l_1, ..., l_n), g^m(r_1, ..., r_m)) & 1 + \sum_{i = 1}^{\min(n, m)} \cost(l_i, r_i) \\
     \end{array}
 \end{equation*}
 
 Actually, independently from the actual definition, we only need that:
 \begin{itemize}
-    \item $\income(x, t) = \income(t, x) = \size(t)$ --- obviously by the definition;
-    \item if $\commonpart(t_1, t_2) = t$ then $\income(t_1, t_2) + \size(t) = \size(t_1) + \size(t_2)$ \\
-    \inRocq{rational_unification_income_common_part}. In other words, that $\income(t_1, t_2)$ is the sum of the $t_1, t_2$ non-variable sizes without the non-variable size of its' common part.
+    \item $\cost(x, t) = \cost(t, x) = \size(t)$ --- obviously by the definition;
+    \item if $\commonpart(t_1, t_2) = t$ then $\cost(t_1, t_2) + \size(t) = \size(t_1) + \size(t_2)$ \\
+    \inRocq{rational_unification_cost_common_part}. In other words, that $\cost(t_1, t_2)$ is the sum of the $t_1, t_2$ non-variable sizes without the non-variable size of its' common part.
 \end{itemize}
 
 
@@ -359,7 +358,7 @@ Now we able to define ``recursive call'' relation between unification tasks $\ta
         \begin{prooftree}
             \AxiomC{$|\roots_X(\xi_2)| \le |\roots_X(\xi_1)|$}
             \noLine
-            \UnaryInfC{$\size(\xi_2) \le \size(\xi_1) + \sum_{j = 1}^{i - 1} \income(l_j, r_j)$}
+            \UnaryInfC{$\size(\xi_2) \le \size(\xi_1) + \sum_{j = 1}^{i - 1} \cost(l_j, r_j)$}
             \RuleName{SubtermCall}
             \UnaryInfC{$(\xi_1, f^n(l_1, ..., l_n), g^n(r_1, ..., r_n)) \reccall (\xi_2, l_i, r_i)$}
         \end{prooftree}
@@ -370,7 +369,7 @@ Now we able to define ``recursive call'' relation between unification tasks $\ta
 \end{figure}
 
 We define a unification task size modulo a finite (and decidable) $X \subset \V$ $\size_X : \T \rightarrow \N \times \N$\inRocq{rational_unification_size} as:
-\[\size_X(\xi, t_1, t_2) = (|\roots_X(\xi)|, \size(\xi) + \income(t_1, t_2)).\]
+\[\size_X(\xi, t_1, t_2) = (|\roots_X(\xi)|, \size(\xi) + \cost(t_1, t_2)).\]
 
 Also we define an equation system unification size modulo a finite (and decidable) $X \subset \V$ $\size_X : \Xi \rightarrow \N \times \N$\inRocq{rational_unification_system_size} as:
 \[\size_X(\xi) = (|\roots_X(\xi)|, \size(\xi)).\]
@@ -394,22 +393,22 @@ Further we imply lexicographical order on pairs. Under these definitions we may 
             \begin{enumerate}
                 \item Let's show that $\size_X(\xi_1, x, t_y) = \size_X(\xi_2, t_x, t_y)$:
                 \begin{itemize}
-                    \item Since $|\roots_X(\xi_1)| = |\roots_X(\xi_2)|$, we only need to show that $\size(\xi_1) + \income(x, t_y) = \size(\xi_2) + \income(t_x, t_y)$.
-                    \item By the definition of \income, $\income(x, t_y) = \size(t_y)$.
-                    \item By the property of common part and \income, $\income(t_x, t_y) + \size(t) = \size(t_x) + \size(t_y)$.
+                    \item Since $|\roots_X(\xi_1)| = |\roots_X(\xi_2)|$, we only need to show that $\size(\xi_1) + \cost(x, t_y) = \size(\xi_2) + \cost(t_x, t_y)$.
+                    \item By the definition of \cost, $\cost(x, t_y) = \size(t_y)$.
+                    \item By the property of common part and \cost, $\cost(t_x, t_y) + \size(t) = \size(t_x) + \size(t_y)$.
                 \end{itemize}
                 \begin{equation*}
                     \begin{array}{r@{{}={}}l}
-                        \size(\xi_1) + \underline{\income(x, t_y)} + \size(t) & \size(\xi_1) + \underline{\size(t_y) + \size(t)} \\
+                        \size(\xi_1) + \underline{\cost(x, t_y)} + \size(t) & \size(\xi_1) + \underline{\size(t_y) + \size(t)} \\
                         & \underline{\size(\xi_1) + \size(t)} + \size(t_y) \\
                         & \size(\xi_2) + \underline{\size(t_x) + \size(t_y)} \\
-                        & \size(\xi_2) + \income(t_x, t_y) + \size(t).
+                        & \size(\xi_2) + \cost(t_x, t_y) + \size(t).
                     \end{array}
                 \end{equation*}
-                \item Let's consider the possible recursive calls from $(\xi_2, t_x, t_y)$. Since $t_x, t_y \not\in \V$, it's only \nameref{rule:subterm-call}. We may see that any \nameref{rule:subterm-call} recursive call strictly reduces the terms \income because of the top-level constructors so we may use IH.
+                \item Let's consider the possible recursive calls from $(\xi_2, t_x, t_y)$. Since $t_x, t_y \not\in \V$, it's only \nameref{rule:subterm-call}. We may see that any \nameref{rule:subterm-call} recursive call strictly reduces the terms \cost because of the top-level constructors so we may use IH.
             \end{enumerate}
         \end{itemize}
-        \item If $t_1 \not\in \V$, the only allowed recursive calls are \nameref{rule:swap-var-term-call} and \nameref{rule:subterm-call}. The first one just swaps terms of the task and immediately turns into the previous case. The latter always strictly reduces the terms \income because of the top-level constructors so we may use IH.
+        \item If $t_1 \not\in \V$, the only allowed recursive calls are \nameref{rule:swap-var-term-call} and \nameref{rule:subterm-call}. The first one just swaps terms of the task and immediately turns into the previous case. The latter always strictly reduces the terms \cost because of the top-level constructors so we may use IH.
     \end{itemize}
 \end{proof}
 
@@ -433,7 +432,7 @@ Using these properties we firstly prove that if $\unify(\xi, t_1, t_2) = \xi'$ a
     Given $\xi \in \Xi$ and $t_1, t_2 \in T$. The computation of $\unify(\xi, t_1, t_2)$ terminates.
 \end{rocqtheorem}
 \begin{proof}
-    We need to prove the more general fact here: for any finite (and decidable) $X \subset \V$ so that $\vars(\xi) \cup \vars(t_1) \cup \vars(t_2) \subseteq X$ the algorithm terminates and if its result $\xi' \neq \bot$, $\size_X(\xi') \le \size_X(\xi, t_1, t_2)$. It means that we able to increase the equation system size up to $\income(t_1, t_2)$.
+    We need to prove the more general fact here: for any finite (and decidable) $X \subset \V$ so that $\vars(\xi) \cup \vars(t_1) \cup \vars(t_2) \subseteq X$ the algorithm terminates and if its result $\xi' \neq \bot$, $\size_X(\xi') \le \size_X(\xi, t_1, t_2)$. It means that we able to increase the equation system size up to $\cost(t_1, t_2)$.
     \begin{itemize}
         \item This fact straightforwardly comes from the properties of \union and the previous lemma, by well-founded induction on $\reccall$.
         \item Finally, we instantiate the generalized fact with $X = \vars(\xi) \cup \vars(t_1) \cup \vars(t_2)$.

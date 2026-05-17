@@ -1,0 +1,200 @@
+\section{Rational Unification}
+
+In this section, we introduce rational terms, equation systems and the unification algorithm. The algorithm itself is inspired by the Martelli-Rossi algorithm ``UNIFY-1''~\cite{martelli1984efficient}.
+
+\subsection{Rational Terms}
+
+In relational (and logic) programming, we conventionally consider terms as finite expressions of the following syntax (also named Herbrand trees):
+\begin{equation*}
+    \begin{array}{ccl}
+        \V & \text{---} & \text{variables}, \\
+        \C & \text{---} & \text{constructors}, \\
+        T & ::= & \mathbb{V} \mid \mathbb{C}(T, \dots, T). \\
+    \end{array}
+\end{equation*}
+
+This notion could be generalized to consider also possibly-infinite expressions of the same syntax which we name infinite terms. While ``truly'' infinite terms like $f_1(f_2(f_3(\dots)))$ are not much semantically helpful in computational logic (since we cannot run programs infinitely long), it is pretty interesting to consider rational terms.
+
+Rational term is an infinite term with the only finite set of subterms~\cite{colmerauer1982prolog} (which are subtrees). For example, $f(f(f(\dots)))$ is a rational term since it have only one subterm (itself).
+
+Formally, we consider countable infinite sets $x, y, z, \dots \in \V$ of variables and $f, g, h, \dots \in \C$ of constructors. The latter is equipped with the function $\arity : \C \rightarrow \N$ which determines the arities of constructors and the notation $f^n \in \C$ where $f \in C$ and $n = \arity(f)$.
+
+We consider an endofunctor $F : \text{Set} \rightarrow \text{Set}$ and define the sets of terms $T = \mu F$ and infinite terms $T^\infty = \nu F$ as the least fixed point and the greatest fixed point~\cite{simon2006coinductive} of $F$ respectively:
+\[F(X) = \V \cup \{ f^n(t_1, \dots, t_n) \mid f^n \in \C, t_i \in X \}.\]
+
+The set of subterms of a term, $\subterms : T^\infty \rightarrow 2^{T^\infty}$, is defined in conventional way inductively:
+\begin{itemize}
+    \item $t \in \subterms(t)$;
+    \item $t \in \subterms(t_i) \implies t \in \subterms(f^n(\dots, t_i, \dots))$.
+\end{itemize}
+
+Then, the set of rational terms is defined as $T^R = \{ t \in T^\infty \mid \subterms(t) \text{ is finite} \}$. Thus, $T \subset T^R \subset T^\infty$.
+
+We define a substitution $\sigma \in \Sigma$ as a mapping $\V \rightarrow T^\infty$ with a finite substitution domain $\dom(\sigma) = \{ x \in V \mid \sigma(x) \neq x \}$. Substitution application and composition operations, generality and unifier properties are defined conventionally~\cite{baader2001unification}:
+\begin{itemize}
+    \item Substitution application is denoted in the postfix manner: $t \sigma$;
+    \item Substitution composition follows the equality: $t (\sigma_1 \diamond \sigma_2) = t\sigma_2\sigma_1$;
+    \item ``More general'' relation is denoted as: $\sigma_1 \preceq \sigma_2 \iff \exists \sigma, \sigma_2 = \sigma \diamond \sigma_1$.
+\end{itemize}
+
+Also, we consider a generalization of the most general unifier (MGU) property named the minimal unifying extension. We say that $\sigma_2$ is a minimal unifying extension of $\sigma_1$ for terms $t_1, t_2 \in T^\infty$ iff:
+\[ \sigma_1 \preceq \sigma_2 \land t_1 \sigma_2 = t_2 \sigma_2 \land \forall \sigma \in \Sigma. \sigma_1 \preceq \sigma \land t_1 \sigma = t_2 \sigma \implies \sigma_2 \preceq \sigma. \]
+
+Thus, $\sigma$ is MGU for terms $t_1, t_2$ iff it is a minimal unifying extension of the empty substitution.
+
+
+\subsection{Equation Systems}
+
+For convenience, we will use the notation $A^? = \{ \bot \} \cup A$ for some set $A$ and call it ``optional $A$''. Also, we use the notation $\pi_i$ for the $i$-th projection of a tuple; for example, $\pi_1 : A \times B \rightarrow A$.
+
+We define an equation $e \in \E$ as a pair:
+\begin{itemize}
+    \item a pointed finite set $X \subset \V$ named ``left-hand side'' with some variable named ``representing variable'' chosen as a base point;
+    \item an optional non-variable term $t \in T^? \setminus \V$ named ``right-hand side''.
+\end{itemize}
+
+For convenience, we will use the notations $\lhs : \E \rightarrow 2^\V$, $\repr : \E \rightarrow \V$ and $\rhs : \E \rightarrow T^?$ for corresponding equation components. Also, we will use the notation $\underline{x}, y, z \equiv t$, where $\lhs(\underline{x}, y, z \equiv t) = \{ x, y, z \}$, $\repr(\underline{x}, y, z \equiv t) = x$ and $\rhs(\underline{x}, y, z \equiv t) = t$.
+
+We define an equation system $\xi \in \Xi$ as a finite set of equations $\Xi \subset 2^\E$ with pairwise disjunctive left-hand sides. For convenience, we will use the notation $\xi, e$ for the equation system extension $\{ e \} \cup \{ e' \in \xi \mid \lhs(e) \cap \lhs(e') = \emptyset \}$.
+
+We consider our equation definition as a representation of the special case of equation system in conventional sense. For example:
+\begin{equation*}
+    \begin{array}{c|c}
+        \text{Conventional equation system} & \text{Our equation} \\[2pt]
+        \left\{\begin{array}{l@{{}={}}l}
+            x & f(z) \\
+            y & x \\
+            z & x \\
+        \end{array}\right. & \underline{x}, y, z \equiv f(z) \\
+    \end{array}
+\end{equation*}
+
+In this sense, we may see that trivial equations of the form $\underline{x} \equiv \bot$ do not equate anything so we consider them illegal, i.e., $\forall x \in \V, x \in \Xi. x \equiv \bot \notin \xi$. However, we will still allow them in $\E$ for the simplicity of the following definition.
+
+The main operation defined on equation systems is $\walk : \Xi \times \V \rightarrow \E \times T$. This operation looks up for a variable in an equation system returning a corresponding pair of equation and term. More formally:
+\begin{equation*}
+    \walk(\xi, x) = \begin{cases}
+        (\underline{x} \equiv \bot, x) & \text{if there is no such $e \in \xi$ so $x \in \lhs(e)$}, \\
+        (e, \repr(e)) & \text{if $e \in \xi, x \in \lhs(e)$ and $\rhs(e) = \bot$}, \\
+        (e, \rhs(e)) & \text{otherwise}. \\
+    \end{cases}
+\end{equation*}
+
+Basically, we may consider our definition of equation system as an ``enhanced'' triangular substitution~\cite{baader2001unification} w.r.t. \walk. For example:
+\begin{equation*}
+    \begin{array}{c|c}
+        \text{Triangular substitution} & \text{Equation system} \\[2pt]
+        \left\{\begin{array}{l@{{}\mapsto{}}l}
+            x & f(z) \\
+            y & x \\
+            z & w \\
+        \end{array}\right. & \left\{\begin{array}{l@{{}\equiv{}}l}
+            \underline{x}, y & f(z) \\
+            z, \underline{w} & \bot \\
+        \end{array}\right.
+    \end{array}
+\end{equation*}
+
+Indeed, we may consider equation systems as substitutions which are being applied recursively to a term. More formally, we define the equation system application as follows:
+\begin{algorithmic}
+    \Function{ApplyEqSys}{$\xi \in \Xi$, $t \in T^\infty$}
+        \If{$x \gets t \in \V$}
+            \State $(\_, t) \gets \walk(\xi, x)$
+        \EndIf
+        \If{$x' \gets t \in \V$}
+            \State \Return $x'$
+        \EndIf
+        \If{$f^n(\dots, t_i, \dots) \gets t$}
+            \State \Return $f^n(\dots, \Call{ApplyEqSys}{\xi, t_i}, \dots)$
+        \EndIf
+    \EndFunction
+\end{algorithmic}
+
+Under the equation system application, we may consider equation systems as a special case of substitutions. More precisely, we may prove that the application of an equation system to a rational term is always rational, too.
+
+The second key operation of equation systems is $\union : \Xi \times \V \times \V \rightarrow \Xi \times (T \times T)^?$. Given two variables $x, y$ and an equation system $\xi$, this operation builds a new equation system from $\xi$ such that $x, y$ belong to the same equation. More formally:
+\begin{algorithmic}[1]
+    \Function{UnionEqSys}{$\xi \in \Xi$, $x, y \in \V$}
+        \State $(e_x, \_) \gets \walk(\xi, x)$
+        \State $(e_y, \_) \gets \walk(\xi, y)$
+        \If{$\repr(e_x) = \repr(e_y)$}
+            \State \Return $(\xi, \bot)$
+            \Comment{already in the one equation or equals}
+        \EndIf
+        \If{$\rhs(e_x) = \bot$ \textbf{and} $\rhs(e_y) = \bot$}
+            \State \Return $([\xi, \lhs(e_x) \cup \lhs(e_y) \equiv \bot], \bot)$
+        \EndIf
+        \If{$\rhs(e_x) = \bot$}
+            \State \Return $([\xi, \lhs(e_x) \cup \lhs(e_y) \equiv \rhs(e_y)], \bot)$
+        \EndIf
+        \If{$\rhs(e_y) = \bot$}
+            \State \Return $([\xi, \lhs(e_x) \cup \lhs(e_y) \equiv \rhs(e_x)], \bot)$
+        \EndIf
+        \State \Return $([\xi, \lhs(e_x) \cup \lhs(e_y) \equiv \rhs(e_x)],(\rhs(e_x), \rhs(e_y)))$
+    \EndFunction
+\end{algorithmic}
+
+When we add a new equation at lines 6-12, we may choose either $\repr(e_x)$ or $\repr(e_y)$ as the representing variable. The same is true about the right-hand side of the new equation at line 12: it could be either $\rhs(e_x)$ or $\rhs(e_y)$. As we can see, the second element of \union result is intended to inform a caller about a collision in right-hand sides during the union.
+
+
+\subsection{Common Part}
+
+We define a ``common part''~\cite{martelli1984efficient} of two terms $\commonpart : T \times T \rightarrow T^?$ inductively:
+\begin{equation*}
+    \begin{split}
+        \commonpart(x, \_) &= x \\
+        \commonpart(\_, y) &= y \\
+        \commonpart(f^n(\dots, l_i, \dots), f^n(\dots, r_i, \dots)) &= f^n(\dots, \commonpart(l_i, r_i), \dots) \\
+    \end{split}
+\end{equation*}
+
+The definition is intentionally left non-total since two terms may not have a common part (is such cases the result is $\bot$) and slightly non-deterministic (in the case of two variables) to allow optimizations. Hereafter we require the implementation of \commonpart to be a total deterministic function.
+
+
+\subsection{The Unification Algorithm}
+
+We define the unification algorithm as a recursive function $\unify : \Xi \times T \times T \rightarrow \Xi^?$:
+
+\begin{algorithmic}[1]
+    \Function{RationalUnify}{$\xi \in \Xi$, $t_1, t_2 \in T$}
+        \If{$x \gets t_1 \in \V$ \textbf{and} $y \gets t_2 \in \V$}
+            \State $(\xi, ts) \gets \union(\xi, x, y)$
+            \If{$(t_1, t_2) \gets ts$}
+                \State \Return $\Call{RationalUnify}{\xi, t_1, t_2}$
+            \EndIf
+            \State \Return $\xi$
+        \EndIf
+        \If{$x \gets t_1 \in \V$}
+            \State $(e, \_) \gets \walk(\xi, x)$
+            \If{$\rhs(e) = \bot$}
+                \State \Return $\lhs(e) \equiv t_2, \xi$
+            \EndIf
+            \State $t \gets \commonpart(\rhs(e), t_2)$
+            \If{$t = \bot$}
+                \State \bf failure
+            \EndIf
+            \State $\xi \gets \lhs(e) \equiv t, \xi$
+            \State \Return \Call{RationalUnify}{$\xi, \rhs(e), t_2$}
+        \EndIf
+        \If{$y \gets t_2 \in \V$}
+            \State \Return \Call{RationalUnify}{$\xi, y, t_1$}
+        \EndIf
+        \If{$f^n(l_1, ..., l_n) \gets t_1$ \textbf{and} $g^m(r_1, ..., r_m) \gets t_2$}
+            \If{$f^n \neq g^m$}
+                \State \bf failure
+            \EndIf
+            \For{$i = 1, ..., n$}
+                \State $\xi \gets \Call{RationalUnify}{\xi, l_i, r_i}$
+            \EndFor
+            \State \Return $\xi$
+        \EndIf
+    \EndFunction
+\end{algorithmic}
+
+
+We have proved the following properties of this algorithm in \Rocq\footnote{\url{https://anonymous.4open.science/r/20BC/}}:
+\begin{itemize}
+    \item Correctness: if the algorithm terminated with the non-$\bot$ result, the result is a minimal unifying extension of a source equation system for the given terms.
+    \item Completeness: if the algorithm terminated with $\bot$ result, there is no unifying extension of a source equation system for the given terms.
+    \item Termination: the algorithm terminates with some result on every input.
+\end{itemize}

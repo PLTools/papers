@@ -1,0 +1,210 @@
+\section{Evaluation}
+
+In this section we present the evaluation of our algorithm in comparison with the conventional (as a baseline) and another well-known rational unification algorithm.
+
+We have implemented three unification algorithms with some optimizations\footnote{\url{https://anonymous.4open.science/r/rational-unification-1935}}. These algorithms have been implemented in three variants: ephemeral, ephemeral with path compression and persistent. The latter use only persistent data structures, that make it possible to use them in a \miniKanren implementation, while others use mutable and don't allow backtracking.
+
+To allow fair algorithm comparison, all implementations include same generic optimizations but as many as possible algorithm-specific micro-optimizations. Especially, we use different data structures for them.
+
+We compare the following algorithms:
+\begin{itemize}
+    \item \texttt{robinson} --- the conventional algorithm (Robinson's with triangular substitution, baseline);
+    \item \texttt{rational} --- Martelli-Rossi algorithm (described above);
+    \item \texttt{huet} --- Huet's algorithm for unification of recursive types~\cite{huet1976resolution}\footnote{The actual implementation was studied from \url{https://github.com/SWI-Prolog/swipl/blob/45e83178379f0fd6f918bd294bb361f3db7bf1d7/src/pl-prims.c\#L71}.}.
+\end{itemize}
+
+We use unification traces for evaluation. Unification trace is a list of pairs of terms, i.e., sequence of equations. We use three test sets:
+\begin{itemize}
+    \item \texttt{JGS} --- collected from the tests from Java Generic Solver implemented in \OCanren~\cite{lozov2023relational} (9 tests, 1448 traces);
+    \item \texttt{Lama} --- collected from the tests from Lama type checker implemented in \OCanren~\cite{domoratskiy2024relational} (66 traces, 1 per test);
+    \item \texttt{synth} --- synthetical tests, generated manually (66 traces, 11 per test).
+\end{itemize}
+
+We consider JGS and Lama as close to ``real-world'' applications of our algorithm. While JGS includes only unification of finite terms, several Lama tests requires dealing with rational.
+
+Synthetical tests are intended for stress testing and parameterized with $n = 0, 10, \dots, 100$:
+\begin{itemize}
+    \item \texttt{full} --- equates two full binary trees of depth $n$ ($T_i, U_i \in \V$):
+    \begin{equation*}
+        \left\{
+        \begin{array}{c@{{}={}}ll}
+            T_0 & x, & x \in \V, \\
+            U_0 & a, & a^0 \in \C, \\
+            T_i & f(T_{i-1}, T_{i-1}), & i = 1, 2, \dots, n, \\
+            U_i & f(U_{i-1}, U_{i-1}), & i = 1, 2, \dots, n, \\
+            T_n & U_n. \\
+        \end{array}
+        \right.
+    \end{equation*}
+    \item \texttt{left\_right} --- equates leftist and rightist binary trees of depth $n$ ($T_i, U_i \in \V$):
+    \begin{equation*}
+        \left\{
+        \begin{array}{c@{{}={}}ll}
+            T_0 & x, \\
+            U_0 & x, \\
+            T_i & f(T_{i-1}, x), & i = 1, 2, \dots, n, \\
+            U_i & f(x, U_{i-1}), & i = 1, 2, \dots, n, \\
+            T_n & U_n. \\
+        \end{array}
+        \right.
+    \end{equation*}
+    \item $\texttt{loops}_1$ --- equates $n$ loops together:
+    \begin{equation*}
+        \left\{
+        \begin{array}{c@{{}={}}ll}
+            x_i & f(x_i), & i = 1, 2, \dots, n, \\
+            x_0 & x_i, & i = 1, 2, \dots, n. \\
+        \end{array}
+        \right.
+    \end{equation*}
+    \item $\texttt{loops}_2$ --- as the previous but with $x_i = x_0$ instead of $x_0 = x_i$.
+    \item $\texttt{loops}_3$ --- as $\texttt{loops}_1$ but with $x_{i-1} = x_i$ instead of $x_0 = x_i$.
+    \item $\texttt{loops}_4$ --- as the previous but with $x_i = x_{i-1}$ instead of $x_{i-1} = x_i$.
+\end{itemize} 
+
+All synthetical tests except \texttt{full} require support for rational unification. Also, \texttt{full} being ran using the conventional algorithm consumes exponential time. Consequently, we don't use the conventional algorithm with them.
+
+% TODO: fix pictures!!!
+\begin{figure}[b]
+    \centering
+    \begin{subfigure}{.48\linewidth}
+        \includegraphics[width=\linewidth]{bench/ephemeral/robinson_comparison.png}
+        \subcaption{Ephemeral variant}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{.48\linewidth}
+        \includegraphics[width=\linewidth]{bench/persistent/robinson_comparison.png}
+        \subcaption{Persistent variant}
+    \end{subfigure}
+    \caption{Comparison of the algorithms in dependence from the conventional}
+    \label{fig:baseline}
+\end{figure}
+
+The main evaluation results follow:
+\begin{itemize}
+    \item Our algorithm shows it as perform as the conventional in the real-world scenarios. This is shown by \autoref{fig:baseline}. These plots shows an algorithm's run time in dependence from the conventional algorithm run time. As we may see, our algorithm is always near to the main diagonal.
+    \item While the Huet's algorithm works faster in ephemeral variant, it degrades being implemented in persistent (this is shown on \autoref{fig:baseline}, too, and on \autoref{fig:Lama}). On \autoref{fig:synth-ephemeral} and \autoref{fig:synth-persistent} we may also see that even in the ephemeral implementation it works slower than our and moreover its performance depends on the ordering of equation sides.
+\end{itemize}
+
+\begin{figure}
+    \centering
+    \begin{subfigure}{.48\linewidth}
+        \includegraphics[width=\linewidth]{bench/ephemeral/Lama.png}
+        \subcaption{Ephemeral variant}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{.48\linewidth}
+        \includegraphics[width=\linewidth]{bench/persistent/Lama.png}
+        \subcaption{Persistent variant}
+    \end{subfigure}
+    \caption{Comparison of the algorithms on the \texttt{Lama} traces that require rational unification}
+    \label{fig:Lama}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \begin{subfigure}{.48\linewidth}
+        \includegraphics[width=\linewidth]{bench/ephemeral/synth_full.png}
+        \subcaption{\texttt{full}}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{.48\linewidth}
+        \includegraphics[width=\linewidth]{bench/ephemeral/synth_left_right.png}
+        \subcaption{\texttt{left\_right}}
+    \end{subfigure}
+    \\
+    \begin{subfigure}{.48\linewidth}
+        \includegraphics[width=\linewidth]{bench/ephemeral/synth_loops1.png}
+        \subcaption{$\texttt{loops}_1$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{.48\linewidth}
+        \includegraphics[width=\linewidth]{bench/ephemeral/synth_loops2.png}
+        \subcaption{$\texttt{loops}_2$}
+    \end{subfigure}
+    \\
+    \begin{subfigure}{.48\linewidth}
+        \includegraphics[width=\linewidth]{bench/ephemeral/synth_loops3.png}
+        \subcaption{$\texttt{loops}_3$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{.48\linewidth}
+        \includegraphics[width=\linewidth]{bench/ephemeral/synth_loops4.png}
+        \subcaption{$\texttt{loops}_4$}
+    \end{subfigure}
+    \caption{Comparison of the ephemeral rational unification algorithm implementations on the synthetical tests}
+    \label{fig:synth-ephemeral}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \begin{subfigure}{.48\linewidth}
+        \includegraphics[width=\linewidth]{bench/persistent/synth_full.png}
+        \subcaption{\texttt{full}}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{.48\linewidth}
+        \includegraphics[width=\linewidth]{bench/persistent/synth_left_right.png}
+        \subcaption{\texttt{left\_right}}
+    \end{subfigure}
+    \\
+    \begin{subfigure}{.48\linewidth}
+        \includegraphics[width=\linewidth]{bench/persistent/synth_loops1.png}
+        \subcaption{$\texttt{loops}_1$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{.48\linewidth}
+        \includegraphics[width=\linewidth]{bench/persistent/synth_loops2.png}
+        \subcaption{$\texttt{loops}_2$}
+    \end{subfigure}
+    \\
+    \begin{subfigure}{.48\linewidth}
+        \includegraphics[width=\linewidth]{bench/persistent/synth_loops3.png}
+        \subcaption{$\texttt{loops}_3$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{.48\linewidth}
+        \includegraphics[width=\linewidth]{bench/persistent/synth_loops4.png}
+        \subcaption{$\texttt{loops}_4$}
+    \end{subfigure}
+    \caption{Comparison of the persistent rational unification algorithm implementations on the synthetical tests}
+    \label{fig:synth-persistent}
+\end{figure}
+
+We also applied the Kruskal-Wallis test and the Dunn post-hoc test with the Bonferroni correction to determine which algorithm works faster on which traces. Overall summary is presented as numbers of statistically significant wins is presented on \autoref{tab:analyse}. Best results are highlighted with the bold font. Here we see again that the Huet's algorithm works better in the ephemeral implementation but losing in the persistent while our stay aligned with the conventional.
+
+\begin{table}[b]
+    \centering
+    \begin{tabular}{l||c|c|c}
+        \toprule
+        \textbf{Algorithm} & \textbf{Ephemeral} & \textbf{Ephemeral with path compression} & \textbf{Persistent} \\
+        \midrule
+        Conventional & 755 & 915 & \textbf{1982} \\
+        Our & 847 & 727 & \textbf{2155} \\
+        Huet's & \textbf{2677} & \textbf{2651} & 62 \\
+        \bottomrule
+    \end{tabular}
+    \caption{Statistically significant wins of every algorithm on all traces comparing per-algorithm}
+    \label{tab:analyse}
+\end{table}
+
+Also, the Huet's algorithm requires a more complex data structure representation than the conventional while our doesn't. These results shows that it is reasonable to use our algorithm instead of the conventional in \miniKanren implementations.
+
+Additionally, following~\cite{domoratskiy2025empirical}, we have studied once again that the path compression technique don't improve overall unification performance. Moreover, it make our algorithm slightly slower (for about 1\%) while the Huet's slightly faster. This could be seen on \autoref{tab:analyse-ephemeral}.
+
+\begin{table}[b]
+    \centering
+    \begin{tabular}{l||c|c|c}
+        \toprule
+        \textbf{Variant} & \textbf{Conventional} & \textbf{Our} & \textbf{Huet's} \\
+        \midrule
+        Ephemeral & 597 & \textbf{784} & 494 \\
+        Ephemeral with path compression & \textbf{470} & 345 & \textbf{685} \\
+        \midrule
+        Median ratio & 1.00 & 0.99 & 1.00 \\
+        \bottomrule
+    \end{tabular}
+    \caption{Statistically significant wins of every algorithm on all traces comparing the ephemeral variants}
+    \label{tab:analyse-ephemeral}
+\end{table}
+

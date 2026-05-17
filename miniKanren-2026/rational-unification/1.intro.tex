@@ -1,0 +1,9 @@
+\section{Introduction}
+
+In \miniKanren, we conventionally deal with only finite terms (Herbrand trees) such as lists but sometimes it is convenient to consider recursively defined terms such as streams or recursive types, named rational terms. In practical logic programming, algorithms for first-order rational unification also used to reduce time consumption by omitting an ``occurs check''.
+
+Despite the existence of a variety of rational unification algorithms, in practice only the Huet's algorithm~\cite{huet1976resolution} is used. While it shows brilliant results in many applications, we show that it is inappropriate to use in persistent rational unification which is required to implement \miniKanren due to the interleaving search.
+
+We present own algorithm based on the Marelli and Rossi's approach~\cite{martelli1984efficient} which explores an interesting approach to avoid infinite looping by reducing the size of the intermediate state. This work includes a comprehensive and verifiable comparative evaluation of these two approaches with the conventional (w.r.t. \miniKanren) Robinson's algorithm as a baseline.
+
+The paper is organized as follows. In Section 2 we introduce rational terms, equation systems and our algorithm. In Section 3 we describe a simplified implementation of our algorithm in \OCaml in compare with the conventional. Section 4 presents evaluation; Section 5 explores the related work and section 6 concludes.

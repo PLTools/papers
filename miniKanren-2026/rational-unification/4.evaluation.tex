@@ -4,9 +4,9 @@ In this section we present the results evaluation of our algorithm in comparison
 
 We have implemented three unification algorithms with some optimizations\footnote{\url{https://anonymous.4open.science/r/rational-unification-1935}}. These algorithms
 were implemented in three variants: ephemeral, ephemeral with path compression and persistent. The latter uses only persistent data structures which makes it possible to utilize them
-in a \miniKanren implementation, while others use mutable and thus don't allow backtracking.
+in a \miniKanren implementation, while others use mutable without backtracking support (in contrast with WAM~\cite{warren1983abstract}, to reduce overhead).
 
-To allow fair algorithm comparison all implementations include the same generic optimizations but as many as possible algorithm-specific micro-optimizations.
+To allow fair algorithm comparison, all implementations include the same generic optimizations but as many as possible algorithm-specific micro-optimizations.
 Especially, we use different data structures for them.
 
 We compare the following algorithms:
@@ -188,11 +188,9 @@ The main evaluation results are:
     \label{fig:synth-persistent}
 \end{figure}
 
-We also applied the Kruskal-Wallis test and the Dunn post-hoc test with the Bonferroni correction to determine which
-algorithm works faster on which traces. The overall summary is presented as numbers of statistically significant wins 
-in \autoref{tab:analyse}. The best results are highlighted using the bold font. Here we see again that the Huet's
-algorithm works better in ephemeral implementation but loses its performance in persistent while our stay aligned
-with the conventional.
+We also applied the Kruskal-Wallis test~\cite{kruskal1952use} and the Dunn post-hoc test~\cite{dunn1964multiple} with the Bonferroni correction~\cite{bonferroni1936teoria} to determine which algorithm works faster on which traces.
+The overall summary is presented as numbers of statistically significant wins in \autoref{tab:analyse}. The best results are highlighted using the bold font.
+Here we see again that the Huet's algorithm works better in ephemeral implementation but loses its performance in persistent while our stay aligned with the conventional.
 
 \begin{table}[b]
     \centering

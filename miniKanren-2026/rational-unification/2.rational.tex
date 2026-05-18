@@ -9,15 +9,15 @@ In relational (and logic) programming, we conventionally consider terms as finit
     \begin{array}{ccl}
         \V & \text{---} & \text{variables}, \\
         \C & \text{---} & \text{constructors}, \\
-        T & ::= & \mathbb{V} \mid \mathbb{C}(T, \dots, T). \\
+        T & ::= & \mathbb{V} \mid \mathbb{C}\,(T, \dots, T). \\
     \end{array}
 \end{equation*}
 
-This notion could be generalized to consider also possibly-infinite expressions of the same syntax which we name infinite terms. While ``truly'' infinite terms like $f_1(f_2(f_3(\dots)))$ are not much semantically helpful in computational logic (since we cannot run programs infinitely long), it is pretty interesting to consider rational terms.
+This notion could be generalized to consider also possibly-infinite expressions of the same syntax which we name infinite terms. While ``truly'' infinite terms like $f_1\,(f_2\,(f_3\,(\dots)))$ are not much semantically helpful in computational logic (since we cannot run programs infinitely long), it is pretty interesting to consider rational terms.
 
-Rational term is an infinite term with the only finite set of subterms~\cite{colmerauer1982prolog} (which are subtrees). For example, $f(f(f(\dots)))$ is a rational term since it have only one subterm (itself).
+Rational term is an infinite term with the only finite set of subterms~\cite{colmerauer1982prolog} (which are subtrees). For example, $f\,(f\,(f\,(\dots)))$ is a rational term since it have only one subterm (itself).
 
-Formally, we consider countable infinite sets $x, y, z, \dots \in \V$ of variables and $f, g, h, \dots \in \C$ of constructors. The latter is equipped with the function $\arity : \C \rightarrow \N$ which determines the arities of constructors and the notation $f^n \in \C$ where $f \in C$ and $n = \arity(f)$.
+Formally, we consider countable infinite sets $x, y, z, ... \in \V$ of variables and $f, g, h, ... \in \C$ of constructors. The latter is equipped with the function $\arity : \C \rightarrow \N$ which determines the arities of constructors and the notation $f^n \in \C$ where $f \in \C$ and $n = \arity(f)$.
 
 We consider an endofunctor $F : \text{Set} \rightarrow \text{Set}$ and define the sets of terms $T = \mu F$ and infinite terms $T^\infty = \nu F$ as the least fixed point and the greatest fixed point~\cite{simon2006coinductive} of $F$ respectively:
 \[F(X) = \V \cup \{ f^n(t_1, \dots, t_n) \mid f^n \in \C, t_i \in X \}.\]
@@ -30,7 +30,7 @@ The set of subterms of a term, $\subterms : T^\infty \rightarrow 2^{T^\infty}$, 
 
 Then, the set of rational terms is defined as $T^R = \{ t \in T^\infty \mid \subterms(t) \text{ is finite} \}$. Thus, $T \subset T^R \subset T^\infty$.
 
-We define a substitution $\sigma \in \Sigma$ as a mapping $\V \rightarrow T^\infty$ with a finite substitution domain $\dom(\sigma) = \{ x \in V \mid \sigma(x) \neq x \}$. Substitution application and composition operations, generality and unifier properties are defined conventionally~\cite{baader2001unification}:
+We define a substitution $\sigma \in \Sigma$ as a mapping $\V \rightarrow T^\infty$ with a finite substitution domain $\dom(\sigma) = \{ x \in \V \mid \sigma(x) \neq x \}$. Substitution application and composition operations, generality and unifier properties are defined conventionally~\cite{baader2001unification}:
 \begin{itemize}
     \item Substitution application is denoted in the postfix manner: $t \sigma$;
     \item Substitution composition follows the equality: $t (\sigma_1 \diamond \sigma_2) = t\sigma_2\sigma_1$;
@@ -38,14 +38,14 @@ We define a substitution $\sigma \in \Sigma$ as a mapping $\V \rightarrow T^\inf
 \end{itemize}
 
 Also, we consider a generalization of the most general unifier (MGU) property named the minimal unifying extension. We say that $\sigma_2$ is a minimal unifying extension of $\sigma_1$ for terms $t_1, t_2 \in T^\infty$ iff:
-\[ \sigma_1 \preceq \sigma_2 \land t_1 \sigma_2 = t_2 \sigma_2 \land \forall \sigma \in \Sigma. \sigma_1 \preceq \sigma \land t_1 \sigma = t_2 \sigma \implies \sigma_2 \preceq \sigma. \]
+\[ \sigma_1 \preceq \sigma_2 \land t_1 \sigma_2 = t_2 \sigma_2 \land \forall \sigma \in \Sigma. ~ \sigma_1 \preceq \sigma \land t_1 \sigma = t_2 \sigma \implies \sigma_2 \preceq \sigma. \]
 
 Thus, $\sigma$ is MGU for terms $t_1, t_2$ iff it is a minimal unifying extension of the empty substitution.
 
 
 \subsection{Equation Systems}
 
-For convenience, we will use the notation $A^? = \{ \bot \} \cup A$ for some set $A$ and call it ``optional $A$''. Also, we use the notation $\pi_i$ for the $i$-th projection of a tuple; for example, $\pi_1 : A \times B \rightarrow A$.
+For convenience, we will use the notation $A^? = \{ \bot \} \cup A$ for some set $A$ and call it ``optional $A$''.
 
 We define an equation $e \in \E$ as a pair:
 \begin{itemize}
@@ -69,7 +69,7 @@ We consider our equation definition as a representation of the special case of e
     \end{array}
 \end{equation*}
 
-In this sense, we may see that trivial equations of the form $\underline{x} \equiv \bot$ do not equate anything so we consider them illegal, i.e., $\forall x \in \V, x \in \Xi. x \equiv \bot \notin \xi$. However, we will still allow them in $\E$ for the simplicity of the following definition.
+In this sense, we may see that trivial equations of the form $\underline{x} \equiv \bot$ do not equate anything so we consider them illegal, i.e., $\forall x \in \V, x \in \Xi. ~ x \equiv \bot \notin \xi$. However, we will still allow them in $\E$ for the simplicity of the following definition.
 
 The main operation defined on equation systems is $\walk : \Xi \times \V \rightarrow \E \times T$. This operation looks up for a variable in an equation system returning a corresponding pair of equation and term. More formally:
 \begin{equation*}
@@ -104,8 +104,8 @@ Indeed, we may consider equation systems as substitutions which are being applie
         \If{$x' \gets t \in \V$}
             \State \Return $x'$
         \EndIf
-        \If{$f^n(\dots, t_i, \dots) \gets t$}
-            \State \Return $f^n(\dots, \Call{ApplyEqSys}{\xi, t_i}, \dots)$
+        \If{$f^n(t_1, \dots, t_n) \gets t$}
+            \State \Return $f^n(\Call{ApplyEqSys}{\xi, t_1}, \dots, \Call{ApplyEqSys}{\xi, t_n})$
         \EndIf
     \EndFunction
 \end{algorithmic}
@@ -144,7 +144,7 @@ We define a ``common part''~\cite{martelli1984efficient} of two terms $\commonpa
     \begin{split}
         \commonpart(x, \_) &= x \\
         \commonpart(\_, y) &= y \\
-        \commonpart(f^n(\dots, l_i, \dots), f^n(\dots, r_i, \dots)) &= f^n(\dots, \commonpart(l_i, r_i), \dots) \\
+        \commonpart(f^n(l_1, \dots, l_n), f^n(r_1, \dots, r_n)) &= f^n(\commonpart(l_1, r_1), \dots, \commonpart(l_n, r_n)) \\
     \end{split}
 \end{equation*}
 
@@ -191,8 +191,8 @@ We define the unification algorithm as a recursive function $\unify : \Xi \times
     \EndFunction
 \end{algorithmic}
 
-
 We have proved the following properties of this algorithm in \Rocq\footnote{\url{https://anonymous.4open.science/r/20BC/}}:
+
 \begin{itemize}
     \item Correctness: if the algorithm terminates with a non-$\bot$ result then the result is a minimal unifying extension of the source equation system for given terms.
     \item Completeness: if the algorithm terminates with $\bot$ result then there is no unifying extension of the source equation system for given terms.

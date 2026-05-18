@@ -12,46 +12,50 @@ module Term = struct
   | Var of int
   | Con of int * t array
 end
-
 module M = Map.Make(Int)
 \end{minted}
 
 The difference is in the interpretation of this intermediate state. While in conventional unification we understand an intermediate state as a substitution $\sigma$ (and encode
-it in a triangular manner~\cite{baader2001unification}), in rational unification we understand it as an equation system $\xi$ and encode it in a union-find manner~\cite{arden1961algorithm}.
+it in a triangular manner~\cite{baader2001unification}), in rational unification we understand it as an equation system $\xi$ and encode it in a union-find manner~\cite{arden1961algorithm}\footnote{Actually, we don't use path-compression and rank heuristic since they slows down the algorithm in persistent implementations. Thus, it may be called ``a triangular equation system''.}.
 
-The core operation \walk that allows us to ``dereference'' variables in triangular substitution changes its signature from $\walk : \Sigma \times \V \rightarrow T$ to $\walk : \Xi \times \V \rightarrow \E \times T$ and plays the role of ``find'' operation of union-find:
+\begin{samepage}
 
-\begin{figure}[H]
-    \centering
-    \begin{minipage}{0.46\textwidth}
-        \centering
-        \begin{minted}[fontsize=\small,baselinestretch=0.9]{OCaml}
+    The core operation \walk that allows us to ``dereference'' variables in triangular substitution changes its signature from $\walk : \Sigma \times \V \rightarrow T$ to $\walk : \Xi \times \V \rightarrow \E \times T$ and plays the role of ``find'' operation of union-find:
+
+    \begin{center}
+        \begin{minipage}{0.46\textwidth}
+            \centering
+            \begin{minted}[fontsize=\small,baselinestretch=0.9]{OCaml}
 let rec walk s x = match M.find x s with
 | exception Not_found -> Term.Var x
 | Term.Var x -> walk s x
 | t -> t
-        \end{minted}
-    \end{minipage}
-    \hfill
-    \vrule
-    \hfill
-    \begin{minipage}{0.46\textwidth}
-        \centering
-        \begin{minted}[fontsize=\small,baselinestretch=0.9]{OCaml}
+            \end{minted}
+        \end{minipage}
+        \hfill
+        \vrule
+        \hfill
+        \begin{minipage}{0.46\textwidth}
+            \centering
+            \begin{minted}[fontsize=\small,baselinestretch=0.9]{OCaml}
 let rec walk s x = match M.find x s with
 | exception Not_found -> x, Term.Var x
 | Term.Var x -> walk s x
 | t -> x, t
-        \end{minted}
-    \end{minipage}
-\end{figure}
+            \end{minted}
+        \end{minipage}
+    \end{center}
+
+\end{samepage}
 
 The only difference is an ability to observe the ``final'' variable in a ``dereference'' chain. In implementation, we deal with representing variables
 instead of equations defined in the previous section.
 
-Let us recall the ``occurs check'' from the conventional algorithm:
+\begin{samepage}
 
-\begin{minted}{OCaml}
+    Let us recall the ``occurs check'' from the conventional algorithm:
+
+    \begin{minted}{OCaml}
 let rec occurs s x = function
 | Term.Var y ->
   begin match walk s y with
@@ -60,17 +64,19 @@ let rec occurs s x = function
   end
 | Term.Con (_, ts) -> Array.iter (occurs s x) ts
 
-let extend s x t =
-  occurs s x t ;
-  M.add x t s
-\end{minted}
+let extend s x t = occurs s x t ; M.add x t s
+    \end{minted}
+
+\end{samepage}
 
 While in the conventional algorithm these functions help us to prevent the construction of illegal (recursive) substitution,
 rational unification must allow them so we omit them.
 
-Instead, we define the operations $\commonpart : T \times T \rightarrow T^?$ and $\union : \Xi \times \V \times \V \rightarrow \Xi \times (T \times T)^?$ where $A^?$ stands for $A \cup \{ \bot \}$. These operations help us to prevent infinite looping similarly to ``occurs check'' in the conventional algorithm:
+\begin{minipage}{\textwidth}
 
-\begin{minted}{OCaml}
+    Instead, we define the operations $\commonpart : T \times T \rightarrow T^?$ and $\union : \Xi \times \V \times \V \rightarrow \Xi \times (T \times T)^?$. These operations help us to prevent infinite looping similarly to ``occurs check'' in the conventional algorithm:
+
+    \begin{minted}{OCaml}
 module Term = struct
   let rec common_part x y = match x, y with
   | Var x, _ -> Var x
@@ -91,15 +97,14 @@ let union s x y =
   | _, Var _ -> M.add y (Term.Var x) s, None
   | _, _ -> M.add x (Term.Var y) s, Some (xt, yt)
   end
-\end{minted}
+    \end{minted}
 
-Finally, we implement the algorithm itself:
+    Finally, we implement the algorithm itself:
 
-\begin{figure}[H]
-    \centering
-    \begin{minipage}{0.46\textwidth}
-        \centering
-        \begin{minted}[fontsize=\small,baselinestretch=0.9]{OCaml}
+    \begin{center}
+        \begin{minipage}{0.46\textwidth}
+            \centering
+            \begin{minted}[fontsize=\small,baselinestretch=0.9]{OCaml}
 let rec unify_vt s x yt =
   match walk s x with
   | Term.Var x -> extend s x yt
@@ -129,14 +134,14 @@ and unify s xt yt =
     in
     hlp 0 s
   | _ -> raise Term.No_common_part
-        \end{minted}
-    \end{minipage}
-    \hfill
-    \vrule
-    \hfill
-    \begin{minipage}{0.46\textwidth}
-        \centering
-        \begin{minted}[fontsize=\small,baselinestretch=0.9]{OCaml}
+            \end{minted}
+        \end{minipage}
+        \hfill
+        \vrule
+        \hfill
+        \begin{minipage}{0.46\textwidth}
+            \centering
+            \begin{minted}[fontsize=\small,baselinestretch=0.9]{OCaml}
 let rec unify_vt s x yt =
   let x, xt = walk s x in
   begin match xt with
@@ -167,26 +172,29 @@ and unify s xt yt =
     in
     hlp 0 s
   | _ -> raise Term.No_common_part
-        \end{minted}
-    \end{minipage}
-\end{figure}
+            \end{minted}
+        \end{minipage}
+    \end{center}
 
-While handling two constructors case is the same, the changes affect other cases:
+\end{minipage}
 
-\begin{itemize}
-    \item The logic of two variables unification completely migrates in \union.
-    \item The logic of variable and constructor-term unification is incorporated in the \commonpart call. 
-\end{itemize}
+\begin{samepage}
 
-With these changes we may see that the unification of two variables now always assigns a variable to a variable. For example, if $x$ is bound
-to $f\,(y)$ the result of conventional unification of $x$ and $z$ includes the binding $z \mapsto f(y)$ while the result of our unification
-includes $z \mapsto x$. Also, \union performs ``eager'' binding of variables, i.e., if $x$ is bound to $f\,(v)$ and $y$ is bound to $f\,(u)$
-the result of conventional unification of $x$ and $y$ includes the binding $v \mapsto u$ and not $x \mapsto y$ while the result of out unification
-includes both.
+    While handling two constructors case is the same, the changes affect other cases:
 
-The usage of \commonpart forces the unification algorithm to decompose ``complex'' terms in an equation system. For example, if $x$ is bound to $f\,(g\,(y))$
-the result of conventional unification of $x$ and $f\,(z)$ includes $x \mapsto f\,(g\,(y)), z \mapsto g\,(y)$ while the result of our unification
-includes $x \mapsto f\,(z), z \mapsto g\,(y)$.
+    \begin{itemize}
+        \item The logic of two variables unification completely migrates in \union.
+        \item The logic of variable and constructor-term unification is incorporated in the \commonpart call. 
+    \end{itemize}
+
+\end{samepage}
+
+With these changes we may see that the unification of two variables now always assigns a variable to a variable.
+For example, if $x$ is bound to $f\,(y)$ the result of conventional unification of $x$ and $z$ includes the binding $z \mapsto f\,(y)$ while the result of our unification includes $z \mapsto x$.
+Also, \union performs ``eager'' binding of variables, i.e., if $x$ is bound to $f\,(v)$ and $y$ is bound to $f\,(u)$ the result of conventional unification of $x$ and $y$ includes the binding $v \mapsto u$ and not $x \mapsto y$ while the result of our unification includes both.
+
+The usage of \commonpart forces the unification algorithm to decompose ``complex'' terms in an equation system.
+For example, if $x$ is bound to $f\,(g\,(y))$ the result of conventional unification of $x$ and $f\,(z)$ includes $x \mapsto f\,(g\,(y)), z \mapsto g\,(y)$ while the result of our unification includes $x \mapsto f\,(z), z \mapsto g\,(y)$.
 
 While these changes are required to prevent infinite looping and provide the correctness of the algorithm, they abuse variables reassigning in intermediate states.
 This makes it more complicated to apply scope-based optimization widely used in \miniKanren implementations.

@@ -1,19 +1,14 @@
 \section{Introduction}
 
-In \miniKanren, we conventionally deal with only finite terms (Herbrand trees) such as lists or trees but sometimes it is
-convenient to consider recursively defined terms such as streams or recursive types, named rational terms. In practical
-logic programming algorithms for first-order rational unification also used to reduce the time consumption by omitting the ``occurs check''.
+In \miniKanren, we conventionally deal with only finite terms (Herbrand trees) such as lists or trees but sometimes it is convenient to consider recursively defined terms such as streams or recursive types, named rational terms. In practical logic programming, algorithms for first-order rational unification also used to reduce the time consumption by omitting the ``occurs check''.
 
 Despite the existence of a variety of rational unification algorithms, in practice only the Huet's one~\cite{huet1976resolution} is used.
 While it shows brilliant results in many applications, we show that it is inappropriate to use in persistent rational unification which
 is required to implement \miniKanren due to the interleaving search.
 
-We present our own algorithm based on the Marelli and Rossi's work~\cite{martelli1984efficient} which uses an interesting approach to avoid
-infinite looping by reducing the size of intermediate state. Our work includes a comprehensive and verifiable comparative evaluation of these
-two approaches versus the conventional (w.r.t. \miniKanren) Robinson's algorithm taken as a baseline. In addition we provide verifiable
-certified proofs of principal algorithm properties in Rocq proof assistant, which to our knowledge is the first mechanized justification
-of rational unification algorithm correctness.
+We present our own algorithm based on the Marelli and Rossi's work~\cite{martelli1984efficient} which uses an interesting approach to avoid infinite looping by reducing the size of intermediate state.
+Our work includes a comprehensive and verifiable comparative evaluation of these two approaches versus the conventional (w.r.t. \miniKanren) Robinson's algorithm taken as a baseline.
+In addition, we provide verifiable certified proofs of principal algorithm properties in Rocq proof assistant, which to our knowledge is the first mechanized justification of rational unification algorithm correctness.
 
-The paper is organized as follows. In Section 2 we introduce rational terms, equation systems and our algorithm. In Section 3 we describe a simplified
-implementation of our algorithm in \OCaml given in a line-to-line comparison with the conventional one. Section 4 presents the results of evaluation;
+The paper is organized as follows. In Section 2 we introduce rational terms, equation systems and our algorithm. In Section 3 we describe a simplified implementation of our algorithm in \OCaml given in a line-to-line comparison with the conventional one. Section 4 presents the results of evaluation;
 Section 5 explores the related work and section 6 concludes.

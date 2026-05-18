@@ -1,6 +1,6 @@
 \section{Evaluation}
 
-In this section we present the results evaluation of our algorithm in comparison with the conventional one (as a baseline) and another well-known rational unification algorithm.
+In this section we present the results' evaluation of our algorithm in comparison with the conventional one (as a baseline) and another well-known rational unification algorithm.
 
 We have implemented three unification algorithms with some optimizations\footnote{\url{https://anonymous.4open.science/r/rational-unification-1935}}. These algorithms
 were implemented in three variants: ephemeral, ephemeral with path compression and persistent. The latter uses only persistent data structures which makes it possible to utilize them
@@ -13,7 +13,7 @@ We compare the following algorithms:
 
 \begin{itemize}
     \item \texttt{robinson}~--- the conventional algorithm (Robinson's with triangular substitution, baseline);
-    \item \texttt{rational}~--- Martelli-Rossi algorithm (described above);
+    \item \texttt{rational}~--- our algorithm (described above);
     \item \texttt{huet}~--- Huet's algorithm for unification of recursive types~\cite{huet1976resolution}\footnote{The actual implementation was studied using \url{https://github.com/SWI-Prolog/swipl/blob/45e83178379f0fd6f918bd294bb361f3db7bf1d7/src/pl-prims.c\#L71}.}.
 \end{itemize}
 
@@ -69,7 +69,7 @@ Synthetic tests are specifically devised for stress testing and parameterized wi
     \item $\texttt{loops}_4$ --- as the previous but with $x_i = x_{i-1}$ instead of $x_{i-1} = x_i$.
 \end{itemize} 
 
-All synthetic tests except for \texttt{full} require the support for rational unification. Also, \texttt{full} being ran using
+All synthetic tests except for \texttt{full} require the support for rational unification. Also, \texttt{full} being running using
 the conventional algorithm consumes exponential time. Consequently, we don't use the conventional algorithm for synthetic tests.
 
 % TODO: fix pictures!!!
@@ -84,7 +84,7 @@ the conventional algorithm consumes exponential time. Consequently, we don't use
         \includegraphics[width=\linewidth]{bench/persistent/robinson_comparison.png}
         \subcaption{Persistent variant}
     \end{subfigure}
-    \caption{Comparison of the algorithms performance w.r.t. the conventional one}
+    \caption{Comparison of the algorithms' performance w.r.t. the conventional one}
     \label{fig:baseline}
 \end{figure}
 

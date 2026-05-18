@@ -16,7 +16,7 @@ module M = Map.Make(Int)
 \end{minted}
 
 The difference is in the interpretation of this intermediate state. While in conventional unification we understand an intermediate state as a substitution $\sigma$ (and encode
-it in a triangular manner~\cite{baader2001unification}), in rational unification we understand it as an equation system $\xi$ and encode it in a union-find manner~\cite{arden1961algorithm}\footnote{Actually, we don't use path-compression and rank heuristic since they slows down the algorithm in persistent implementations. Thus, it may be called ``a triangular equation system''.}.
+it in a triangular manner~\cite{baader2001unification}), in rational unification we understand it as an equation system $\xi$ and encode it in a union-find manner~\cite{arden1961algorithm}\footnote{Actually, we don't use path-compression and rank heuristic since they slow down the algorithm in persistent implementations. Thus, it may be called ``a triangular equation system''.}.
 
 \begin{samepage}
 

@@ -1,6 +1,6 @@
 \section{Rational Unification}
 
-In this section, we introduce rational terms, equation systems and the unification algorithm. The algorithm itself is inspired by the Martelli-Rossi algorithm ``UNIFY-1''~\cite{martelli1984efficient}.
+In this section we introduce rational terms, equation systems and the unification algorithm. The algorithm itself is inspired by the Martelli-Rossi algorithm ``UNIFY-1''~\cite{martelli1984efficient}.
 
 \subsection{Rational Terms}
 
@@ -194,7 +194,7 @@ We define the unification algorithm as a recursive function $\unify : \Xi \times
 
 We have proved the following properties of this algorithm in \Rocq\footnote{\url{https://anonymous.4open.science/r/20BC/}}:
 \begin{itemize}
-    \item Correctness: if the algorithm terminated with the non-$\bot$ result, the result is a minimal unifying extension of a source equation system for the given terms.
-    \item Completeness: if the algorithm terminated with $\bot$ result, there is no unifying extension of a source equation system for the given terms.
+    \item Correctness: if the algorithm terminates with a non-$\bot$ result then the result is a minimal unifying extension of the source equation system for given terms.
+    \item Completeness: if the algorithm terminates with $\bot$ result then there is no unifying extension of the source equation system for given terms.
     \item Termination: the algorithm terminates with some result on every input.
 \end{itemize}

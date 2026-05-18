@@ -1,9 +1,17 @@
 \section{Related Work}
 
-Unification of rational terms is a well-studied area in computational logic. Although there are many works~\cite{huet1976resolution, martelli1984efficient, mukai1983unification, jaffar1984efficient} presenting first-order unification algorithms for rational terms, they all follow one of two possible approaches: either as in the Huet's algorithm~\cite{huet1976resolution} or as in Martelli and Rossi's algorithm~\cite{martelli1984efficient}. The first approach is to accumulate a set of equivalences between input terms and the second is to accumulate only a set of equivalences between input variables.
+Unification of rational terms is a well-studied area in computational logic. Although there are many
+works~\cite{huet1976resolution, martelli1984efficient, mukai1983unification, jaffar1984efficient} presenting a
+first-order unification algorithms for rational terms they all follow one of two possible approaches: either as
+in the Huet's algorithm~\cite{huet1976resolution} or as in Martelli and Rossi's algorithm~\cite{martelli1984efficient}.
+The first approach is to accumulate a set of equivalences between input terms and the second is to accumulate only a
+set of equivalences between input variables.
 
-In practice, we observe that only Huet-like approach is used\footnote{\url{https://github.com/SWI-Prolog/swipl/blob/45e83178379f0fd6f918bd294bb361f3db7bf1d7/src/pl-prims.c\#L71}}~\cite{gauthier2004numbering} since it proved itself in ephemeral rational unification which we have demonstrated before, too. At the same time, we haven't seen yet any practical applications of the second approach which we have shown to be considerable for persistent rational unification.
+We observe that only Huet-like approach is used\footnote{\url{https://github.com/SWI-Prolog/swipl/blob/45e83178379f0fd6f918bd294bb361f3db7bf1d7/src/pl-prims.c\#L71}}~\cite{gauthier2004numbering} in practice since it proved itself efficient in ephemeral setting. At the same time, we haven't seen yet
+any practical applications of the second approach which we have shown to be preferrable for persistent rational unification.
 
-Also, despite that all works on first-order rational unification discussing about time complexity, no one of them present evaluation of the algorithms on real data. In our work, we provide the comprehensive and verifiable comparative evaluation for two known approaches, and compare them with the mostly used conventional algorithm.
+Also, although all works on first-order rational unification discuss time complexity, none of them present evaluation of the algorithms on real data. In our work
+we provide the comprehensive and verifiable comparative evaluation for two known approaches, and compare them with the most used conventional algorithm.
 
-The most relevant previous work~\cite{domoratskiy2025empirical} provide an inefficient algorithm which was incorrectly derived from the Martelli and Rossi's approach and moreover breaks MGU in general.
+The most relevant previous work~\cite{domoratskiy2025empirical} provide an inefficient algorithm which was roughly derived from the Martelli and Rossi's approach
+and moreover broke the MGU property in general.

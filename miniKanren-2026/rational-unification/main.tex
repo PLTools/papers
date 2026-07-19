@@ -1,13 +1,15 @@
-\documentclass[acmsmall,screen,review,anonymous]{acmart}
+\documentclass[acmsmall,screen]{acmart}
 \setcopyright{none}
 \copyrightyear{2026}
 \acmYear{2026}
 \acmISBN{}
 \acmDOI{}
 
-% \usepackage{fancyhdr}
+\usepackage{fancyhdr}
 
-\usepackage{amsmath,array,subcaption,xspace,algpseudocodex,minted}
+\usepackage{amsmath,array,subcaption,xspace,algpseudocodex,minted,longtable,multirow}
+% \usepackage{fontawesome5}[]
+\usepackage{pifont}
 
 \def\emptyset{\varnothing}
 \def\phi{\varphi}
@@ -86,20 +88,20 @@
 
 \begin{document}
 
-% \settopmatter{printacmref=false}
-% \settopmatter{printfolios=true}
-% \renewcommand\footnotetextcopyrightpermission[1]{}
-% \pagestyle{fancy}
-% \fancyfoot{}
-% \fancyfoot[R]{miniKanren'26}
-% \fancypagestyle{firstfancy}{
-%   \fancyhead{}
-%   \fancyhead[R]{miniKanren'26}
-%   \fancyfoot{}
-% }
-% \makeatletter
-% \let\@authorsaddresses\@empty
-% \makeatother
+\settopmatter{printacmref=false}
+\settopmatter{printfolios=true}
+\renewcommand\footnotetextcopyrightpermission[1]{}
+\pagestyle{fancy}
+\fancyfoot{}
+\fancyfoot[R]{miniKanren'26}
+\fancypagestyle{firstfancy}{
+  \fancyhead{}
+  \fancyhead[R]{miniKanren'26}
+  \fancyfoot{}
+}
+\makeatletter
+\let\@authorsaddresses\@empty
+\makeatother
 
 \begin{abstract}
   We present an efficient algorithm for rational term unification in persistent settings
@@ -112,7 +114,7 @@
 \end{abstract}
 
 \maketitle
-% \thispagestyle{firstfancy}
+\thispagestyle{firstfancy}
 \input{1.intro}
 \input{2.rational}
 \input{3.implementation}

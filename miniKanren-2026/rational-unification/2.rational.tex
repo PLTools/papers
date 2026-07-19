@@ -1,6 +1,6 @@
 \section{Rational Unification}
 
-In this section we introduce rational terms, equation systems and the unification algorithm. The algorithm itself is inspired by the Martelli-Rossi algorithm ``UNIFY-1''~\cite{martelli1984efficient}.
+In this section we introduce rational terms, equation systems and the unification algorithm. The algorithm itself is inspired by the Martelli-Rossi algorithm ``UNIFY-1''~\cite{martelli1984efficient}: it is specialized to work with a threading intermediate state (equation system) and a pair of terms instead of a number of equations and formulated as a recursive function so the representation of an intermediate state simplified and some steps are merged together.
 
 \subsection{Rational Terms}
 
@@ -20,12 +20,12 @@ Rational term is an infinite term with the only finite set of subterms~\cite{col
 Formally, we consider countable infinite sets $x, y, z, ... \in \V$ of variables and $f, g, h, ... \in \C$ of constructors. The latter is equipped with the function $\arity : \C \rightarrow \N$ which determines the arities of constructors and the notation $f^n \in \C$ where $f \in \C$ and $n = \arity(f)$.
 
 We consider an endofunctor $F : \text{Set} \rightarrow \text{Set}$ and define the sets of terms $T = \mu F$ and infinite terms $T^\infty = \nu F$ as the least fixed point and the greatest fixed point~\cite{simon2006coinductive} of $F$ respectively:
-\[F(X) = \V \cup \{ f^n(t_1, \dots, t_n) \mid f^n \in \C, t_i \in X \}.\]
+\[F(X) = \V \cup \{ f^n\,(t_1, \dots, t_n) \mid f^n \in \C, t_i \in X \}.\]
 
 The set of subterms of a term, $\subterms : T^\infty \rightarrow 2^{T^\infty}$, is defined in conventional way inductively:
 \begin{itemize}
     \item $t \in \subterms(t)$;
-    \item $t \in \subterms(t_i) \implies t \in \subterms(f^n(\dots, t_i, \dots))$.
+    \item $t \in \subterms(t_i) \implies t \in \subterms(f^n\,(\dots, t_i, \dots))$.
 \end{itemize}
 
 Then, the set of rational terms is defined as $T^R = \{ t \in T^\infty \mid \subterms(t) \text{ is finite} \}$. Thus, $T \subset T^R \subset T^\infty$.
@@ -62,14 +62,16 @@ We consider our equation definition as a representation of the special case of e
     \begin{array}{c|c}
         \text{Conventional equation system} & \text{Our equation} \\[2pt]
         \left\{\begin{array}{l@{{}={}}l}
-            x & f(z) \\
+            x & f\,(z) \\
             y & x \\
             z & x \\
-        \end{array}\right. & \underline{x}, y, z \equiv f(z) \\
+        \end{array}\right. & \underline{x}, y, z \equiv f\,(z) \\
     \end{array}
 \end{equation*}
 
 In this sense, we may see that trivial equations of the form $\underline{x} \equiv \bot$ do not equate anything so we consider them illegal, i.e., $\forall x \in \V, x \in \Xi. ~ x \equiv \bot \notin \xi$. However, we will still allow them in $\E$ for the simplicity of the following definition.
+
+Also, under this restriction the equation system become a variant of the union-find~\cite{arden1961algorithm} data structure over variables where each equivalence class is attributed with an optional term. To abstract the theoretical definition from the implementation details, we are presenting it in pure set-theoretical terms.
 
 The main operation defined on equation systems is $\walk : \Xi \times \V \rightarrow \E \times T$. This operation looks up for a variable in an equation system returning a corresponding pair of equation and term. More formally:
 \begin{equation*}
@@ -85,11 +87,11 @@ Basically, we may consider our definition of equation system as an ``enhanced'' 
     \begin{array}{c|c}
         \text{Triangular substitution} & \text{Equation system} \\[2pt]
         \left\{\begin{array}{l@{{}\mapsto{}}l}
-            x & f(z) \\
+            x & f\,(z) \\
             y & x \\
             z & w \\
         \end{array}\right. & \left\{\begin{array}{l@{{}\equiv{}}l}
-            \underline{x}, y & f(z) \\
+            \underline{x}, y & f\,(z) \\
             z, \underline{w} & \bot \\
         \end{array}\right.
     \end{array}
@@ -104,7 +106,7 @@ Indeed, we may consider equation systems as substitutions which are being applie
         \If{$x' \gets t \in \V$}
             \State \Return $x'$
         \EndIf
-        \If{$f^n(t_1, \dots, t_n) \gets t$}
+        \If{$f^n\,(t_1, \dots, t_n) \gets t$}
             \State \Return $f^n(\Call{ApplyEqSys}{\xi, t_1}, \dots, \Call{ApplyEqSys}{\xi, t_n})$
         \EndIf
     \EndFunction
@@ -131,6 +133,7 @@ The second key operation of equation systems is $\union : \Xi \times \V \times \
             \State \Return $([\xi, \lhs(e_x) \cup \lhs(e_y) \equiv \rhs(e_x)], \bot)$
         \EndIf
         \State \Return $([\xi, \lhs(e_x) \cup \lhs(e_y) \equiv \rhs(e_x)],(\rhs(e_x), \rhs(e_y)))$
+        \Comment{conflict in the right-hand sides}
     \EndFunction
 \end{algorithmic}
 
@@ -144,7 +147,7 @@ We define a ``common part''~\cite{martelli1984efficient} of two terms $\commonpa
     \begin{split}
         \commonpart(x, \_) &= x \\
         \commonpart(\_, y) &= y \\
-        \commonpart(f^n(l_1, \dots, l_n), f^n(r_1, \dots, r_n)) &= f^n(\commonpart(l_1, r_1), \dots, \commonpart(l_n, r_n)) \\
+        \commonpart(f^n\,(l_1, \dots, l_n), f^n\,(r_1, \dots, r_n)) &= f^n\,(\commonpart(l_1, r_1), \dots, \commonpart(l_n, r_n)) \\
     \end{split}
 \end{equation*}
 
@@ -159,7 +162,9 @@ We define the unification algorithm as a recursive function $\unify : \Xi \times
     \Function{RationalUnify}{$\xi \in \Xi$, $t_1, t_2 \in T$}
         \If{$x \gets t_1 \in \V$ \textbf{and} $y \gets t_2 \in \V$}
             \State $(\xi, ts) \gets \union(\xi, x, y)$
+            \Comment{union the equations}
             \If{$(t_1, t_2) \gets ts$}
+                \Comment{check for a collision and resolve it}
                 \State \Return $\Call{RationalUnify}{\xi, t_1, t_2}$
             \EndIf
             \State \Return $\xi$
@@ -168,18 +173,22 @@ We define the unification algorithm as a recursive function $\unify : \Xi \times
             \State $(e, \_) \gets \walk(\xi, x)$
             \If{$\rhs(e) = \bot$}
                 \State \Return $\lhs(e) \equiv t_2, \xi$
+                \Comment{bind the unbound variable}
             \EndIf
             \State $t \gets \commonpart(\rhs(e), t_2)$
             \If{$t = \bot$}
-                \State \bf failure
+                \State {\bf failure}
+                \Comment{there is no common part}
             \EndIf
             \State $\xi \gets \lhs(e) \equiv t, \xi$
+            \Comment{simplifying the right-hand side}
             \State \Return \Call{RationalUnify}{$\xi, \rhs(e), t_2$}
+            \Comment{handling the residual parts of the terms}
         \EndIf
         \If{$y \gets t_2 \in \V$}
             \State \Return \Call{RationalUnify}{$\xi, y, t_1$}
         \EndIf
-        \If{$f^n(l_1, ..., l_n) \gets t_1$ \textbf{and} $g^m(r_1, ..., r_m) \gets t_2$}
+        \If{$f^n\,(l_1, ..., l_n) \gets t_1$ \textbf{and} $g^m\,(r_1, ..., r_m) \gets t_2$}
             \If{$f^n \neq g^m$}
                 \State \bf failure
             \EndIf
@@ -191,10 +200,206 @@ We define the unification algorithm as a recursive function $\unify : \Xi \times
     \EndFunction
 \end{algorithmic}
 
-We have proved the following properties of this algorithm in \Rocq\footnote{\url{https://anonymous.4open.science/r/20BC/}}:
+We have proved the following properties of this algorithm in \Rocq\footnote{\url{https://github.com/dboulytchev/miniKanren-coq/tree/master/src/Rational}}:
 
 \begin{itemize}
-    \item Correctness: if the algorithm terminates with a non-$\bot$ result then the result is a minimal unifying extension of the source equation system for given terms.
+    \item Soundness: if the algorithm terminates with a non-$\bot$ result then the result is a minimal unifying extension of the source equation system for given terms.
     \item Completeness: if the algorithm terminates with $\bot$ result then there is no unifying extension of the source equation system for given terms.
     \item Termination: the algorithm terminates with some result on every input.
 \end{itemize}
+
+While soundness and completeness of the algorithm are mostly intuitive, its termination is a bit unclear. We consider two characteristics of an equation system: the number of ``roots'' and the number of constructors in right-hand sides (``size''). Intuitively, a root is an equivalence class of variables w.r.t. an equation system: every equation represents one by its left-hand side. Also, we consider a ``cost'' of two terms which is a number of their constructors, counting shared ones (w.r.t. \commonpart) only once. We have proved that any run $(\Xi, t_1, t_2)$ of the algorithm may be presented on a decreasing sequence of pairs $(\textsf{roots}(\Xi), \textsf{size}(\Xi) + \textsf{cost}(t_1, t_2))$, comparing them lexicographically, so it won't loop infinitely. More detailed explanation is not a topic of this paper so we refer to the repository with the \Rocq implementation for now.
+
+\subsection{Examples}
+
+To give a more precise comprehension of the algorithm in theory, we are to consider some concrete examples comparing intermediate states between the conventional one and ours. To give a bit more intuition about termination, we are to use a variant of the conventional algorithm without ``occurs check''.
+
+Starting from the empty state, let us unify the variable $x$ with the term $f\,(f\,(x))$. Both algorithms are observing that $x$ is unbound and stop immediately:
+\begin{equation*}
+    \begin{array}{c|c}
+        \text{Triangular substitution} & \text{Equation system} \\[2pt]
+        \left\{\begin{array}{l@{{}\mapsto{}}l}
+            x & f\,(f\,(x)) \\
+        \end{array}\right. & \left\{\begin{array}{l@{{}\equiv{}}l}
+            \underline{x} & f\,(f\,(x)) \\
+        \end{array}\right.
+    \end{array}
+\end{equation*}
+
+Next, we are to unify the variable $y$ with the term $f\,(f\,(y))$ in the same manner:
+\begin{equation}
+    \begin{array}{c|c}
+        \text{Triangular substitution} & \text{Equation system} \\[2pt]
+        \left\{\begin{array}{l@{{}\mapsto{}}l}
+            x & f\,(f\,(x)) \\
+            y & f\,(f\,(y)) \\
+        \end{array}\right. & \left\{\begin{array}{l@{{}\equiv{}}l}
+            \underline{x} & f\,(f\,(x)) \\
+            \underline{y} & f\,(f\,(y)) \\
+        \end{array}\right.
+    \end{array}
+    \label{eq:example-state}
+\end{equation}
+
+To demonstrate the role of \union, let us trace the unification of the variables $x$ and $y$:
+\begin{center}
+    \begin{longtable}{p{4cm}|p{7cm}}
+        {\centering Conventional \par} & {\centering Our \par} \\
+        \hline\hline\endhead
+        {
+            \textbf{Input: $x, y$}
+            \begin{dinglist}{212}
+                \item $\walk(x) = f\,(f\,(x))$
+                \item $\walk(y) = f\,(f\,(y))$
+            \end{dinglist}
+        } & {
+            \textbf{Input: $x, y$}
+            \begin{dinglist}{212}
+                \item $\union(x, y) = (\dots, (f\,(f\,(x)), f\,(f\,(y))))$
+                \item Update equation system: \newline
+                \begin{minipage}{\linewidth}
+                    \begin{equation*}
+                        \left\{\begin{array}{l@{{}\equiv{}}l}
+                            \underline{x}, y & f\,(f\,(x)) \\
+                        \end{array}\right.
+                    \end{equation*}
+                \end{minipage}
+            \end{dinglist}
+        } \\\\\hline
+        {
+            \textbf{Input: $f\,(f\,(x)), f\,(f\,(y))$}
+            \begin{dinglist}{212}
+                \item Unwrap $f\,(\cdot)$
+            \end{dinglist}
+        } & {
+            \textbf{Input: $f\,(f\,(x)), f\,(f\,(y))$}
+            \begin{dinglist}{212}
+                \item Unwrap $f\,(\cdot)$
+            \end{dinglist}
+        } \\\hline
+        {
+            \textbf{Input: $f\,(x), f\,(y)$}
+            \begin{dinglist}{212}
+                \item Unwrap $f\,(\cdot)$
+            \end{dinglist}
+        } & {
+            \textbf{Input: $f\,(x), f\,(y)$}
+            \begin{dinglist}{212}
+                \item Unwrap $f\,(\cdot)$
+            \end{dinglist}
+        } \\\hline
+        {
+            \textbf{Input: $x, y$}
+            \begin{dinglist}{212}
+                \item Loop infinitely...
+            \end{dinglist}
+        } & {
+            \textbf{Input: $x, y$}
+            \begin{dinglist}{212}
+                \item $\union(x, y) = (\text{same equation system}, \bot)$
+            \end{dinglist}
+        } \\
+    \end{longtable}
+\end{center}
+
+This example uncovers how \textit{proactively} updating the intermediate state avoids infinite looping in simple cases where the term cycles directly on a variable.
+
+Similarly, let us undo this (returning to the state marked~\ref{eq:example-state}) to demonstrate the contribution of \commonpart, tracing the unification of the variable $x$ and the term $f\,(y)$:
+\begin{center}
+    \begin{longtable}{p{4cm}|p{6.5cm}}
+        {\centering Conventional \par} & {\centering Our \par} \\
+        \hline\hline\endhead
+        {
+            \textbf{Input: $x, f\,(y)$}
+            \begin{dinglist}{212}
+                \item $\walk(x) = f\,(f\,(x))$
+            \end{dinglist}
+        } & {
+            \textbf{Input: $x, f\,(y)$}
+            \begin{dinglist}{212}
+                \item $\walk(x) = (\underline{x} \equiv f\,(f\,(x)), f\,(f\,(x)))$
+                \item $\commonpart(f\,(f\,(x)), f\,(y)) = f\,(y)$
+                \item Update equation system: \newline
+                \begin{minipage}{\linewidth}
+                    \begin{equation*}
+                        \left\{\begin{array}{l@{{}\equiv{}}l}
+                            \underline{x} & f\,(y) \\
+                            \underline{y} & f\,(f\,(y)) \\
+                        \end{array}\right.
+                    \end{equation*}
+                \end{minipage}
+            \end{dinglist}
+        } \\\\\hline
+        {
+            \textbf{Input: $f\,(f\,(x)), f\,(y)$}
+            \begin{dinglist}{212}
+                \item Unwrap $f\,(\cdot)$
+            \end{dinglist}
+        } & {
+            \textbf{Input: $f\,(f\,(x)), f\,(y)$}
+            \begin{dinglist}{212}
+                \item Unwrap $f\,(\cdot)$
+            \end{dinglist}
+        } \\\hline
+        {
+            \textbf{Input: $f\,(x), y$}
+            \begin{dinglist}{212}
+                \item $\walk(y) = f\,(f\,(y))$
+            \end{dinglist}
+        } & {
+            \textbf{Input: $f\,(x), y$}
+            \begin{dinglist}{212}
+                \item $\walk(y) = (\underline{y} \equiv f\,(f\,(y)), f\,(f\,(y)))$
+                \item $\commonpart(f\,(x), f\,(f\,(y))) = f\,(x)$
+                \item Update equation system: \newline
+                \begin{minipage}{\linewidth}
+                    \begin{equation*}
+                        \left\{\begin{array}{l@{{}\equiv{}}l}
+                            \underline{x} & f\,(y) \\
+                            \underline{y} & f\,(x) \\
+                        \end{array}\right.
+                    \end{equation*}
+                \end{minipage}
+            \end{dinglist}
+        } \\\\\hline
+        {
+            \textbf{Input: $f\,(x), f\,(f\,(y))$}
+            \begin{dinglist}{212}
+                \item Unwrap $f\,(\cdot)$
+            \end{dinglist}
+        } & {
+            \textbf{Input: $f\,(x), f\,(f\,(y))$}
+            \begin{dinglist}{212}
+                \item Unwrap $f\,(\cdot)$
+            \end{dinglist}
+        } \\\hline
+        {
+            \textbf{Input: $x, f\,(y)$}
+            \begin{dinglist}{212}
+                \item Loop infinitely...
+            \end{dinglist}
+        } & {
+            \textbf{Input: $x, f\,(y)$}
+            \begin{dinglist}{212}
+                \item $\walk(x) = (\underline{x} \equiv f\,(y), f\,(y))$
+                \item $\commonpart(f\,(y), f\,(y)) = f\,(y)$
+                \item Update equation system (no-op)
+            \end{dinglist}
+        } \\\cline{2-2}
+        & {
+            \textbf{Input: $f\,(y), f\,(y)$}
+            \begin{dinglist}{212}
+                \item Unwrap $f\,(\cdot)$
+            \end{dinglist}
+        } \\\cline{2-2}
+        & {
+            \textbf{Input: $y, y$}
+            \begin{dinglist}{212}
+                \item Do \union (no-op)
+            \end{dinglist}
+        } \\
+    \end{longtable}
+\end{center}
+
+As the example shows, \commonpart plays a crucial role in termination gradually simplifying the intermediate state until reaching the fixed point. This allows the algorithm to detect cycling terms in more difficult cases when the initial state doesn't include a cycling part itself.
+

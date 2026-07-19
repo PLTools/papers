@@ -2,12 +2,11 @@
 
 In this section we present the results' evaluation of our algorithm in comparison with the conventional one (as a baseline) and another well-known rational unification algorithm.
 
-We have implemented three unification algorithms with some optimizations\footnote{\url{https://anonymous.4open.science/r/rational-unification-1935}}. These algorithms
-were implemented in three variants: ephemeral, ephemeral with path compression and persistent. The latter uses only persistent data structures which makes it possible to utilize them
-in a \miniKanren implementation, while others use mutable without backtracking support (in contrast with WAM~\cite{warren1983abstract}, to reduce overhead).
+We have implemented three unification algorithms with some optimizations\footnote{\url{https://github.com/ProgMiner/rational-unification}}.
+These algorithms were implemented in three variants: ephemeral, ephemeral with path compression and persistent.
+The latter uses only persistent data structures which makes it possible to utilize them in a \miniKanren implementation, while others use mutable without backtracking support (in contrast with WAM~\cite{warren1983abstract}, to reduce overhead).
 
-To allow fair algorithm comparison, all implementations include the same generic optimizations but as many as possible algorithm-specific micro-optimizations.
-Especially, we use different data structures for them.
+To allow fair algorithm comparison, all implementations include the same generic optimizations (e.g., the variable-age one) but as many as possible algorithm-specific micro-optimizations. Especially, we use different data structures for them.
 
 We compare the following algorithms:
 
@@ -91,17 +90,21 @@ the conventional algorithm consumes exponential time. Consequently, we don't use
 The main evaluation results are:
 
 \begin{itemize}
-\item Our algorithm performs as fast as the conventional one in the real-world scenarios.
-  This is shown by \autoref{fig:baseline}. These plots show the algorithm's run time w.r.t.
-  conventional algorithm run time. As we may see, our algorithm is always near to the main
-  diagonal.
+    \item Our algorithm performs \textbf{as fast as the conventional one} in the real-world scenarios. This is shown by \autoref{fig:baseline}.
+    These plots show the algorithm's run time w.r.t. conventional algorithm run time.
+    As we may see, our algorithm is always near to the main diagonal.
   
-\item While the Huet's algorithm works faster in ephemeral variant, it degrades being implemented
-  in persistent settings (this is shown in \autoref{fig:baseline}, too, and in \autoref{fig:Lama}).
-  On \autoref{fig:synth-ephemeral} and \autoref{fig:synth-persistent} we may also see that even in
-  the ephemeral implementation it works slower than our and moreover its performance depends on the
-  ordering of equation sides.
+    \item While the Huet's algorithm works faster in ephemeral variant, it degrades being implemented in persistent settings (this is shown in \autoref{fig:baseline}, too, and in \autoref{fig:Lama}).
+    On \autoref{fig:synth-ephemeral} and \autoref{fig:synth-persistent} we may also see that even in the ephemeral implementation it works notably slower than our and moreover its performance depends on the ordering of equation sides.
 \end{itemize}
+
+The main (and perhaps the only) reason for the slowdown of Huet's algorithm is its approach to avoiding infinite loops. In theory, this algorithm assumes that every \textit{non-variable} term instance is attributed with a unique identifier. Under this assumption, it can accumulate equivalence classes for these term instances as for variables.
+
+However, in practice, this is implemented by adding an extra slot that stores references between term instances. Since they are non-comparable, there is no way to perform an optimization like the variable-age heuristic which leads to both asymmetric running times (which is shown on the \autoref{fig:synth-ephemeral} and \autoref{fig:synth-persistent}) and longer ``dereference'' paths.
+
+This also enlarges the object space in which equivalence information is accumulated since it must now contain both variables and term instances rather than just variables. While this is not a problem in ephemeral settings, in persistent ones it leads to a significant enlarging of intermediate states because we must preserve in them both equivalences between variables and between term instances.
+
+In persistent settings, additional time is required to allocate numeric identifiers for each non-variable term instance (because there is no other way to identify them in a persistent intermediate state). This is inconvenient in practical \miniKanren implementations and introduces additional runtime overhead.
 
 \begin{figure}
     \centering
@@ -220,10 +223,10 @@ faster. This could be seen in \autoref{tab:analyse-ephemeral}.
         \toprule
         \textbf{Variant} & \textbf{Conventional} & \textbf{Our} & \textbf{Huet's} \\
         \midrule
-        Ephemeral & 597 & \textbf{784} & 494 \\
-        Ephemeral with path compression & \textbf{470} & 345 & \textbf{685} \\
+        Ephemeral & \textbf{597} & \textbf{784} & 494 \\
+        Ephemeral with path compression & 470 & 345 & \textbf{685} \\
         \midrule
-        Median ratio & 1.00 & 0.99 & 1.00 \\
+        Median ratio (avg) & 1.02 & 1.00 & 1.02 \\
         \bottomrule
     \end{tabular}
     \caption{Statistically significant wins of every algorithm on all traces comparing the ephemeral variants}

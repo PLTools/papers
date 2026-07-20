@@ -16,7 +16,7 @@ module M = Map.Make(Int)
 \end{minted}
 
 The difference is in the interpretation of this intermediate state. While in conventional unification we understand an intermediate state as a substitution $\sigma$ (encoded
-in a triangular manner~\cite{baader2001unification}), in rational unification we understand it as an equation system $\xi$ encoded in a union-find manner~\cite{arden1961algorithm}\footnote{Actually, we don't use path-compression and rank heuristic since they slow down the algorithm in persistent implementations. Thus, it may be called ``a triangular equation system''.}.
+in a triangular manner~\cite{baader2001unification}), in rational unification we understand it as an equation system $\xi$ encoded in a union-find manner~\cite{arden1961algorithm}\footnote{Actually, we don't use path compression and the union-by-rank heuristic since they slow down the algorithm in persistent implementations. Thus, it may be called ``a triangular equation system''.}.
 
 The core operation \walk which allows us to ``dereference'' variables in triangular substitution changes its signature from $\walk : \Sigma \times \V \rightarrow T$ to $\walk : \Xi \times \V \rightarrow \E \times T$ and plays the role of the ``find'' operation of union-find:
 
@@ -205,10 +205,10 @@ The core idea is to consider a simple lattice of four elements (we name it ``sid
     \end{tikzpicture}
 \end{center}
 
-This lattice designates which of the arguments are ``physically equal'' to their \commonpart. With it, the optimization is captured by the function $\commonpart' : T \times T \rightarrow (T \times \textsf{Side})^?$. Since non-recursive cases are trivial, while performing recursive calls we are accumulating a supremum of sides:
+This lattice designates which of the arguments are ``physically equal'' to their \commonpart. With it, the optimization is captured by the function $\commonpart' : T \times T \rightarrow (T \times \textsf{Side})^?$. While non-recursive cases are trivial, during performing recursive calls we are accumulating the infimum of the sides:
 \begin{itemize}
-    \item if it is $\bot$, we are required to return the accumulated term (as in a straightforward implementation) -- there is no way to preserve a ``physical equality'' to any of the arguments;
-    \item otherwise, we are discarding the accumulated term and return one of the arguments instead.
+    \item if it is $\bot$, we are required to return the accumulated term (as in the simple implementation) -- there is no way to preserve a ``physical equality'' to any of the arguments;
+    \item otherwise, we are discarding the accumulated term and returning one of the arguments instead.
 \end{itemize}
 
 The implementation is mostly intuitive but verbose, so we omit it and refer to the repository with evaluation of the algorithm. Also, we haven't measured the concrete performance impact of this algorithm w.r.t. the simple one.

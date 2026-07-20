@@ -92,10 +92,10 @@ The main evaluation results are:
 \begin{itemize}
     \item Our algorithm performs \textbf{as fast as the conventional one} in the real-world scenarios. This is shown by \autoref{fig:baseline}.
     These plots show the algorithm's run time w.r.t. conventional algorithm run time.
-    As we may see, our algorithm is always near to the main diagonal.
+    As these plots show, our algorithm is always near to the main diagonal.
   
-    \item While the Huet's algorithm works faster in ephemeral variant, it degrades being implemented in persistent settings (this is shown in \autoref{fig:baseline}, too, and in \autoref{fig:Lama}).
-    On \autoref{fig:synth-ephemeral} and \autoref{fig:synth-persistent} we may also see that even in the ephemeral implementation it works notably slower than our and moreover its performance depends on the ordering of equation sides.
+    \item While the Huet's algorithm works faster in ephemeral variant, it degrades being implemented in persistent settings (this is shown on \autoref{fig:baseline}, too, and on \autoref{fig:Lama}).
+    \autoref{fig:synth-ephemeral} and \autoref{fig:synth-persistent} also show that even in the ephemeral implementation it works notably slower than our and moreover its performance depends on the ordering of equation sides.
 \end{itemize}
 
 The main (and perhaps the only) reason for the slowdown of Huet's algorithm is its approach to avoiding infinite loops. In theory, this algorithm assumes that every \textit{non-variable} term instance is attributed with a unique identifier. Under this assumption, it can accumulate equivalence classes for these term instances as for variables.
@@ -193,7 +193,7 @@ In persistent settings, additional time is required to allocate numeric identifi
 
 We also applied the Kruskal-Wallis test~\cite{kruskal1952use} and the Dunn post-hoc test~\cite{dunn1964multiple} with the Bonferroni correction~\cite{bonferroni1936teoria} to determine which algorithm works faster on which traces.
 The overall summary is presented as numbers of statistically significant wins in \autoref{tab:analyse}. The best results are highlighted using the bold font.
-Here we see again that the Huet's algorithm works better in ephemeral implementation but loses its performance in persistent while our stay aligned with the conventional.
+The table shows again that the Huet's algorithm works better in the ephemeral implementation but loses its performance in the persistent one while our stay aligned with the conventional.
 
 \begin{table}[b]
     \centering
@@ -213,9 +213,7 @@ Here we see again that the Huet's algorithm works better in ephemeral implementa
 Also, the Huet's algorithm requires a more complex data structure representation than the conventional one while our doesn't.
 These results show that our algorithm can be used as a drop-in replacement for the conventional one in \miniKanren implementations.
 
-Additionally, following~\cite{domoratskiy2025empirical}, we have studied that path compression technique doesn't
-improve overall unification performance. Moreover, it makes our algorithm slightly slower (for about 1\%) while the Huet's slightly
-faster. This could be seen in \autoref{tab:analyse-ephemeral}.
+Additionally, following~\cite{domoratskiy2025empirical}, we have studied that path compression technique doesn't improve overall unification performance. This is shown in \autoref{tab:analyse-ephemeral}.
 
 \begin{table}[b]
     \centering

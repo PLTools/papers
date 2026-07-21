@@ -175,7 +175,7 @@ With these changes we may see that the unification of two variables now always a
 For example, if $x$ is bound to $f\,(y)$ the result of conventional unification of $x$ and $z$ includes the binding $z \mapsto f\,(y)$ while the result of our unification includes $z \mapsto x$.
 Also, \union performs an ``eager'' binding of variables, i.e., if $x$ is bound to $f\,(v)$ and $y$ is bound to $f\,(u)$ the result of conventional unification of $x$ and $y$ includes the binding $v \mapsto u$ and not $x \mapsto y$ while the result of our unification includes both.
 
-The usage of \commonpart forces the unification algorithm to decompose ``complex'' terms in an equation system.
+The usage of \commonpart forces the unification algorithm to decompose ``complex'' terms in the context of current equation system.
 For example, if $x$ is bound to $f\,(g\,(y))$, the result of conventional unification of $x$ and $f\,(z)$ includes $x \mapsto f\,(g\,(y)), z \mapsto g\,(y)$ while the result of our unification includes $x \mapsto f\,(z), z \mapsto g\,(y)$ instead.
 
 While these changes are required to prevent infinite looping and deliver the correctness of the algorithm, they abuse variables reassigning in intermediate states.

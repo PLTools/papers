@@ -209,14 +209,17 @@ We have proved the following properties of this algorithm in \Rocq\footnote{\url
     \item Termination: the algorithm terminates with some result on every input.
 \end{itemize}
 
-While soundness and completeness of the algorithm are mostly intuitive, its termination is a bit unclear. We consider two characteristics of an equation system: the number of ``roots'' and the number of constructors in right-hand sides (``size''). Intuitively, a root is an equivalence class of variables w.r.t. an equation system: every equation represents one by its left-hand side. Also, we consider a ``cost'' of two terms which is a number of their constructors, counting shared ones (w.r.t. \commonpart) only once. We have proved that any run $(\Xi, t_1, t_2)$ of the algorithm may be presented on a decreasing sequence of pairs $(\textsf{roots}(\Xi), \textsf{size}(\Xi) + \textsf{cost}(t_1, t_2))$, comparing them lexicographically, so it won't loop infinitely. More detailed explanation is not a topic of this paper so we refer to the repository with the \Rocq implementation for now.
+While soundness and completeness of the algorithm are mostly intuitive, its termination is a bit unclear. We consider two characteristics of an equation system: the number of ``roots'' and the number of constructors in right-hand sides (``size''). Intuitively, a root is an equivalence class of variables w.r.t. an equation system: every equation represents one by its left-hand side. Also, we consider a ``cost'' of two terms which is a number of their constructors, counting shared ones (w.r.t. \commonpart) only once.
+
+We have proved that any run $(\Xi, t_1, t_2)$ of the algorithm is performed on a decreasing sequence of pairs $(\textsf{roots}(\Xi), \textsf{size}(\Xi) + \textsf{cost}(t_1, t_2))$
+compared lexicographically, so it won't loop infinitely. The details are outside of the scope of the paper; an interested reader can consult the repository with the \Rocq implementation.
 
 We omit the proof because it would require describing the algorithm ``UNIFY-1'' of Martelli and Rossi~\cite{martelli1984efficient}. Any execution of our algorithm can be simulated by a sequence of steps of ``UNIFY-1'' w.r.t. the intermediate state changes. Their complexity analysis yields the asymptotic bound $\mathcal{O}(n + m \alpha(m))$ where $n$ is the number of constructor occurrences, $m$ is the number of variable occurrences and $\alpha(\cdot)$ is the inverse of the Ackermann function. Consequently, our algorithm has the same asymptotic complexity where $n$ and $m$ are measured w.r.t. both the equation system and the pair of input terms. Indeed, this bound is primarily of theoretical interest, since practical implementations often omit path compression and the union-by-rank heuristic for performance reasons. For a persistent implementation, the second term may incur an additional logarithmic factor in the conventional BST-based implementation, or take a different asymptotic form depending on the underlying persistent data structure (e.g.~\cite{conchon2007persistent}).
 
 
 \subsection{Examples}
 
-To give a more precise comprehension of the algorithm in theory, we are to consider some concrete examples comparing intermediate states between the conventional one and ours. To give more intuition
+To illustrate the work of the algorithm we consider here some concrete examples comparing intermediate states of the conventional one and ours. To give more intuition
 about the termination we are using a variant of the conventional algorithm without ``occurs check''.
 
 Starting from the empty state, let us unify the variable $x$ with the term $f\,(f\,(x))$. Both algorithms are observing that $x$ is unbound and stop immediately:
@@ -261,7 +264,7 @@ To demonstrate the role of \union, let us trace the unification of the variables
             \textbf{Input: $x, y$}
             \begin{dinglist}{212}
                 \item $\union(x, y) = (\dots, (f\,(f\,(x)), f\,(f\,(y))))$
-                \item Update equation system: \newline
+                \item Updated equation system: \newline
                 \begin{minipage}{\linewidth}
                     \begin{equation*}
                         \left\{\begin{array}{l@{{}\equiv{}}l}
@@ -324,7 +327,7 @@ Similarly, let us undo this (returning to the state marked~\ref{eq:example-state
             \begin{dinglist}{212}
                 \item $\walk(x) = (\underline{x} \equiv f\,(f\,(x)), f\,(f\,(x)))$
                 \item $\commonpart(f\,(f\,(x)), f\,(y)) = f\,(y)$
-                \item Update equation system: \newline
+                \item Updated equation system: \newline
                 \begin{minipage}{\linewidth}
                     \begin{equation*}
                         \left\{\begin{array}{l@{{}\equiv{}}l}
@@ -356,7 +359,7 @@ Similarly, let us undo this (returning to the state marked~\ref{eq:example-state
             \begin{dinglist}{212}
                 \item $\walk(y) = (\underline{y} \equiv f\,(f\,(y)), f\,(f\,(y)))$
                 \item $\commonpart(f\,(x), f\,(f\,(y))) = f\,(x)$
-                \item Update equation system: \newline
+                \item Updated equation system: \newline
                 \begin{minipage}{\linewidth}
                     \begin{equation*}
                         \left\{\begin{array}{l@{{}\equiv{}}l}
@@ -388,7 +391,7 @@ Similarly, let us undo this (returning to the state marked~\ref{eq:example-state
             \begin{dinglist}{212}
                 \item $\walk(x) = (\underline{x} \equiv f\,(y), f\,(y))$
                 \item $\commonpart(f\,(y), f\,(y)) = f\,(y)$
-                \item Update equation system (no-op)
+                \item Updated equation system (no-op)
             \end{dinglist}
         } \\\cline{2-2}
         & {

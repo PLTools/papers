@@ -1,6 +1,6 @@
 \section{Implementation}
 
-In this section we present the implementation of our algorithm and compare it with the conventional unification algorithm used in most \miniKanren implementations
+In this section we present the implementation of our algorithm and compare it with the conventional unification algorithm used in the majority of \miniKanren implementations
 (which is in turn based on Robinson's algorithm with triangular substitutions~\cite{baader2001unification}). Specifically, we consider a simplified version of \OCanren
 unification implementation.
 
@@ -173,19 +173,19 @@ While handling the two-constructors case is the same, the changes affect other c
 
 With these changes we may see that the unification of two variables now always assigns a variable to a variable.
 For example, if $x$ is bound to $f\,(y)$ the result of conventional unification of $x$ and $z$ includes the binding $z \mapsto f\,(y)$ while the result of our unification includes $z \mapsto x$.
-Also, \union performs ``eager'' binding of variables, i.e., if $x$ is bound to $f\,(v)$ and $y$ is bound to $f\,(u)$ the result of conventional unification of $x$ and $y$ includes the binding $v \mapsto u$ and not $x \mapsto y$ while the result of our unification includes both.
+Also, \union performs an ``eager'' binding of variables, i.e., if $x$ is bound to $f\,(v)$ and $y$ is bound to $f\,(u)$ the result of conventional unification of $x$ and $y$ includes the binding $v \mapsto u$ and not $x \mapsto y$ while the result of our unification includes both.
 
 The usage of \commonpart forces the unification algorithm to decompose ``complex'' terms in an equation system.
 For example, if $x$ is bound to $f\,(g\,(y))$, the result of conventional unification of $x$ and $f\,(z)$ includes $x \mapsto f\,(g\,(y)), z \mapsto g\,(y)$ while the result of our unification includes $x \mapsto f\,(z), z \mapsto g\,(y)$ instead.
 
-While these changes are required to prevent infinite looping and provide the correctness of the algorithm, they abuse variables reassigning in intermediate states.
-This makes it more complicated to apply scope-based optimization~\cite{byrd2009relational} widely used in \miniKanren implementations. More precisely, we need to check a substitution in a state before an attribute one -- since it seems too wasteful, in practice, substitutions in states become noticeably small in presence of the optimization so the performance degradation is acceptable (based on some experiments and not verified strictly).
+While these changes are required to prevent infinite looping and deliver the correctness of the algorithm, they abuse variables reassigning in intermediate states.
+This makes it more complicated to apply scope-based optimization~\cite{byrd2009relational} widely used in \miniKanren implementations. More precisely, we need to check a substitution in a state before an attribute one~--- since it seems too wasteful, in practice, substitutions in states become noticeably small in presence of the optimization so the performance degradation is acceptable (based on some experiments and not verified strictly).
 
-The crucial optimization for the presented algorithm is the well-known variable-age heuristic~\cite{mannila1986complexity,domoratskiy2025empirical} which reduces \walk paths, and it applies directly on \union.
+The crucial optimization for the presented algorithm is a well-known variable-age heuristic~\cite{mannila1986complexity,domoratskiy2025empirical} which reduces \walk paths and applied directly in \union.
 
 \subsection{Optimized Common Part}
 
-A notable optimization is the implementation of \commonpart which preserves ``physical equality''\footnote{``Physical equality'' is the equality of the references to the objects in memory.} as long as possible. The optimization is motivated by both a reduction of memory consumption and an efficiency improving of the unification itself (since we may do a fail-fast ``physical equality'' check).
+A notable optimization is the implementation of \commonpart which preserves ``physical equality''\footnote{``Physical equality'' is the equality of the references to the objects in memory.} as long as possible. The optimization is motivated by both the reduction of memory consumption and the efficiency improvement of the unification itself (since we may do a fail-fast ``physical equality'' check).
 
 The core idea is to consider a simple lattice of four elements (we name it ``side''): $\top$~(\texttt{Both}), $\Leftarrow$~(\texttt{Left}), $\Rightarrow$~(\texttt{Right}) and $\bot$~(\texttt{Aside}):
 \begin{center}
@@ -205,10 +205,11 @@ The core idea is to consider a simple lattice of four elements (we name it ``sid
     \end{tikzpicture}
 \end{center}
 
-This lattice designates which of the arguments are ``physically equal'' to their \commonpart. With it, the optimization is captured by the function $\commonpart' : T \times T \rightarrow (T \times \textsf{Side})^?$. While non-recursive cases are trivial, during performing recursive calls we are accumulating the infimum of the sides:
+This lattice designates which of the arguments are ``physically equal'' to their \commonpart. With it, the optimization is captured by the function $\commonpart' : T \times T \rightarrow (T \times \textsf{Side})^?$. While non-recursive cases are trivial, during recursive calls we are accumulating the infimum of the ``sides'':
+
 \begin{itemize}
-    \item if it is $\bot$, we are required to return the accumulated term (as in the simple implementation) -- there is no way to preserve a ``physical equality'' to any of the arguments;
+    \item if the infimum is $\bot$, we are required to return the accumulated term (as in the simple implementation)~--- there is no way to preserve a ``physical equality'' to any of the arguments;
     \item otherwise, we are discarding the accumulated term and returning one of the arguments instead.
 \end{itemize}
 
-The implementation is mostly intuitive but verbose, so we omit it and refer to the repository with evaluation of the algorithm. Also, we haven't measured the concrete performance impact of this algorithm w.r.t. the simple one.
+The implementation is mostly intuitive but verbose, so we omit it and refer to the evaluation repository. Also, we haven't measured the concrete performance impact of this optimization.

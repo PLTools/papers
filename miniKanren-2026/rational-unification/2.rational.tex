@@ -22,7 +22,7 @@ Formally, we consider countable infinite sets $x, y, z, ... \in \V$ of variables
 We consider an endofunctor $F : \text{Set} \rightarrow \text{Set}$ and define the sets of terms $T = \mu F$ and infinite terms $T^\infty = \nu F$ as the least fixed point and the greatest fixed point~\cite{simon2006coinductive} of $F$ respectively:
 \[F(X) = \V \cup \{ f^n\,(t_1, \dots, t_n) \mid f^n \in \C, t_i \in X \}.\]
 
-The set of subterms of a term, $\subterms : T^\infty \rightarrow 2^{T^\infty}$, is defined in conventional way inductively:
+The set of subterms of a term, $\subterms : T^\infty \rightarrow 2^{T^\infty}$, is defined in a conventional way inductively:
 \begin{itemize}
     \item $t \in \subterms(t)$;
     \item $t \in \subterms(t_i) \implies t \in \subterms(f^n\,(\dots, t_i, \dots))$.
@@ -32,15 +32,15 @@ Then, the set of rational terms is defined as $T^R = \{ t \in T^\infty \mid \sub
 
 We define a substitution $\sigma \in \Sigma$ as a mapping $\V \rightarrow T^\infty$ with a finite substitution domain $\dom(\sigma) = \{ x \in \V \mid \sigma(x) \neq x \}$. Substitution application and composition operations, generality and unifier properties are defined conventionally~\cite{baader2001unification}:
 \begin{itemize}
-    \item Substitution application is denoted in the postfix manner: $t \sigma$;
-    \item Substitution composition follows the equality: $t (\sigma_1 \diamond \sigma_2) = t\sigma_2\sigma_1$;
-    \item ``More general'' relation is denoted as: $\sigma_1 \preceq \sigma_2 \iff \exists \sigma, \sigma_2 = \sigma \diamond \sigma_1$.
+    \item Substitution application is denoted as a postfix form: $t \sigma$;
+    \item Substitution composition ``$\diamond$'' respects the equality $t (\sigma_1 \diamond \sigma_2) = t\sigma_2\sigma_1$;
+    \item ``More general'' relation ``$\preceq$'' is defined as follows: $\sigma_1 \preceq \sigma_2 \iff \exists \sigma, \sigma_2 = \sigma \diamond \sigma_1$.
 \end{itemize}
 
-Also, we consider a generalization of the most general unifier (MGU) property named the minimal unifying extension. We say that $\sigma_2$ is a minimal unifying extension of $\sigma_1$ for terms $t_1, t_2 \in T^\infty$ iff:
+Also, we consider a generalization of the most general unifier (MGU) property named ``the minimal unifying extension''. We say that $\sigma_2$ is the minimal unifying extension of $\sigma_1$ for terms $t_1, t_2 \in T^\infty$ iff:
 \[ \sigma_1 \preceq \sigma_2 \land t_1 \sigma_2 = t_2 \sigma_2 \land \forall \sigma \in \Sigma. ~ \sigma_1 \preceq \sigma \land t_1 \sigma = t_2 \sigma \implies \sigma_2 \preceq \sigma. \]
 
-Thus, $\sigma$ is MGU for terms $t_1, t_2$ iff it is a minimal unifying extension of the empty substitution.
+Thus, $\sigma$ is the MGU for terms $t_1, t_2$ iff it is the minimal unifying extension of the empty substitution.
 
 
 \subsection{Equation Systems}
@@ -69,14 +69,15 @@ We consider our equation definition as a representation of the special case of e
     \end{array}
 \end{equation*}
 
-In this sense, we may see that trivial equations of the form $\underline{x} \equiv \bot$ do not equate anything so we consider them illegal, i.e., $\forall x \in \V, x \in \Xi. ~ x \equiv \bot \notin \xi$. However, we will still allow them in $\E$ for the simplicity of the following definition.
+In this sense, we may see that trivial equations of the form $\underline{x} \equiv \bot$ do not equate anything so we consider them illegal, i.e., $\forall x \in \V, x \in \Xi. ~ x \equiv \bot \notin \xi$. However, we will still allow them in $\E$ for the simplicity of the following definitions.
 
-Also, under this restriction the equation system become a variant of the union-find~\cite{arden1961algorithm} data structure over variables where each equivalence class is attributed with an optional term. To abstract the theoretical definition from the implementation details, we are presenting it in pure set-theoretical terms.
+Also, under this restriction an equation system becomes a variant of the union-find~\cite{arden1961algorithm} data structure over variables where each equivalence class is attributed with an optional term. To abstract the theoretical definition from the implementation details, we are presenting it in a pure set-theoretic terms.
 
-The main operation defined on equation systems is $\walk : \Xi \times \V \rightarrow \E \times T$. This operation looks up for a variable in an equation system returning a corresponding pair of equation and term. More formally:
+The main operation defined on equation systems is $\walk : \Xi \times \V \rightarrow \E \times T$. This operation looks up for a variable in an equation system returning a corresponding pair of an equation and a term. More formally:
+
 \begin{equation*}
     \walk(\xi, x) = \begin{cases}
-        (\underline{x} \equiv \bot, x) & \text{if there is no such $e \in \xi$ so $x \in \lhs(e)$}, \\
+        (\underline{x} \equiv \bot, x) & \text{if there is no $e \in \xi$ such that $x \in \lhs(e)$}, \\
         (e, \repr(e)) & \text{if $e \in \xi, x \in \lhs(e)$ and $\rhs(e) = \bot$}, \\
         (e, \rhs(e)) & \text{otherwise}. \\
     \end{cases}
@@ -97,7 +98,7 @@ Basically, we may consider our definition of equation system as an ``enhanced'' 
     \end{array}
 \end{equation*}
 
-Indeed, we may consider equation systems as substitutions which are being applied recursively to a term. More formally, we define the equation system application as follows:
+Indeed, we may consider equation systems as substitutions which are being applied recursively to a term. More formally, we define an equation system application as follows:
 \begin{algorithmic}
     \Function{ApplyEqSys}{$\xi \in \Xi$, $t \in T^\infty$}
         \If{$x \gets t \in \V$}
@@ -112,16 +113,16 @@ Indeed, we may consider equation systems as substitutions which are being applie
     \EndFunction
 \end{algorithmic}
 
-Under the equation system application, we may consider equation systems as a special case of substitutions. More precisely, we may prove that the application of an equation system to a rational term is always rational, too.
+Under the equation system application we may consider equation systems as a special case of substitutions. More precisely, we may prove that the application of an equation system to a rational term is always rational, too.
 
-The second key operation of equation systems is $\union : \Xi \times \V \times \V \rightarrow \Xi \times (T \times T)^?$. Given two variables $x, y$ and an equation system $\xi$, this operation builds a new equation system from $\xi$ such that $x, y$ belong to the same equation. More formally:
+The second key operation of equation systems is $\union : \Xi \times \V \times \V \rightarrow \Xi \times (T \times T)^?$. Given two variables $x, y$ and an equation system $\xi$ this operation builds a new equation system from $\xi$ such that $x, y$ belong to the same equation. More formally:
 \begin{algorithmic}[1]
     \Function{UnionEqSys}{$\xi \in \Xi$, $x, y \in \V$}
         \State $(e_x, \_) \gets \walk(\xi, x)$
         \State $(e_y, \_) \gets \walk(\xi, y)$
         \If{$\repr(e_x) = \repr(e_y)$}
             \State \Return $(\xi, \bot)$
-            \Comment{already in the one equation or equals}
+            \Comment{already in the same equation or equals}
         \EndIf
         \If{$\rhs(e_x) = \bot$ \textbf{and} $\rhs(e_y) = \bot$}
             \State \Return $([\xi, \lhs(e_x) \cup \lhs(e_y) \equiv \bot], \bot)$
@@ -151,7 +152,7 @@ We define a ``common part''~\cite{martelli1984efficient} of two terms $\commonpa
     \end{split}
 \end{equation*}
 
-The definition is intentionally left non-total since two terms may not have a common part (is such cases the result is $\bot$) and slightly non-deterministic (in the case of two variables) to allow optimizations. Hereafter we require the implementation of \commonpart to be a total deterministic function.
+The definition is intentionally left non-total since two terms may not have a common part (in such cases the result is assumed to be $\bot$) and slightly non-deterministic (in the case of two variables) to allow optimizations. Hereafter we require the implementation of \commonpart to be a total deterministic function.
 
 
 \subsection{The Unification Algorithm}
@@ -203,8 +204,8 @@ We define the unification algorithm as a recursive function $\unify : \Xi \times
 We have proved the following properties of this algorithm in \Rocq\footnote{\url{https://github.com/dboulytchev/miniKanren-coq/tree/master/src/Rational}}:
 
 \begin{itemize}
-    \item Soundness: if the algorithm terminates with a non-$\bot$ result then the result is a minimal unifying extension of the source equation system for given terms.
-    \item Completeness: if the algorithm terminates with $\bot$ result then there is no unifying extension of the source equation system for given terms.
+    \item Soundness: if the algorithm terminates with a non-$\bot$ result then the result is the minimal unifying extension of the source equation system for given terms.
+    \item Completeness: if the algorithm terminates with result $\bot$ then there is no unifying extension of the source equation system for given terms.
     \item Termination: the algorithm terminates with some result on every input.
 \end{itemize}
 
@@ -215,7 +216,8 @@ We omit the proof because it would require describing the algorithm ``UNIFY-1'' 
 
 \subsection{Examples}
 
-To give a more precise comprehension of the algorithm in theory, we are to consider some concrete examples comparing intermediate states between the conventional one and ours. To give a bit more intuition about termination, we are to use a variant of the conventional algorithm without ``occurs check''.
+To give a more precise comprehension of the algorithm in theory, we are to consider some concrete examples comparing intermediate states between the conventional one and ours. To give more intuition
+about the termination we are using a variant of the conventional algorithm without ``occurs check''.
 
 Starting from the empty state, let us unify the variable $x$ with the term $f\,(f\,(x))$. Both algorithms are observing that $x$ is unbound and stop immediately:
 \begin{equation*}
@@ -294,7 +296,7 @@ To demonstrate the role of \union, let us trace the unification of the variables
         {
             \textbf{Input: $x, y$}
             \begin{dinglist}{212}
-                \item Loop infinitely...
+                \item Loops infinitely...
             \end{dinglist}
         } & {
             \textbf{Input: $x, y$}
@@ -404,5 +406,5 @@ Similarly, let us undo this (returning to the state marked~\ref{eq:example-state
     \end{longtable}
 \end{center}
 
-As the example shows, \commonpart plays a crucial role in termination gradually simplifying the intermediate state until reaching the fixed point. This allows the algorithm to detect cycling terms in more difficult cases when the initial state doesn't include a cycling part itself.
+As the example shows, \commonpart plays a crucial role in termination gradually simplifying the intermediate state until reaching the fixed point. This allows the algorithm to detect cycling terms in more complicated cases when the initial state doesn't include a cycling part itself.
 

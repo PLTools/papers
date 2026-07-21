@@ -1,12 +1,12 @@
 \section{Evaluation}
 
-In this section we present the results' evaluation of our algorithm in comparison with the conventional one (as a baseline) and another well-known rational unification algorithm.
+In this section we present the evaluation results of our algorithm in comparison with the conventional one (as a baseline) and another well-known rational unification algorithm.
 
 We have implemented three unification algorithms with some optimizations\footnote{\url{https://github.com/ProgMiner/rational-unification}}.
 These algorithms were implemented in three variants: ephemeral, ephemeral with path compression and persistent.
-The latter uses only persistent data structures which makes it possible to utilize them in a \miniKanren implementation, while others use mutable without backtracking support (in contrast with WAM~\cite{warren1983abstract}, to reduce overhead).
+The latter uses only persistent data structures which makes it possible to utilize them in a \miniKanren implementation, while others use mutable ones without backtracking support (in contrast with WAM~\cite{warren1983abstract}, to reduce the overhead).
 
-To allow fair algorithm comparison, all implementations include the same generic optimizations (e.g., the variable-age one) but as many as possible algorithm-specific micro-optimizations. Especially, we use different data structures for them.
+To provide a fair algorithm comparison all implementations include the same generic optimizations (e.g., the variable-age one) but as many as possible algorithm-specific micro-optimizations. Specifically, we use different data structures for them.
 
 We compare the following algorithms:
 
@@ -24,7 +24,7 @@ We used \emph{unification traces} for evaluation. Unification trace is a list of
     \item \texttt{synth}~--- synthetic tests, generated manually (66 traces, 11 per test).
 \end{itemize}
 
-We consider JGS and Lama as unification problem close to a ``real-world'' applications of our algorithm. While JGS includes only unification of finite terms,
+We consider JGS and Lama benchmarks as unification problems close to a ``real-world'' applications of our algorithm. While JGS includes only unification of finite terms,
 several Lama tests require dealing with rational ones.
 
 Synthetic tests are specifically devised for stress testing and parameterized with a certain value $n = 0, 10, \dots, 100$:
@@ -68,7 +68,7 @@ Synthetic tests are specifically devised for stress testing and parameterized wi
     \item $\texttt{loops}_4$ --- as the previous but with $x_i = x_{i-1}$ instead of $x_{i-1} = x_i$.
 \end{itemize} 
 
-All synthetic tests except for \texttt{full} require the support for rational unification. Also, \texttt{full} being running using
+All synthetic tests except for \texttt{full} require the support for rational unification. Also, \texttt{full} being run using
 the conventional algorithm consumes exponential time. Consequently, we don't use the conventional algorithm for synthetic tests.
 
 % TODO: fix pictures!!!
@@ -91,20 +91,20 @@ The main evaluation results are:
 
 \begin{itemize}
     \item Our algorithm performs \textbf{as fast as the conventional one} in the real-world scenarios. This is shown by \autoref{fig:baseline}.
-    These plots show the algorithm's run time w.r.t. conventional algorithm run time.
+    These plots show the algorithm's run time w.r.t. the conventional algorithm run time.
     As these plots show, our algorithm is always near to the main diagonal.
   
-    \item While the Huet's algorithm works faster in ephemeral variant, it degrades being implemented in persistent settings (this is shown on \autoref{fig:baseline}, too, and on \autoref{fig:Lama}).
+    \item While the Huet's algorithm works faster in ephemeral variant, it degrades being implemented in persistent settings (this is shown in \autoref{fig:baseline}, too, and in \autoref{fig:Lama}).
     \autoref{fig:synth-ephemeral} and \autoref{fig:synth-persistent} also show that even in the ephemeral implementation it works notably slower than our and moreover its performance depends on the ordering of equation sides.
 \end{itemize}
 
 The main (and perhaps the only) reason for the slowdown of Huet's algorithm is its approach to avoiding infinite loops. In theory, this algorithm assumes that every \textit{non-variable} term instance is attributed with a unique identifier. Under this assumption, it can accumulate equivalence classes for these term instances as for variables.
 
-However, in practice, this is implemented by adding an extra slot that stores references between term instances. Since they are non-comparable, there is no way to perform an optimization like the variable-age heuristic which leads to both asymmetric running times (which is shown on the \autoref{fig:synth-ephemeral} and \autoref{fig:synth-persistent}) and longer ``dereference'' paths.
+However, in practice, this is implemented by adding an extra slot that stores references between term instances. Since they are non-comparable, there is no way to perform an optimization like the variable-age heuristic which leads to both asymmetric running times (which is shown in the \autoref{fig:synth-ephemeral} and \autoref{fig:synth-persistent}) and longer ``dereference'' paths.
 
-This also enlarges the object space in which equivalence information is accumulated since it must now contain both variables and term instances rather than just variables. While this is not a problem in ephemeral settings, in persistent ones it leads to a significant enlarging of intermediate states because we must preserve in them both equivalences between variables and between term instances.
+This also enlarges the object space in which equivalence information is accumulated since it must now contain both variables and term instances rather than just variables. While this is not a problem in ephemeral settings, in persistent ones it leads to a significant growth of intermediate states because we must preserve in them both equivalences between variables and between term instances.
 
-In persistent settings, additional time is required to allocate numeric identifiers for each non-variable term instance (because there is no other way to identify them in a persistent intermediate state). This is inconvenient in practical \miniKanren implementations and introduces additional runtime overhead.
+In persistent settings additional time is required to allocate numeric identifiers for each non-variable term instance (because there is no other way to identify them in a persistent intermediate state). This is inconvenient in practical \miniKanren implementations and introduces an additional runtime overhead.
 
 \begin{figure}
     \centering
@@ -117,7 +117,7 @@ In persistent settings, additional time is required to allocate numeric identifi
         \includegraphics[width=\linewidth]{bench/persistent/Lama.png}
         \subcaption{Persistent variant}
     \end{subfigure}
-    \caption{Comparison of the algorithms on the \texttt{Lama} traces that require rational unification}
+    \caption{Comparison of the algorithms on \texttt{Lama} traces that require rational unification}
     \label{fig:Lama}
 \end{figure}
 
@@ -193,7 +193,7 @@ In persistent settings, additional time is required to allocate numeric identifi
 
 We also applied the Kruskal-Wallis test~\cite{kruskal1952use} and the Dunn post-hoc test~\cite{dunn1964multiple} with the Bonferroni correction~\cite{bonferroni1936teoria} to determine which algorithm works faster on which traces.
 The overall summary is presented as numbers of statistically significant wins in \autoref{tab:analyse}. The best results are highlighted using the bold font.
-The table shows again that the Huet's algorithm works better in the ephemeral implementation but loses its performance in the persistent one while our stay aligned with the conventional.
+The table shows again that the Huet's algorithm works better in the ephemeral implementation but loses its performance in the persistent one while our stays aligned with the conventional.
 
 \begin{table}[b]
     \centering

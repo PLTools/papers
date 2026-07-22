@@ -1,6 +1,6 @@
 \section{Rational Unification}
 
-In this section we introduce rational terms, equation systems and the unification algorithm. The algorithm itself is inspired by the Martelli-Rossi algorithm ``UNIFY-1''~\cite{martelli1984efficient}: it is specialized to work with a threading intermediate state (equation system) and a pair of terms instead of a number of equations and formulated as a recursive function so the representation of an intermediate state simplified and some steps are merged together.
+In this section we introduce rational terms, equation systems and the unification algorithm. The algorithm itself is inspired by the Martelli-Rossi algorithm ``UNIFY-1''~\cite{martelli1984efficient}: it is specialized to work with a threading intermediate state (equation system) and a pair of terms instead of a number of equations, and formulated as a recursive function, so the representation of an intermediate state simplified and some steps are merged together.
 
 \subsection{Rational Terms}
 
@@ -69,7 +69,7 @@ We consider our equation definition as a representation of the special case of e
     \end{array}
 \end{equation*}
 
-In this sense, we may see that trivial equations of the form $\underline{x} \equiv \bot$ do not equate anything so we consider them illegal, i.e., $\forall x \in \V, x \in \Xi. ~ x \equiv \bot \notin \xi$. However, we will still allow them in $\E$ for the simplicity of the following definitions.
+In this sense, trivial equations of the form $\underline{x} \equiv \bot$ do not equate anything so we consider them illegal, i.e., $\forall x \in \V, x \in \Xi. ~ x \equiv \bot \notin \xi$. However, we will still allow them in $\E$ for the simplicity of the following definitions.
 
 Also, under this restriction an equation system becomes a variant of the union-find~\cite{arden1961algorithm} data structure over variables where each equivalence class is attributed with an optional term. To abstract the theoretical definition from the implementation details, we are presenting it in a pure set-theoretic terms.
 
@@ -106,16 +106,17 @@ Indeed, we may consider equation systems as substitutions which are being applie
         \EndIf
         \If{$x' \gets t \in \V$}
             \State \Return $x'$
+            \Comment{reached the fixed point}
         \EndIf
         \If{$f^n\,(t_1, \dots, t_n) \gets t$}
-            \State \Return $f^n(\Call{ApplyEqSys}{\xi, t_1}, \dots, \Call{ApplyEqSys}{\xi, t_n})$
+            \State \Return $f^n\,(\Call{ApplyEqSys}{\xi, t_1}, \dots, \Call{ApplyEqSys}{\xi, t_n})$
         \EndIf
     \EndFunction
 \end{algorithmic}
 
 Under the equation system application we may consider equation systems as a special case of substitutions. More precisely, we may prove that the application of an equation system to a rational term is always rational, too.
 
-The second key operation of equation systems is $\union : \Xi \times \V \times \V \rightarrow \Xi \times (T \times T)^?$. Given two variables $x, y$ and an equation system $\xi$ this operation builds a new equation system from $\xi$ such that $x, y$ belong to the same equation. More formally:
+The second key operation of equation systems is $\union : \Xi \times \V \times \V \rightarrow \Xi \times (T \times T)^?$. Given two variables $x, y$ and an equation system $\xi$, this operation builds a new equation system from $\xi$ such that $x, y$ belong to the same equation. More formally:
 \begin{algorithmic}[1]
     \Function{UnionEqSys}{$\xi \in \Xi$, $x, y \in \V$}
         \State $(e_x, \_) \gets \walk(\xi, x)$
@@ -138,7 +139,7 @@ The second key operation of equation systems is $\union : \Xi \times \V \times \
     \EndFunction
 \end{algorithmic}
 
-When we add a new equation at lines 6-12, we may choose either $\repr(e_x)$ or $\repr(e_y)$ as the representing variable. The same is true about the right-hand side of the new equation at line 12: it could be either $\rhs(e_x)$ or $\rhs(e_y)$. As we can see, the second element of \union result is intended to inform a caller about a collision in right-hand sides during the union.
+When we add a new equation at lines 6-12, we may choose either $\repr(e_x)$ or $\repr(e_y)$ as the representing variable. The same is true about the right-hand side of the new equation at line 12: it could be either $\rhs(e_x)$ or $\rhs(e_y)$. As the listing shows, the second element of \union result is intended to inform a caller about a collision in right-hand sides during the union.
 
 
 \subsection{Common Part}
@@ -264,7 +265,7 @@ To demonstrate the role of \union, let us trace the unification of the variables
             \textbf{Input: $x, y$}
             \begin{dinglist}{212}
                 \item $\union(x, y) = (\dots, (f\,(f\,(x)), f\,(f\,(y))))$
-                \item Updated equation system: \newline
+                \item Update equation system: \newline
                 \begin{minipage}{\linewidth}
                     \begin{equation*}
                         \left\{\begin{array}{l@{{}\equiv{}}l}
@@ -327,7 +328,7 @@ Similarly, let us undo this (returning to the state marked~\ref{eq:example-state
             \begin{dinglist}{212}
                 \item $\walk(x) = (\underline{x} \equiv f\,(f\,(x)), f\,(f\,(x)))$
                 \item $\commonpart(f\,(f\,(x)), f\,(y)) = f\,(y)$
-                \item Updated equation system: \newline
+                \item Update equation system: \newline
                 \begin{minipage}{\linewidth}
                     \begin{equation*}
                         \left\{\begin{array}{l@{{}\equiv{}}l}
@@ -359,7 +360,7 @@ Similarly, let us undo this (returning to the state marked~\ref{eq:example-state
             \begin{dinglist}{212}
                 \item $\walk(y) = (\underline{y} \equiv f\,(f\,(y)), f\,(f\,(y)))$
                 \item $\commonpart(f\,(x), f\,(f\,(y))) = f\,(x)$
-                \item Updated equation system: \newline
+                \item Update equation system: \newline
                 \begin{minipage}{\linewidth}
                     \begin{equation*}
                         \left\{\begin{array}{l@{{}\equiv{}}l}
@@ -384,14 +385,14 @@ Similarly, let us undo this (returning to the state marked~\ref{eq:example-state
         {
             \textbf{Input: $x, f\,(y)$}
             \begin{dinglist}{212}
-                \item Loop infinitely...
+                \item Loops infinitely...
             \end{dinglist}
         } & {
             \textbf{Input: $x, f\,(y)$}
             \begin{dinglist}{212}
                 \item $\walk(x) = (\underline{x} \equiv f\,(y), f\,(y))$
                 \item $\commonpart(f\,(y), f\,(y)) = f\,(y)$
-                \item Updated equation system (no-op)
+                \item Update equation system (no-op)
             \end{dinglist}
         } \\\cline{2-2}
         & {

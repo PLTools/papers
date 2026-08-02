@@ -1,0 +1,482 @@
+\documentclass[russian]{intsys}
+\usepackage{thmtools}
+\usepackage{cite}
+\usepackage{tikz}
+\usepackage{pgfplots}
+
+\usetikzlibrary{positioning, arrows.meta}
+\pgfplotsset{compat = 1.9}
+\usepackage{proof}
+\usepackage[nottoc]{tocbibind}
+
+\input{macro}
+
+\Author%
+  {Доморацкий Эридан Алексеевич}%
+  {аспирант каф. системного программирования мат.-мех. ф-та СПбГУ}%
+  {Domoratskiy Eridan Alekseevich}%
+  {PhD student, Software Engineering Chair, Faculty of Mathematics and Mechanics, Saint-Petersburg State University}%
+  {eridan200@mail.ru}%
+  {0009-0005-9020-3403}
+
+\Author%
+  {Булычев Дмитрий Юрьевич}%
+  {к.ф.-м.н., доцент каф. системного программирования мат.-мех. ф-та СПбГУ}%
+  {Boulytchev Dmitry Yurievich}%
+  {Candidate of Physical and Mathematical Sciences, Associate Professor, Software Engineering Chair, Faculty of Mathematics and Mechanics, Saint-Petersburg State University}%
+  {dboulytchev@math.spbu.ru}%
+  {0000-0001-8363-7143}
+
+\TitleRU{Эффективный персистентный алгоритм для унификации рациональных термов}
+\ShortTitle{Эффективная рациональная унификация}
+\AbstractRU{TODO}
+\KeywordsRU{персистентные алгоритмы, рациональные деревья, унификация, логическое программирование.}
+
+\TitleEN{Efficient persistent algorithm for rational unification}
+\AbstractEN{TODO}
+\KeywordsEN{persistent algorithms, rational tree, unification, relational programming}
+
+
+\begin{document}
+
+\section{Введение}
+Недавние конструкции асимптотически хороших локально тестируемых кодов (LTC) и квантовых LDPC (qLDPC) кодов \cite{Panteleev&Kalachev:stoc2022,Dinur:stoc2022,Dinur:decoders,Leverrier:focs2022,Leverrier:qldpcdecoder:2023,Leverrier:2023,Gu:stoc2023:qpdpc-decoder} используют специальное свойство произведений кодов, которое имеет несколько названий и определений: робастная тестируемость (robust testability), тестируемость на согласованность (agreement testability) и расширение произведения (product expansion). Было показано \cite[Lemma 2.9]{Dinur:stoc2022}, \cite[Lemma 1]{PK2022robust}, что эти определения по существу эквивалентны в случае произведения двух кодов. Для всех известных конструкций хороших qLDPC кодов это свойство необходимо для обеспечения линейного расстояния и построения эффективных декодеров. Для LTC существует одно исключение: в работе \cite{Lin2022:losslessLTC} конструкция LTC кодов основывается на односторонних вершинных экспандерах и не требует локальных кодов, удовлетворяющих специальному свойству.
+
+В \cite[Appendix B]{PK2022robust} было показано, что свойство расширения произведения кодов может быть интерпретировано как форма многомерного расширения, называемая кограничным расширением\footnote{Для двухмерного случая см. также \cite[Section 2.6]{Dinur:decoders}} (coboundary expansion). Таким образом, это представляется важным свойством произведений кодов наряду с робастной тестируемостью и тестируемостью на согласованность. Более того, поскольку расширение произведения кодов является формой кограничного расширения, то вероятно, что оно будет полезно для построения многомерных аналогов кодов из \cite{Dinur:stoc2022,Panteleev&Kalachev:stoc2022}, которые потенциально могут дать хорошие квантовые локально тестируемые коды (qLTC).
+
+В \cite[Lemma 1]{PK2022robust} также было показано, что расширение произведения двух кодов совпадает с тестируемостью на согласованность с той же константой (см. также \cite[Section 2.6]{Dinur:decoders}).
+Цель нашей статьи --- прояснить взаимосвязь между робастной тестируемостью, тестируемостью на согласованность и расширением произведения для произведений более чем двух кодов.
+В частности, мы рассматриваем естественное обобщение тестируемости на согласованность для произведений нескольких кодов и показываем, что в случае произведений 3 и более кодов: 1) расширение произведения отличается от робастной тестируемости и тестируемости на согласованность; 2) тестируемость на согласованность эквивалентна робастной тестируемости для теста по осепараллельным линиям (axis-parallel line test), с точностью до константного множителя.
+
+\subsection{Расширение произведения кодов}
+Приведём определение расширения произведения из \cite{PK2022robust}, где также представлены история и связь с другими формами этого определения.
+Пусть заданы линейные коды $\cC_1,\dots,\cC_m$ над $\F_q$. Мы можем определить (\emph{тензорное}) \emph{произведение кодов}
+\[
+\cC_1\otimes\dots\otimes\cC_m := \{c\in \F_q^{n_1\times\dots\times n_m} \mid \forall i\in [m]\ \forall \ell\in \cL_i\colon c|_\ell\in  \cC_i\},
+\]
+где $\F_q^{n_1\times\dots\times n_m}$ --- это множество функций $c\colon[n_1]\times \dots\times [n_m] \to \F_q$, а $\cL_i$ --- множество линий, параллельных $i$-й оси в $m$-мерной решётке $[n_1]\times \dots\times [n_m]$, то есть
+\[
+\cL_i := \{A_1\times\dots\times A_m\subseteq [n_1]\times \dots\times [n_m]\mid A_i=[n_i], \forall j\ne i: |A_j|=1 \}.
+\]
+Здесь и далее мы используем обозначение $[n]:=\{1,\dots,n\}$. Также для набора $\cC = (\cC_i)_{i\in [m]}$ линейных кодов над $\F_q$ нам будет удобно использовать обозначение $\otimes \cC:=\cC_1\otimes\dots\otimes \cC_m$.
+
+Как и в \cite{PK2022robust}, для линейных кодов $\cC_1\subseteq \F_q^{n_1}$, $\cC_2\subseteq \F_q^{n_2}$ мы обозначаем $\cC_1\boxplus \cC_2$ как код $(\cC_1^\bot\otimes \cC_2^\bot)^\bot=\cC_1\otimes \F_q^{n_2}+\F_q^{n_1}\otimes \cC_2 \subseteq \F_q^{n_1\times n_2}$.
+Для набора $\cC = (\cC_i)_{i\in [m]}$ линейных кодов над $\F_q$ мы можем определить коды 
+\[
+\cC^{(i)} := \F_q^{n_1} \otimes\dots\otimes \cC_i \otimes\dots\otimes \F_q^{n_m} = \{ c\in \F_q^{n_1\times\dots\times n_m} \mid \forall \ell\in \cL_i\colon c|_\ell\in  \cC_i \} .
+\]
+Легко видеть, что \[
+    \cC_1\otimes \dots \otimes \cC_m = \cC^{(1)}\cap \dots \cap \cC^{(m)}, \qquad 
+    \cC_1\boxplus \dots \boxplus \cC_m = \cC^{(1)}+ \dots + \cC^{(m)}.
+\]
+Заметим, что каждый код $\cC^{(i)}$ представляет собой прямую сумму $|\cL_i| = \frac{1}{n_i}\prod_{j\in [m]} n_j$ копий кода $\cC_i$. 
+Для $x\in \F_q^{n_1\times\dots\times n_m}$ обозначим $|x|_i$ и $\|x\|_i$ соответственно как количество и долю линий $\ell\in\cL_i$, для которых $x|_\ell \ne 0$.
+Очевидно, что $\|x\|_i = \frac{1}{|\cL_i|}|x|_i$. $|x|$ и $\|x\|$ обозначают соответственно \emph{вес Хэмминга} (то есть количество ненулевых элементов) и \emph{нормализованный вес Хэмминга} (то есть долю ненулевых элементов) в $x$.  Легко видеть, что введённые нормы связаны неравенством $\|x\|\le \|x\|_i$, $i\in [m]$.
+Мы также будем использовать следующие обозначения: нормализованное расстояние $\delta(x,y):=\|x-y\|$, нормализованное расстояние до кода $\delta(x,\cC):=\min_{y\in\cC}\|x-y\|$ и нормализованное минимальное расстояние $\delta(\cC):=\min_{x\in\cC\setminus \{0\}}\|x\|$ для кода $\cC\subseteq\F_q^n$.
+
+\begin{definition}[Расширение произведения кодов \cite{PK2022robust}]
+Пусть задан набор $\cC = (\cC_i)_{i\in [m]}$ линейных кодов $\cC_i\subseteq \F_q^{n_i}$. Мы говорим, что $\cC$ является \emph{$\rho$-расширяющим}, если каждое кодовое слово $c\in \cC_1\boxplus \dots \boxplus \cC_m$ может быть представлено как сумма $c = \sum_{i\in[m]} a_i$, где $a_i\in \cC^{(i)}$ для всех $i\in [m]$ и выполнено следующее неравенство:
+\begin{equation}\label{eq:prod-exp}
+\rho\sum_{i\in [m]} \|a_i\|_i \le \|c\|.
+\end{equation}
+\end{definition}
+
+Через $\rho(\cC)$ обозначим наибольшее значение $\rho$, для которого $\cC$ является $\rho$-расширяющим. В \cite[Appendix B]{PK2022robust} было показано, что $\rho(\cC)$ с точностью до множителя $1/m$ равен константе Чигера цепного комплекса, естественно ассоциированного с произведением кодов $\cC_1\otimes\cdots\otimes \cC_m$.
+
+\subsection{Робастная тестируемость и тестируемость на согласованность}
+Пусть $X$ --- некоторое конечное индексное множество, которое мы будем использовать для нумерации битов кода. Тогда код $\cC\subseteq \F_q^X$ можно интерпретировать как множество функций $f:X\to\F_q$. Если $I\subseteq X$, то $\cC|_I:=\{c|_I\mid c\in \cC\}$ --- это перфорированный код (punctured code) $\cC$, состоящий из ограничений кодовых слов из $\cC$ на индексное множество $I$.
+
+\begin{definition}
+    \emph{Тест для кода} $\cC\subseteq \F_q^X$ --- это множество $T\subseteq 2^{X}$ с вероятностной мерой $\PP$, определённой на нём.
+\end{definition}
+В этой статье мы всегда будем использовать следующую вероятностную меру:
+\begin{equation}\label{eqn:prob}
+\PP(I)=\frac{|I|}{\sum_{J\in T}|J|}\quad\mbox{для}\quad I\in T.
+\end{equation}
+
+Тестер для пары (код $\cC\subseteq \F_q^X$ и тест $T$) работает следующим образом: для заданного слова $c\in \F_q^X$ мы случайным образом выбираем множество $I\in T$ и принимаем $c$, если $c|_I\in \cC|_I$, и отвергаем в противном случае. Таким образом, если $c\in \cC$, то тестер всегда принимает это слово.
+
+\begin{definition}[Робастность теста]
+    Тест $T$ для кода $\cC\subseteq \F_q^X$ называется \emph{$\alpha$-робастным}, если для всех $c\in \F_q^X$ выполнено
+    \[\EE_{I\in T}\delta(c|_I,\cC|_I)\ge\alpha \delta(c,\cC),\]
+    где $\EE$ обозначает математическое ожидание.
+\end{definition}
+
+Обозначим максимальную робастность как:
+\begin{align*}
+  \rho_r(T,\cC)&:=\max\fbr{\alpha\mid \mbox{тест $T$ является $\alpha$-робастным для кода }\cC}.
+\end{align*}
+
+Обычно, когда код $\cC$ определяется множеством локальных кодов, естественный тест содержит носители всех этих локальных кодов. Например, произведение кодов $\cC_1\otimes \cC_2$ можно определить локальными кодами на линиях, параллельных осям множества $X=[n_1]\times [n_2]$:
+$$\cC_1\otimes \cC_2\!=\!\fbr{f\in\F_q^{[n_1]\times [n_2]}\Bigm| f(\cdot, j)\in\cC_1\mbox{ для }j\in [n_2], f(i,\cdot)\in\cC_2\mbox{ для }i\in [n_1]}.$$
+Таким образом, естественный тест для кода $\cC_1\otimes \cC_2$ --- это множество всех линий, параллельных осям:
+$$T=\cL_1\cup\cL_2 = \fbr{[n_1]\times \{j\}\mid j\in [n_2]}\cup \fbr{\{i\}\times [n_2]\mid i\in[n_1]},$$
+и $\PP$, определённое в \eqref{eqn:prob}, соответствует следующему процессу: выбирается случайное направление, затем случайная линия вдоль этого направления.
+Этот тест называется \emph{тестом по осепараллельным линиям} (\emph{axis-parallel line test}). Для произведения $m\ge 3$ кодов существуют различные естественные тесты, так как можно рассматривать подпространства, параллельные осям, различных размеров от $1$ до $m-1$.
+Следующее определение даёт прямое обобщение 2-flat test из \cite[Algorithm 12.2]{Lin-func-prop}.
+
+\begin{definition}[Тест по осепараллельным $k$-плоскостям]
+    Пусть $X=[n_1]\times \cdots\times [n_m]$, $k\in [m-1]$. Тогда \emph{тест по осепараллельным $k$-плоскостям} (\emph{axis-parallel $k$-flat test}) определяется как множество $T_m^k$ всех $k$-мерных параллельных координатным осям подпространств (\emph{$k$-плоскостей}) в $X$:
+    $$T_m^k(X)=\bigcup_{I\subseteq [m], |I|=k}\cL_I,$$
+    \begin{align*}        
+    \cL_I=\Bigfbr{A_1\times\dots\times A_m\subseteq [n_1]\times \dots\times [n_m]\Bigm|\  
+    &\forall j\in I:  A_j=[n_j],\\
+    &\forall j\in [m]\setminus I: |A_j|=1}.
+    \end{align*}
+    Мы будем опускать аргумент $T_m^k$ там, где это не важно или очевидно из контекста.
+\end{definition}
+
+Здесь мы следуем терминологии из \cite{Lin-func-prop}. 
+Тест $T_2^1$ --- это стандартный тест по осепараллельным линиям, $T_m^1$ --- его многомерная версия, а $T_m^{m-1}$ --- \emph{тест по осепараллельным гиперплоскостям}. 
+В \cite[Theorem 12.5]{Lin-func-prop} было показано, что $\rho_r(T_m^2, \cC^{\otimes m})\ge \alpha(\delta(\cC),m)$ для $m\ge 3$ и некоторой функции\footnote{Из доказательства \cite[Theorem 12.5]{Lin-func-prop} следует, что $\alpha(\epsilon, m)=\epsilon^{\frac12(m-2)(m+3)}\cdot 24^{\,2-m}$.} $\alpha(\epsilon, m)>0$. 
+Этот результат показывает, что требование постоянной робастности теста $T_m^2$ для семейства кодов $(\cC_i^{\otimes m})_{i\in\NN}$ эквивалентно требованию линейного минимального расстояния для кодов в этом семействе: $\delta(\cC_i)=\Omega(1)$ при $i\to\infty$. 
+Таким образом, единственный тест, который накладывает нетривиальное ограничение на код $\cC$, --- это тест по осепараллельным линиям $T_m^1$. 
+
+    Тест $T_m^1$ можно рассматривать как композицию тестов $T_m^2$ для $\cC^{\otimes m}$ и $T_2^1$ для $\cC^{\otimes 2}$. Как будет формально показано в лемме~\ref{lemma:robust-combine}, 
+\[
+\rho_r(T_m^1,\cC^{\otimes m})\ge \rho_r(T_m^2,\cC^{\otimes m})\rho_r(T_2^1,\cC^{\otimes 2}),
+\]
+то есть константная робастность теста $T_m^1$ для $\cC^{\otimes m}$ эквивалентна константной робастности теста $T_2^1$ для $\cC^{\otimes 2}$.
+
+Следующее определение тестируемости на согласованность для произведения нескольких кодов является непосредственным обобщением тестируемости на согласованность для произведения двух кодов \cite[Definition 2.8]{Dinur:stoc2022}.
+
+\begin{definition}[Тестируемость на согласованность для произведений кодов]
+    Пусть $\cC=(\cC_1,\ldots,\cC_m)$ --- коллекция кодов. Произведение кодов $\otimes \cC$ является $\alpha$-\emph{тестируемым на согласованность}, если для каждого $c_1\in\cC^{(1)},\ldots,c_m\in\cC^{(m)}$ существует $c\in\otimes\cC$ такое, что
+    \[
+    \alpha \EE_{i\in[m]}\|c_i-c\|_i
+    \le \EE_{i,j\in[m]}\|c_i-c_j\|,
+    \]
+    где предполагается равномерное распределение на $[m]$.
+    Определим максимальную тестируемость на согласованность:
+    \begin{align*}
+      \rho_a(\otimes\cC)&:=\max\fbr{\alpha\mid \mbox{$\otimes\cC$ является $\alpha$-тестируемым на согласованность}}.
+    \end{align*}
+\end{definition}
+
+Заметим, что $\rho_a(\otimes\cC)\le 2$, поскольку для любого $c$ выполнено $\|c_i-c_j\|\le \|c_i-c\|+\|c_j-c\|\le \|c_i-c\|_i+\|c_j-c\|_j$.
+
+\newcommand{\cI}{\mathcal{I}}
+\begin{restatable}[Робастная тестируемость + линейное расстояние = тестируемость на согласованность]{lemma}{LemRobustAgreement}\label{lemma:robust=agreement}
+    Пусть $\cC=(\cC_1,\ldots,\cC_m)$ --- набор кодов $\cC_i\in\F_q^{n_i}$, $\rho_r:=\rho_r(T_m^1,\otimes\cC)$, $\rho_a:=\rho_a(\otimes\cC)$. Тогда
+    \[
+    \rho_r\ge \frac14\rho_a,\qquad \rho_a\ge \frac{\rho_r}{\rho_r+1}\min_{i\in[m]}\delta(\cC_i).
+    \]
+\end{restatable}
+
+Доказательство приведено в разделе~\ref{app:robust-agreement}. 
+Оно в целом совпадает с доказательством для произведения двух кодов \cite[Lemma 2.9]{Dinur:stoc2022}.
+Из леммы~\ref{lemma:robust=agreement} следует, что робастная тестируемость и тестируемость на согласованность по существу эквивалентны. 
+
+Основной результат данной работы состоит в том, что расширение произведения набора кодов отличается от робастной тестируемости и тестируемости на согласованность произведения этих кодов.
+
+\begin{restatable}{theorem}{MainTheorem}\label{th:main}
+    Пусть $C_t$ --- примитивный $[n_t,\frac{n_t}{3}]$ код Рида-Соломона над полем $\F_{2^{2t}}$, определённый проверочным многочленом $(x-1)(x-\omega)\ldots (x-\omega^{\frac{n_t}{3}-1})$, где $t\in\NN$, $n_t=2^{2t}-1$, $\omega$ --- примитивный элемент $\F_{2^{2t}}$. 
+    Для каждого $m\ge 3$ существуют $\alpha_r>0$ и $\alpha_a>0$, такие что для всех $t\in\NN$ выполняются следующие неравенства:
+    \begin{enumerate}
+        \item $\rho(\underbrace{C_t,\ldots,C_t}_{m\ \mbox{\scriptsize\rm раз}})\le \displaystyle\frac{1}{n_t}$;
+        \item $\rho_r(T_m^k, C_t^{\otimes m})\ge \alpha_r$ для всех $k\in[m-1]$;
+        \item $\rho_a(C_t^{\otimes m})\ge \alpha_a.$
+    \end{enumerate}
+\end{restatable}
+
+Более того, расширение произведения влечёт робастность теста $T_m^1$ для кода $\cCpow{m}$.
+\begin{restatable}{proposition}{MainProp}\label{prop:main}
+    Пусть $\cC\subsetneq\F_q^n$ и $m\ge 2$. Тогда существует функция $\alpha$ такая, что $\alpha(x)>0$ при $x>0$ и
+    \[
+    \rho_r(T_m^1,\cCpow{m})\ge \alpha(\rho(\underbrace{\cC,\ldots,\cC}_{m\ \mbox{\scriptsize\rm раз}})).
+    \]
+\end{restatable}
+Это утверждение вместе с теоремой~\ref{th:main} показывает, что свойство расширения произведения накладывает более сильное ограничение на код $\cC$, чем робастная тестируемость.
+Теорема~\ref{th:main} и утверждение~\ref{prop:main} доказаны в следующем разделе.
+
+\section{Доказательства}
+Зафиксируем $t\in \NN$ и рассмотрим примитивный $[n,k]$ код Рида-Соломона $C$ над полем $\F_q$, где $q=2^{2t}$, $n=q-1$, и $k=n/3$. Этот код может быть определён проверочным многочленом $p(x)=(x-1)(x-\omega)\ldots (x-\omega^{k-1})$, где $\omega$ --- примитивный элемент $\F_q$:
+\[
+C = \Bigfbr{(a_i)_{i=0}^{n-1}\in \F_q^n\Bigm| p(x)\sum_{i=0}^{n-1}a_ix^i\equiv 0\mod (x^n-1)}.
+\]
+Сначала мы покажем, что $\rho(C,C,C)\le 1/n$.
+
+Начнём с описания двойственного кода к произведению циклических кодов в терминах проверочных многочленов. Рассмотрим циклические коды $\cC_1,\ldots,\cC_m\subseteq \F_q^n$, определённые соответственно проверочными многочленами $p_1,\ldots,p_m\in \F_q[x]$ такими, что $p_i|(x^n-1)$:
+\begin{align*}
+    \cC_i&=\Bigfbr{(a_i)_{i=0}^{n-1}\in \F_q^n\Bigm| p_i(x)\sum_{i=0}^{n-1}a_ix^i\equiv 0\mod (x^n-1)}\\
+    &\cong \Bigfbr{a\in \F_q[x]\Bigm| \deg a<n,\ p_i(x)a(x)\equiv 0\mod (x^n-1)}.
+\end{align*}
+Здесь для кодов $\cC_1\subseteq V_1$, $\cC_2\subseteq V_2$ мы говорим, что $\cC_1\cong\cC_2$, если существует линейный изоморфизм $\phi:V_1\to V_2$, сохраняющий расстояние Хэмминга, такой, что $\phi(\cC_1)=\cC_2$.
+
+\begin{lemma}\label{lemma:sum-check}
+    Пусть $\cC=\cC_1\boxplus \cdots\boxplus \cC_m$. Рассмотрим идеал \[\cI=(x_1^n-1,\ldots,x_m^n-1)\subseteq \F_q[x_1,\dots,x_m].\]
+    Тогда
+    \begin{equation*}
+        \cC\! =\! \Bigfbr{a\in \F_q[x_1,\dots,x_m] \Bigm| \deg_{x_i}\!a<n \mbox{ \rm и } a(x_1,\dots,x_m)\prod_{i=1}^m p_i(x_i)\equiv 0\!\!\!\! \mod \cI}.
+    \end{equation*}
+\end{lemma}
+\begin{proof}
+    Для многочлена $p(x_1,\dots,x_k)$ определим \[p^*(x_1,\dots,x_k):=p(x_1^{n-1},\dots,x_k^{n-1})\mod \cI.\]
+    
+    Поскольку $p_i(x)$ является проверочным многочленом для $\cC_i$, то $p_i^*(x)$ является порождающим многочленом для $\cC_i^\bot$, то есть
+    \[
+    \cC_i^\bot=\bigfbr{p^*_i(x)q(x)\bigm| \deg q<n-\deg p_i}=\bigfbr{a\in \F_q[x]\bigm| \deg a<n\mbox{ и }p_i^*|a}.
+    \]
+    Следовательно, тензорное произведение $\cC_1^\bot,\ldots,\cC_m^\bot$ порождается полиномом \[
+    p^*_1(x_1)\cdots p^*_m(x_m)\in \F_q[x_1,\ldots,x_m],
+    \] а именно:
+    \[
+    \cC_1^\bot\otimes\cdots\otimes \cC_m^\bot=\bigfbr{a\in \F_q[x_1,\dots,x_m]\bigm| \deg_{x_i} a<n\mbox{ и }p_i^*(x_i)|a}.
+    \]
+    Значит $(p^*_1(x_1)\cdots p^*_m(x_m))^*=p_1(x_1)\cdots p_m(x_m)$ является проверочным многочленом для $(\cC_1^\bot\otimes\cdots\otimes \cC_m^\bot)^\bot=\cC_1\boxplus \cdots\boxplus \cC_m$.
+\end{proof}
+
+\begin{lemma}\label{lemma:not-expanding}
+    Пусть $C$ --- примитивный код Рида-Соломона $[n,k]$ над полем $\F_q$, определённый проверочным многочленом $p(x)=(x-1)(x-\omega)\ldots (x-\omega^{k-1})$, где $q=2^{2t}$, $n=q-1$, $k=n/3$. Тогда
+    $$\rho(C,C,C) \le 1/n.$$
+\end{lemma}
+\begin{proof}
+    Кодовое слово кода $C\boxplus C\boxplus C$ может быть задано как многочлен 
+    $f(x,y,z)$, такой что 
+    $$f(x,y,z)p(x)p(y)p(z)\equiv 0\mod (x^n-1,y^n-1,z^n-1).$$ 
+    Рассмотрим многочлены 
+    $$a'(x,y,z)=\sum_{i=0}^{n-1}\sum_{j=0}^{n-1}\sum_{l=0}^{n-1}a'_{ijl}x^iy^jz^l,\quad\mbox{и}\quad a(x,y,z):=a'(x,\omega^{-k}y,\omega^{-2k}z),$$
+    где 
+    $$a'_{ijl}=\begin{cases}1,&i+j+l\equiv 0\mod n\\0,&\mbox{иначе}.\end{cases}$$
+    Сначала покажем, что $a$ --- это кодовое слово кода $C\boxplus C\boxplus C$. Нам нужно показать, что 
+    \begin{equation}\label{eqn:a-is-codeword}
+     a(x,y,z)p(x)p(y)p(z)=0\mod (x^n-1,y^n-1,z^n-1).
+    \end{equation}
+    Рассмотрим многочлены 
+    $$r(x):=p(\omega^k x)=\omega^{k^2}\prod_{i=2k}^{3k-1}(x-\omega^i),\qquad s(x):=p(\omega^{2k}x)=\omega^{2k^2}\prod_{i=k}^{2k-1}(x-\omega^i).$$
+    Мы имеем \[
+        a(x,y,z)p(x)p(y)p(z)=a'(x,\omega^{-k}y,\omega^{-2k}z)p(x)r(\omega^{-k}y)s(\omega^{-2k}z),\quad \omega^n=1,
+    \]
+    таким образом, заменяя $y\mapsto \omega^{-k}y$, $z\mapsto\omega^{-2k}z$, мы можем переписать условие \eqref{eqn:a-is-codeword} как
+    \begin{equation}\label{eqn:a'-is-codeword}
+     a'(x,y,z)p(x)r(y)s(z)=0\mod (x^n-1,y^n-1,z^n-1).
+    \end{equation}
+    Поскольку $\omega$ --- примитивный элемент $\F_q$, то \[
+        p(x)r(x)s(x)=\underbrace{\omega^{3k^2}}_{=1}\prod_{i=0}^{n-1}(x-\omega^i)=x^{n}-1.
+    \]
+    Пусть $p(x)=\sum_{i=0}^{n-1}p_ix^i$, $r(x)=\sum_{i=0}^{n-1}r_ix^i$, $s(x)=\sum_{i=0}^{n-1}s_ix^i$.
+    Из \[p(x)r(x)s(x)\equiv 0\mod (x^n-1)\] следует
+    $$0=\sum_{d=0}^{n-1}\sum_{i+j+l\equiv d}p_ir_js_lx^d\quad\Longrightarrow\quad \sum_{i+j+l\equiv d}p_ir_js_l=0\mbox{ для всех }d\le n-1.$$
+    Следовательно, по модулю $(x^n-1,y^n-1,z^n-1)$ мы имеем
+    \begin{align*}
+    a'(x,y,z)p(x)r(y)s(z)&=\sum_{i=0}^{n-1}\sum_{j=0}^{n-1}\sum_{l=0}^{n-1}x^iy^jz^l\sum_{i'=0}^{n-1}\sum_{j'=0}^{n-1}\sum_{l'=0}^{n-1} p_{i-i'}r_{j-j'}s_{l-l'}a'_{i'j'l'}\\
+    %&=\sum_{i=0}^{n-1}\sum_{j=0}^{n-1}\sum_{l=0}^{n-1}x^iy^jz^l\sum_{i''+j''+l''\equiv 0\!\!\!\!\mod n} p_{i''}r_{j''}s_{l''}\\
+    &=\sum_{i=0}^{n-1}\sum_{j=0}^{n-1}\sum_{l=0}^{n-1}x^iy^jz^l\sum_{i'+j'+l'\equiv 0\!\!\!\!\mod n} p_{i-i'}r_{j-j'}s_{l-l'}\\
+    &=\sum_{i=0}^{n-1}\sum_{j=0}^{n-1}\sum_{l=0}^{n-1}x^iy^jz^l\underbrace{\sum_{i''+j''+l''\equiv i+j+l\!\!\!\!\mod n} p_{i''}r_{j''}s_{l''}}_{=0}\\
+    &=0,
+    \end{align*}
+    где во второй строке были использованы подстановки $i'':=i-i'$, $j'':=j-j'$, $l'':=l-l'$. 
+    Таким образом, \eqref{eqn:a'-is-codeword} выполняется, а значит, выполняется и \eqref{eqn:a-is-codeword}, и, следовательно, $a$ является кодовым словом $C\boxplus C\boxplus C$ по лемме~\ref{lemma:sum-check}.
+
+    По определению выполнено $|a|=n^2$. Предположим, что $a=a_1+a_2+a_3$, где $a_1\in C\otimes \F_q^n\otimes \F_q^n$, $a_2\in \F_q^n\otimes C\otimes \F_q^n$, $a_3\in \F_q^n\otimes \F_q^n\otimes C$. Поскольку каждая линия, параллельная осям в кубе $[n]^3$, покрывает только один ненулевой элемент $a_{ijl}$, мы имеем $|a_1|_1+|a_2|_2+|a_3|_3\ge |a|=n^2$. 
+    Учитывая, что $\|a\|=\frac{1}{n^3}|a|=\frac{1}{n}$ и $\|a_i\|_i=\frac{1}{n^2}|a_i|_i$, получаем
+    \[
+    \sum_{i\in[3]}\|a_i\|_i=\frac{1}{n^2}\sum_{i\in[3]}|a_i|_i\ge 1=n\|a\|.
+    \]
+    Таким образом, $\rho(C,C,C)\le 1/n$.
+\end{proof}
+
+Только что доказанная лемма~\ref{lemma:not-expanding} показывает, что расширение произведения тройки $(C,C,C)$ стремится к нулю при $n\to\infty$. 
+Теперь объединим известные результаты, чтобы показать, что все тесты $T_m^k$ имеют константную робастность для кода $C^{\otimes m}$ и $k\in[m-1]$ при $n\to\infty$.
+
+Сначала покажем, что тест $T_2^1$ робастный для кода $C\otimes C$. Переформулируем теорему о робастной тестируемости кодов Рида-Соломона из \cite{Polishchuk:1994} для нашего случая.
+
+\begin{theorem}[Theorem 9 in \cite{Polishchuk:1994}]\label{th:PolishchukSpielman}
+Пусть $\F$ --- поле, $X=\{x_1,\dots,x_n\}\subseteq \FF$, $Y=\{y_1,\dots,y_n\}\subseteq \F$. Пусть $R(x,y)$ --- полином над $\F$ степени $(d,n)$, $C(x,y)$ --- полином над $\F$ степени $(n,d)$. Если \[
+\PP_{(x,y)\in X\times Y}\fbr{R(x,y)\ne C(x,y)}<\tau^2,
+\]
+и $n>2\tau n+2d$, то существует полином $Q(x,y)$ степени $(d,d)$ такой, что \[
+\PP_{(x,y)\in X\times Y}\fbr{R(x,y)\ne Q(x,y)\mbox{ или }C(x,y)\ne Q(x,y)}<2\tau^2.
+\]
+\end{theorem}
+
+\begin{lemma}[Следствие из теоремы~\ref{th:PolishchukSpielman}]\label{th:RS-robust}
+    Пусть $C$ --- это $[n,k]$ примитивный код Рида-Соломона над $\F_q$, определённый проверочным многочленом $(x-1)(x-\omega)\ldots (x-\omega^{k-1})$, где $n=q-1$, $k<n/2$, а $\omega$ --- примитивный элемент $\F_q$. Тогда для любого $c_1\in C\otimes \F_q^n$, $c_2\in \F_q^n\otimes C$, если 
+    $$\delta(c_1,c_2)\le \rbr{\frac 12-\frac kn}^2,$$ 
+    то 
+    \[
+    \delta(c_1,C\otimes C)\le 2\delta(c_1,c_2),\qquad\delta(c_2,C\otimes C)\le 2\delta(c_1,c_2).
+    \]
+\end{lemma}
+
+\begin{proof}
+    Используя дискретное преобразование Фурье (см., например, \cite[Theorem 6.1.5]{book:AlgCodes}), можно показать, что каждое кодовое слово $c\in C$ может быть определено как вектор значений некоторого многочлена $p_c\in \F_q[x]$ степени не более $d=k-1$ в точках $\{1,\omega^{-1},\omega^{-2},\ldots,\omega^{1-n}\}$. 
+
+    Применим теорему~\ref{th:PolishchukSpielman} к $X=Y=\{1,\omega,\dots,\omega^{n-1}\}$, $d=k-1$, $\tau \in I$, где $I$ --- это интервал $\bigrbr{\sqrt{\delta(c_1,c_2)},\frac 12-\frac d n}$. 
+    Так как $\sqrt{\delta(c_1,c_2)}\le \frac 12-\frac kn<\frac{1}{2}-\frac{d}{n}$, интервал $I$ непуст.
+
+    Каждое кодовое слово $c_1\in C\otimes \F_q^n$ (соответственно, $c_2\in \F_q^n\otimes C$) определяется вектором значений на $X\times Y$ некоторого многочлена $p_{c_1}(x,y)$ от двух переменных степени не выше\footnote{Мы говорим, что многочлен $p(x,y)$ от двух переменных степени не выше $(a,b)$, если каждый его моном имеет степень по $x$ не выше $a$ и степень по $y$ не выше $b$} $(d,n)$ (соответственно, $p_{c_2}(x,y)$ степени не выше $(n,d)$).
+    Расстояние $\delta(c,c')$ для $c,c'\in \F_q^n\otimes \F_q^n$ можно интерпретировать как $\PP_{(x,y)\in X\times Y}\fbr{p_{c}(x,y)\ne p_{c'}(x,y)}$. 
+
+    Поскольку $\tau\in I$, то выполнены условия теоремы~\ref{th:PolishchukSpielman}. Применяя эту теорему к $p_{c_1}$ и $p_{c_2}$, существует $p_c$ степени не выше $(d,d)$ такой, что
+    \begin{equation*}
+      \PP_{(x,y)\in X\times Y}\fbr{p_{c_1}(x,y)\ne p_{c}(x,y)\mbox{ или }p_{c_2}(x,y)\ne p_{c}(x,y)}\le 2\tau^2.  
+    \end{equation*}
+    Соответствующее слово $c$ принадлежит произведению кодов $C\otimes C$, так как степень $p_c$ по каждой переменной не превосходит $d$.
+    Следовательно, имеем
+    $$\delta(c_1,C\otimes C)\le \delta(c_1,c)=\PP_{(x,y)\in X\times Y}\fbr{p_{c_1}(x,y)\ne p_{c}(x,y)}\le 2\tau^2.$$
+    Беря инфинум по всем $\tau\in I$, получаем $\delta(c_1,C\otimes C)\le 2\delta(c_1,c_2)$. Аналогично $\delta(c_2,C\otimes C)\le 2\delta(c_1,c_2)$.
+\end{proof}
+
+\begin{corollary}\label{col:RS-robust}
+    $\rho_r(T_2^1, C\otimes C)\ge \frac{1}{72}$.
+\end{corollary}
+
+\begin{proof}
+    Рассмотрим слово $x\in \F_q^{n\times n}$. Пусть $c_1$ и $c_2$ --- ближайшие слова к $x$ из $C\otimes \F_q^n$ и $\F_q^n\otimes C$, соответственно. Пусть $\alpha:=\delta(x,c_1)+\delta(x,c_2)$. Нам нужно показать, что 
+    \begin{equation*}
+        \delta(x, C\otimes C)\le 36\rbr{\delta(x,C\otimes \F_q^n)+\delta(x,\F_q^n\otimes C)}.
+    \end{equation*}
+    По определению $c_1$ и $c_2$ мы имеем $\delta(x,c_1)=\delta(x,C\otimes \F_q^n)$, $\delta(x,c_2)=\delta(x,\F_q^n\otimes C)$. Поэтому требуется доказать, что
+    \begin{equation}\label{eqn:CxC-robust}
+        \delta(x,C\otimes C)\le 36 \alpha.
+    \end{equation}
+    Если $\alpha\ge \frac{1}{36}$, то \eqref{eqn:CxC-robust} выполняется. Теперь рассмотрим основной случай $\alpha<\frac{1}{36}$. Поскольку $C$ --- это $[n,k]$ код с $k=n/3$, то по неравенству треугольника мы имеем $\delta(c_1,c_2)\le\alpha<\frac{1}{36}=\rbr{\frac 12-\frac kn}^2$. 
+    Применяя лемму~\ref{th:RS-robust}, получаем
+    $$\delta(x,C\otimes C)\le \delta(x,c_1)+\delta(c_1,C\otimes C)\le \alpha+2\delta(c_1,c_2)\le 3\alpha.$$
+    Таким образом, в данном случае \eqref{eqn:CxC-robust} также выполняется, что завершает доказательство.
+\end{proof}
+\newcommand{\cCn}[1]{\cC^{\widehat{(#1)}}}
+\newcommand{\cCp}[1]{\cC^{(#1)}}
+\newcommand{\prodC}[1][\cC]{\otimes #1}
+
+\begin{lemma}[Робастность композиции тестов]\label{lemma:robust-combine}
+   Пусть $\cC\subseteq \F_q^n$ и $1\le k_1<k_2<m$. Тогда
+   \[\rho_r(T_m^{k_1},\cC^{\otimes m})\ge \rho_r(T_m^{k_2},\cC^{\otimes m})\rho_r(T_{k_2}^{k_1},\cC^{\otimes k_2}).\]
+\end{lemma}
+
+\begin{proof}
+Зафиксируем $x\in (\F_q^n)^{\otimes m}$. Для каждого $k\in[m-1]$ и $\pi\in T_m^{k}$ мы имеем $\cCpow{m}|_\pi\cong \cCpow{k}$. Следовательно,
+\[
+\EE_{\pi\in T_m^{k}}\delta(x|_{\pi}, \cCpow{m}|_\pi)=\EE_{\pi\in T_m^{k}}\delta(x|_{\pi}, \cCpow{k}).
+\]
+Таким образом, 
+\begin{multline*}
+\delta(x, \cCpow{m})\rho_r(T_m^{k_2},\cCpow{m})\rho_r(T_{k_2}^{k_1},\cCpow{k_2})
+\le \EE_{\pi\in T_m^{k_2}}\delta(x|_\pi,\cCpow{k_2})\rho_r(T_{k_2}^{k_1},\cCpow{k_2})\le \\
+\le \EE_{\pi\in T_m^{k_2}}\EE_{\pi'\in T_{k_2}^{k_1}(\pi)}\delta(x|_{\pi'},\cCpow{k_1}) = \EE_{\pi'\in T_m^{k_1}}\delta(x|_{\pi'},\cCpow{k_1}).
+\end{multline*}
+\end{proof}
+
+\begin{lemma}\label{lemma:robust-Tm1}
+    Пусть $\cC\subseteq \F_q^n$. Обозначим $M:=\frac12(m-2)(m+3)=\sum_{k=3}^m k$. Тогда для $k'\in [m-1]$ выполнено
+    \[
+      \rho_r(T_m^{k'},\cCpow{m})\ge \frac1{12^{m-2}}\cdot\rho_r(T_2^1,\cCpow{2})\cdot\delta(\cC)^{M}.
+    \]
+\end{lemma}
+
+\begin{proof}
+    Из \cite[Theorem 2.6]{Chiesa2020:hyperplane-robust} мы знаем нижнюю границу робастности теста $T^{k-1}_k$:
+    \begin{equation}\label{eqn:hp-robust}
+    \rho_r(T_k^{k-1}, \cCpow{k})\ge \frac{1}{12}\delta(\cC)^k.
+    \end{equation}
+    Если $k'\ge 2$, то, применяя $m-k'$ раз лемму~\ref{lemma:robust-combine} получим
+    \begin{align*}
+        \rho_r(T_m^{k'},\cCpow{m})&\ge \prod_{k=k'+1}^m\rho_r(T_k^{k-1},\cCpow{k})\ge \\
+        &\ge \frac{1}{12^{m-k'}}\cdot\delta(\cC)^{\sum_{k=k'+1}^m k}\ge \frac{1}{12^{m-2}}\cdot\delta(\cC)^{M}.    
+    \end{align*}
+    Для $T_m^1$, применяя предыдущее неравенство с $k'=2$ и лемму~\ref{lemma:robust-combine}, получаем:
+    \[
+    \rho_r(T_m^1,\cCpow{m})\ge \rho_r(T_2^1,\cCpow{2})\rho_r(T_m^{2},\cCpow{m})\ge \frac{1}{12^{m-2}}\cdot\rho_r(T_2^1,\cCpow{2})\cdot\delta(\cC)^{M}.\qedhere
+    \]
+\end{proof}
+
+Теперь мы готовы доказать основную теорему и утверждение~\ref{prop:main}.
+
+\MainTheorem*
+
+\begin{proof}%[Доказательство Теоремы~\ref{th:main}]
+    Пункт 1 теоремы следует из леммы~\ref{lemma:not-expanding} и \cite[Lemma 11]{PK2022robust}:
+    \[
+    \rho(\underbrace{C_t,\ldots,C_t}_{m\ge 3\ \mbox{\scriptsize\rm раз}})\le \rho(C_t,C_t,C_t)\le 1/n_t.
+    \]
+    Пункт 2 теоремы следует из леммы~\ref{lemma:robust-Tm1} и следствия~\ref{col:RS-robust}. Поскольку $C_t$ --- это $[n_t,\frac{n_t}{3},\frac23 n_t+1]$ код Рида-Соломона, мы имеем $\delta(C_t)=\frac23+\frac1{n_t}$. Обозначим $\alpha_r:=\frac{1}{72\cdot 12^{m-2}}\cdot \rbr{\frac23}^{\frac12(m-2)(m+3)}$. По лемме~\ref{lemma:robust-Tm1} и следствию~\ref{col:RS-robust} для всех $k\in [m-1]$ имеем
+    \begin{align*}
+        \rho_r(T_m^k,C_t^{\otimes m})
+        &\ge \rho_r(T_2^1, C_t^{\otimes 2})\cdot\frac{1}{12^{m-2}}\cdot\delta(C_t)^{\frac12(m-2)(m+3)} >\\
+        &>\frac{1}{72}\cdot\frac{1}{12^{m-2}}\cdot\rbr{\frac23}^{\frac12(m-2)(m+3)}=\alpha_r.
+    \end{align*}
+    Пункт 3 теоремы с $\alpha_a:=\frac23\frac{\alpha_r}{1+\alpha_r}$ следует из утверждения 2 и леммы~\ref{lemma:robust=agreement}.
+\end{proof}
+
+\MainProp*
+
+\begin{proof}%[Доказательство Утверждения~\ref{prop:main}]
+    Пусть $\rho:=\rho(\underbrace{\cC,\ldots,\cC}_{m\ \mbox{\scriptsize\rm раз}})$. Доказательство состоит из следующих шагов:
+    \begin{itemize}
+        \item Из \cite[Lemma 11]{PK2022robust} следует $\rho(\cC,\cC)\ge\rho$ и $\delta(\cC)=\rho(\cC)\ge\rho$.
+        \item Используя \cite[Lemma 1]{PK2022robust}, мы имеем $\rho_a(\cCpow{2})\ge\rho(\cC,\cC)\ge\rho$.
+        \item Из \cite[Lemma 2.9]{Dinur:stoc2022} следует 
+        \begin{equation*}
+        \rho_r(T_2^1, \cCpow{2})\ge \frac{\rho_a(\cCpow{2})}{2(1+\rho_a(\cCpow{2}))}\ge \frac{\rho}{2(\rho+1)}\ge\frac14\rho.    
+        \end{equation*}
+        \item Наконец, по лемме~\ref{lemma:robust-Tm1} имеем
+        \begin{align*}
+        \rho_r(T_m^1,\cCpow{m})&\ge\rbr{\frac1{12}}^{m-2}\rho_r(T_2^1,\cCpow{2})\cdot\delta(\cC)^{\frac12(m-2)(m+3)} \ge \\
+        &\ge \frac{1}{12^{m-2}}\cdot\frac{1}{4}\rho\cdot \rho^{\frac12(m-2)(m+3)}.    
+        \end{align*}
+    \end{itemize}
+    Таким образом, получаем требуемое неравенство с \[\alpha(\rho)=\frac{1}{4\cdot 12^{m-2}}\rho^{\frac12(m-2)(m+3)+1}.%\qedhere
+    \]
+\end{proof}
+
+\section{Связь между робастной тестируемостью и тестируемостью на согласованность}\label{app:robust-agreement}
+В этом разделе мы доказываем лемму~\ref{lemma:robust=agreement}, которая утверждает, что робастная тестируемость и тестируемость на согласованность произведений кодов эквивалентны с точностью до постоянного множителя для теста $T_m^1$ (тест по линиям, параллельным координатным осям).
+
+\LemRobustAgreement*
+
+\begin{proof}
+    \textbf{1. Тестируемость на согласованность влечёт робастную тестируемость.} Рассмотрим произвольное $x\in \F_q^{n_1\times \cdots\times n_m}$. Пусть $y_i:=\argmin_{y\in \cC^{(i)}}\|y-x\|$ для всех $i\in [m]$. Существует $z\in\otimes\cC$ такое, что 
+    \[
+    \rho_a\EE_{i\in[m]} \|y_i-z\|_i\le \EE_{i,j\in[m]}\|y_i-y_j\|.
+    \]
+    Обозначим $d_x:=\EE_{\ell\in T_m^1}\delta(x|_\ell, \otimes\cC|_{\ell})$. Мы имеем 
+    \[
+    d_x = \EE_{i\in[m]}\EE_{\ell\in\cL_i}\delta(x|_\ell, \cC_i)=\EE_{i\in[m]}\delta(x,\cC^{(i)})=\EE_{i\in[m]}\|x-y_i\|.
+    \]
+    Следовательно,
+    \begin{align*}
+    \|x-z\| &\le \EE_{i\in[m]}(\|x-y_i\|+\underbrace{\|y_i-z\|}_{\le\|y_i-z\|_i}) 
+    \le d_x+\frac1{\rho_a}\EE_{i,j\in[m]}\|y_i-y_j\| \\
+    &\le d_x+\frac1{\rho_a}\cdot 2\EE_{i\in [m]}\|x-y_i\|=d_x\rbr{1+\frac{2}{\rho_a}}\le \frac{4}{\rho_a}d_x.
+    \end{align*}
+    Таким образом, $\rho_r\ge \rho_a/4$.
+    
+    \textbf{2. Робастная тестируемость влечёт тестируемость на согласованность.} 
+    Рассмотрим произвольные слова $c_i\in \cC^{(i)}$ для $i\in [m]$.
+    Пусть 
+    $$i_0:=\argmin_{i\in[m]}\EE_{j\in [m]}\delta(c_i, c_j).$$
+    Тогда
+    \begin{equation}\label{eqn:cI0-J}
+    \EE_{j\in[m]}\|c_{i_0}- c_j\|\le \EE_{i,j\in[m]}\|c_i - c_j\|.
+    \end{equation}
+    Поскольку тест $T_m^1$ является $\rho_r$-робастным для $\otimes\cC$, то существует $c\in\otimes\cC$ такое, что 
+    \begin{multline}
+    \label{eqn:cI0-c}
+    \rho_r \|c_{i_0}-c\|\le \EE_{\ell\in T_{m}^1}\delta(c_{i_0}|_{\ell}, \cC|_{\ell})= \EE_{j\in [m]}\delta(c_{i_0}, \cC^{(j)})\le\\
+    \le\EE_{j\in[m]}\|c_{i_0} - c_j\|\le \EE_{i,j\in[m]}\|c_i- c_j\|.
+    \end{multline}
+    Пусть $\delta_*:=\min_{i\in[m]}\delta(\cC_i)$. Для $i\in[m]$, $x\in\cC^{(i)}$ имеем $\delta(\cC_i)\|x\|_i\le \|x\|$. Следовательно, применяя неравенство треугольника, затем \eqref{eqn:cI0-J} и \eqref{eqn:cI0-c}, получаем:
+    \begin{align*}
+    \delta_*\EE_{i\in[m]}\|c_i-c\|_i\le \EE_{i\in[m]}\|c_i-c\|
+    &\le \|c_{i_0}-c\|+\EE_{i\in[m]}\|c_i-c_{i_0}\|\le
+    \\
+    &\le \rbr{1+\frac1{\rho_r}}\EE_{i,j\in[m]}\|c_i-c_j\|.
+    \end{align*}
+    Следовательно, 
+    $\rho_a(\cC^{\otimes m})\ge\delta_*(1+\frac1{\rho_r})^{-1}$.
+\end{proof}
+
+\section*{Благодарности}
+
+Эта работа поддержана Министерством науки и высшего образования Российской Федерации (грант 075-15-2020-801).
+
+\begin{thebibliographyRU}{99}
+    \input{bibliography}
+\end{thebibliographyRU}
+
+\begin{thebibliographyEN}{99}
+    \input{bibliography}
+\end{thebibliographyEN}
+
+\end{document}

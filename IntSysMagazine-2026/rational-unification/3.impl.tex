@@ -1,0 +1,119 @@
+\section{Реализация алгоритма}
+
+Полноценная реализация алгоритма со всеми оптимизациями требует значительного количества кода, поэтому в этом разделе описаны только основные подходы. Для простоты примеры кода приводятся на языке программирования \OCaml.
+
+Предположим, что термы заданы следующим алгебраическим типом данных:
+\begin{minted}{OCaml}
+type term =
+| Var of int
+| Con of int * term array
+\end{minted}
+
+
+\subsection{Система уравнений}
+
+По аналогии с треугольными подстановками~\cite{baader2001unification}, наши системы уравнений естественным образом представляются в <<треугольном>> виде. Для этого мы используем тип частичных отображений из номеров переменных в термы \mintinline{OCaml}|term M.t|:
+\begin{minted}{OCaml}
+module M = Map.Make(Int)
+\end{minted}
+
+Во всех операциях над системами уравнений, мы используем номера представляющих переменных вместо $\E$. Таким образом, \walk реализуется следующим образом:
+\begin{minted}{OCaml}
+let rec walk s x = match M.find x s with
+| exception Not_found -> x, Var x
+| Var x -> walk s x
+| t -> x, t
+\end{minted}
+
+Простейшая реализация операции \union, соответственно:
+\begin{minted}{OCaml}
+let union s x y =
+  let x, xt = walk s x in
+  let y, yt = walk s y in
+  if x == y then s, None
+  else begin match xt, yt with
+  | Var _, Var _ -> M.add x yt s, None
+  | Var _, _ -> M.add x (Var y) s, None
+  | _, Var _ -> M.add y (Var x) s, None
+  | _, _ -> M.add x (Var y) s, Some (xt, yt)
+  end
+\end{minted}
+
+На практике, при реализации \union стоит применять эвристику <<возраста переменных>>~\cite{mannila1986complexity}: по возможности связывать <<более свежие>> переменных (обладающие б\'{о}льшими номерами) с <<менее свежими>>. Обоснование данной эвристики описано в процитированной статье, но на практике она позволяет уменьшить глубину рекурсии \walk подобно тому, как это делает ранговая эвристика в структуре данных СНМ (система непересекающихся множеств~\cite{galler1964improved}). Примеры реализации с использованием этой оптимизации приведены в репозитории с анализом производительности алгоритма.
+
+
+\subsection{Общая часть термов}
+
+Простейшая реализация \commonpart повторяет определение:
+\begin{minted}{OCaml}
+let rec common_part x y = match x, y with
+| Var x, _ -> Var x
+| _, Var y -> Var y
+| Con (f, ts1), Con (g, ts2)
+when f == g && Array.length ts1 == Array.length ts2 ->
+  Con (f, Array.map2 common_part ts1 ts2)
+| _ -> raise No_common_part
+\end{minted}
+
+На практике, полезно, чтобы реализация \commonpart возвращала непосредственно один из своих аргументов всегда, когда это возможно. Это позволяет снизить затраты памяти и увеличить шанс срабатывания быстрой проверки по равенству ссылок (<<physical equality>>) при выполнении унификации.
+
+Для этого можно рассмотреть следующую решётку из четырёх элементов (<<сторона>>, \textsf{Side}): $\top$, $\Leftarrow$, $\Rightarrow$ и $\bot$.
+\begin{center}
+    \begin{tikzpicture}
+        \node (both) at (0, 1) {$\top$};
+        \node (left) at (-1, 0) {$\Leftarrow$};
+        \node (right) at (1, 0) {$\Rightarrow$};
+        \node (aside) at (0, -1) {$\bot$};
+        \draw[dotted] (left) -- (both) node[midway,sloped] {$<$};
+        \draw[dotted] (right) -- (both) node[midway,sloped] {$>$};
+        \draw[dotted] (aside) -- (left) node[midway,sloped] {$>$};
+        \draw[dotted] (aside) -- (right) node[midway,sloped] {$<$};
+        \node[anchor=south] at (both.north) {<<обе>>};
+        \node[anchor=east] at (left.west) {<<слева>>};
+        \node[anchor=west] at (right.east) {<<справа>>};
+        \node[anchor=north] at (aside.south) {<<ни одна>>};
+    \end{tikzpicture}
+\end{center}
+
+Тогда можно реализовать обобщённую функцию $\commonpart' : T \times T \rightarrow (T \times \textsf{Side})^?$, которая вторым возвращаемым параметром в случае успеха дополнительно сообщает, какие из аргументов подходят на роль результата. Нерекурсивные вызовы в реализации очевидны, а при рекурсивных вызовах требуется накапливать инфинум <<сторон>>:
+\begin{itemize}
+    \item Если накопленный инфинум -- $\bot$, функция вынуждена вернуть сконструированный терм, потому что никакой из аргументов не подходит на роль результата.
+    \item Иначе -- отбросить сконструированный терм и вернуть тот аргумент, на который указывает накопленный инфинум.
+\end{itemize}
+
+Конкретные примеры реализации расположены в репозитории с анализом производительности.
+
+
+\subsection{Алгоритм}
+
+Наконец, реализация \unify почти полностью повторяет псевдокод:
+\begin{minted}{OCaml}
+let rec unify_vt s x yt =
+  let x, xt = walk s x in
+  begin match xt with
+  | Var _ -> M.add x yt s
+  | _ ->
+    let t = common_part xt yt in
+    unify (M.add x t s) xt yt
+  end
+
+and unify s xt yt =
+  if xt == yt then s
+  else match xt, yt with
+  | Var x, Var y ->
+    begin match union s x y with
+    | s, Some (xt, yt) -> unify s xt yt
+    | s, None -> s
+    end
+  | Var x, _ -> unify_vt s x yt
+  | _, Var y -> unify_vt s y xt
+  | Con (f, ts1), Con (g, ts2)
+  when f == g && Array.length ts1 == Array.length ts2 ->
+    let n = Array.length ts1 in
+    let rec hlp i s =
+      if i == n then s
+      else hlp (i + 1) @@ unify s ts1.(i) ts2.(i)
+    in
+    hlp 0 s
+  | _ -> raise No_common_part
+\end{minted}

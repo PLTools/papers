@@ -1,0 +1,57 @@
+\documentclass[russian]{intsys}
+
+\usepackage{amsmath,stmaryrd,array,subcaption,xspace,algpseudocodex,minted,longtable,multirow,pifont,pgfplots,booktabs,makecell,thmtools,cite}
+
+\usepackage{proof}
+\usepackage[nottoc]{tocbibind}
+
+\pgfplotsset{compat = 1.9}
+
+\input{macro}
+
+\Author%
+  {Доморацкий Эридан Алексеевич}%
+  {аспирант каф. системного программирования мат.-мех. ф-та СПбГУ}%
+  {Domoratskiy Eridan Alekseevich}%
+  {PhD student, Software Engineering Chair, Faculty of Mathematics and Mechanics, Saint-Petersburg State University}%
+  {eridan200@mail.ru}%
+  {0009-0005-9020-3403}
+
+\Author%
+  {Булычев Дмитрий Юрьевич}%
+  {к.ф.-м.н., доцент каф. системного программирования мат.-мех. ф-та СПбГУ}%
+  {Boulytchev Dmitry Yurievich}%
+  {Candidate of Physical and Mathematical Sciences, Associate Professor, Software Engineering Chair, Faculty of Mathematics and Mechanics, Saint-Petersburg State University}%
+  {dboulytchev@math.spbu.ru}%
+  {0000-0001-8363-7143}
+
+\TitleRU{Эффективный персистентный алгоритм для унификации рациональных термов}
+\ShortTitle{Эффективная рациональная унификация}
+\AbstractRU{%
+  В работе исследуется производительность алгоритмов для решения задачи синтаксической унификации возможно-бесконечных термов первого порядка с конечным числом различных подтермов (рациональных термов). Показано, что наиболее распространённый на практике алгоритм Юэ для решения данной задачи не оптимален в персистентной реализации. Описан алгоритм, который показывает более высокую производительность не только в персистентной реализации, но и в эфемерной реализации при некоторых экстремальных входных параметрах.
+}
+\KeywordsRU{персистентные алгоритмы, рациональные деревья, унификация, логическое программирование}
+
+\TitleEN{An Efficient Persistent Algorithm for Rational Unification}
+\AbstractEN{%
+  The paper studies the performance of algorithms for syntactic unification in rational terms. We show that the well-known Huet's algorithm is inappropriate in persistent settings. We describe the algorithm which performs better in a persistent implementation. Moreover, even in an ephemeral one it performs better on some extremal inputs.
+}
+\KeywordsEN{persistent algorithms, rational tree, unification, relational programming}
+
+
+\begin{document}
+
+\input{1.intro}
+\input{2.rational}
+\input{3.impl}
+\input{4.eval}
+
+\begin{thebibliographyRU}{99}
+    \input{bibliography}
+\end{thebibliographyRU}
+
+\begin{thebibliographyEN}{99}
+    \input{bibliography}
+\end{thebibliographyEN}
+
+\end{document}

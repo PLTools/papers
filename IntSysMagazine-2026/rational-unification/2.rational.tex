@@ -6,21 +6,21 @@
 
 Несмотря на то, что понятие системы уравнений обладает общепринятым определением, в данной работе мы так называем объект, получаемый в результате работы нашего алгоритма.
 
-Для некоторого множества $A$ введём обозначение $A^? = \{ \bot \} \cup A$, которое мы называем <<опциональный $A$>>.
+Для некоторого множества $A$ введём обозначение $A^? = \{ \bot \} \cup A$, которое мы называем <<опциональное $A$>>.
 
 \begin{definition}[Уравнение]
     Назовём \textit{уравнением} $e \in \E$ упорядоченную пару из:
     \begin{enumerate}
-        \item множества переменных <<левая сторона>> с отмеченной точкой <<представляющая переменная>>;
-        \item опционального (конечного) терма <<правая сторона>>, не являющегося переменной.
+        \item множества переменных <<левая часть>> с отмеченной точкой <<представляющая переменная>>;
+        \item опционального (конечного) терма <<правая часть>>, не являющегося переменной.
     \end{enumerate}
 
-    Для удобства мы вводим проекции $\lhs : \E \rightarrow 2^\V$, $\repr : \E \rightarrow \V$ и $\rhs : \E \rightarrow T^?$ для левой стороны, представляющей переменной и правой стороны уравнения соответственно. Также, мы используем нотацию $\underline{x}, y, z \equiv t$ для обозначения уравнения, в котором $\lhs(\underline{x}, y, z \equiv t) = \{ x, y, z \}$, $\repr(\underline{x}, y, z \equiv t) = x$ и $\rhs(\underline{x}, y, z \equiv t) = t$.
+    Для удобства мы вводим проекции $\lhs : \E \rightarrow 2^\V$, $\repr : \E \rightarrow \V$ и $\rhs : \E \rightarrow T^?$ для левой части, представляющей переменной и правой части уравнения соответственно. Мы также используем нотацию $\underline{x}, y, z \equiv t$ для обозначения уравнения, в котором $\lhs\,(\underline{x}, y, z \equiv t) = \{ x, y, z \}$, $\repr\,(\underline{x}, y, z \equiv t) = x$ и $\rhs\,(\underline{x}, y, z \equiv t) = t$.
 \end{definition}
 
 \begin{definition}[Система уравнений]
-    Назовём \textit{системой уравнений} $\xi \in \Xi$ конечное множество уравнений с попарно непересекающимися левыми сторонами. Для удобства мы будем обозначать пополнение системы уравнений новым уравнением $e$ как $\xi, e$:
-    \[\{ e \} \cup \{ e' \in \xi \mid \lhs(e) \cap \lhs(e') = \emptyset \}.\]
+    Назовём \textit{системой уравнений} $\xi \in \Xi$ конечное множество уравнений с попарно непересекающимися левыми частями. Для удобства мы будем обозначать пополнение системы уравнений новым уравнением $e$ как $\xi, e$:
+    \[\{ e \} \cup \{ e' \in \xi \mid \lhs\,(e) \cap \lhs\,(e') = \emptyset \}.\]
 \end{definition}
 
 Данное определение уравнения стоит рассматривать как частный случай системы уравнений в общепринятом смысле. Например:
@@ -35,14 +35,14 @@
     \end{array}
 \end{equation*}
 
-В этом смысле тривиальные уравнения вида $\underline{x} \equiv \bot$ <<ничего не уравнивают>>, поэтому мы дополнительно считаем, что никакая система уравнений $\xi \in \Xi$ не может содержать таких уравнений:
+В этом смысле тривиальные уравнения вида $\underline{x} \equiv \bot$ ничего не уравнивают, поэтому мы дополнительно считаем, что никакая система уравнений $\xi \in \Xi$ не может содержать таких уравнений:
 \[\forall x \in \V, \xi \in \Xi. ~ \underline{x} \equiv \bot \notin \xi.\]
 
 Мы определяем две операции на системах уравнений. Основная операция $\walk : \Xi \times \V \rightarrow \E \times T$ по данной системе уравнений и переменной находит соответствующее уравнение:
 \begin{equation*}
-    \walk(\xi, x) = \begin{cases}
-        (e, \rhs(e)) & \text{если $e \in \xi, x \in \lhs(e)$ и $\rhs(e) \neq \bot$}, \\
-        (e, \repr(e)) & \text{если $e \in \xi, x \in \lhs(e)$ и $\rhs(e) = \bot$}, \\
+    \walk (\xi, x) = \begin{cases}
+        (e, \rhs\,(e)) & \text{если $e \in \xi, x \in \lhs\,(e)$ и $\rhs\,(e) \neq \bot$}, \\
+        (e, \repr\,(e)) & \text{если $e \in \xi, x \in \lhs\,(e)$ и $\rhs\,(e) = \bot$}, \\
         (\underline{x} \equiv \bot, x) & \text{иначе}. \\
     \end{cases}
 \end{equation*}
@@ -51,7 +51,7 @@
 \begin{algorithmic}
     \Function{ApplyEqSys}{$\xi \in \Xi$, $t \in T^\infty$}
         \If{$x \gets t \in \V$}
-            \State $(\_, t) \gets \walk(\xi, x)$
+            \State $(\_, t) \gets \walk (\xi, x)$
         \EndIf
         \If{$x' \gets t \in \V$}
             \State \Return $x'$
@@ -67,33 +67,33 @@
     Для любых $\xi \in \Xi$ и $t \in T^R$ верно, что $t \llbracket \xi \rrbracket \in T^R$.
 \end{theorem}
 \begin{proof}
-    Достаточно заметить, что уравнений в системе конечное число и их правые стороны также конечны. Более подробно см. \texttt{wf\_eqsys\_to\_subst\_rational} и \texttt{inf\_subst\_apply\_rational} в реализации на \Rocq.
+    Достаточно заметить, что уравнений в системе конечное число и их правые части также конечны. Более подробно см. \texttt{wf\_eqsys\_to\_subst\_rational} и \texttt{inf\_subst\_apply\_rational} в реализации на \Rocq.
 \end{proof}
 
 Вторая вводимая операция $\union : \Xi \times \V \times \V \rightarrow \Xi \times (T \times T)^?$ преобразует данную систему уравнений так, чтобы данные переменные лежали в одном уравнении:
 \begin{algorithmic}[1]
     \Function{UnionEqSys}{$\xi \in \Xi$, $x, y \in \V$}
-        \State $(e_x, \_) \gets \walk(\xi, x)$
-        \State $(e_y, \_) \gets \walk(\xi, y)$
-        \If{$\repr(e_x) = \repr(e_y)$}
+        \State $(e_x, \_) \gets \walk (\xi, x)$
+        \State $(e_y, \_) \gets \walk (\xi, y)$
+        \If{$\repr\,(e_x) = \repr\,(e_y)$}
             \State \Return $(\xi, \bot)$
             \Comment{уже лежат в одном уравнении или равны}
         \EndIf
-        \If{$\rhs(e_x) = \bot$ \textbf{and} $\rhs(e_y) = \bot$}
-            \State \Return $([\xi, \lhs(e_x) \cup \lhs(e_y) \equiv \bot], \bot)$
+        \If{$\rhs\,(e_x) = \bot$ \textbf{and} $\rhs\,(e_y) = \bot$}
+            \State \Return $([\xi, \lhs\,(e_x) \cup \lhs\,(e_y) \equiv \bot], \bot)$
         \EndIf
-        \If{$\rhs(e_x) = \bot$}
-            \State \Return $([\xi, \lhs(e_x) \cup \lhs(e_y) \equiv \rhs(e_y)], \bot)$
+        \If{$\rhs\,(e_x) = \bot$}
+            \State \Return $([\xi, \lhs\,(e_x) \cup \lhs\,(e_y) \equiv \rhs\,(e_y)], \bot)$
         \EndIf
-        \If{$\rhs(e_y) = \bot$}
-            \State \Return $([\xi, \lhs(e_x) \cup \lhs(e_y) \equiv \rhs(e_x)], \bot)$
+        \If{$\rhs\,(e_y) = \bot$}
+            \State \Return $([\xi, \lhs\,(e_x) \cup \lhs\,(e_y) \equiv \rhs\,(e_x)], \bot)$
         \EndIf
-        \State \Return $([\xi, \lhs(e_x) \cup \lhs(e_y) \equiv \rhs(e_x)],(\rhs(e_x), \rhs(e_y)))$ \\
-        \Comment{конфликт правых сторон уравнений}
+        \State \Return $([\xi, \lhs\,(e_x) \cup \lhs\,(e_y) \equiv \rhs\,(e_x)],(\rhs\,(e_x), \rhs\,(e_y)))$ \\
+        \Comment{конфликт правых частей уравнений}
     \EndFunction
 \end{algorithmic}
 
-В приведённом псевдокоде, когда добавляется новое уравнение на строках 6-12, мы можем выбрать в качестве представляющей переменной как $\repr(e_x)$, так и $\repr(e_y)$ -- это не влияет на теоретические свойства алгоритма. То же верно и про выбор правой стороны добавляемого уравнения на строке 12: это может быть как $\rhs(e_x)$, так и $\rhs(e_y)$. Как показывает псевдокод, второе возвращаемое значение сигнализирует о конфликте правых сторон. Квадратные скобки используются для группировки и не несут специального смысла.
+В приведённом псевдокоде, когда добавляется новое уравнение на строках 6-12, мы можем выбрать в качестве представляющей переменной как $\repr\,(e_x)$, так и $\repr\,(e_y)$~--- это не влияет на теоретические свойства алгоритма. То же верно и про выбор правой части добавляемого уравнения на строке 12: это может быть как $\rhs\,(e_x)$, так и $\rhs\,(e_y)$. Как показывает псевдокод, второе возвращаемое значение сигнализирует о конфликте правых частей. Квадратные скобки используются для группировки и не несут специального смысла.
 
 
 \subsection{Общая часть термов}
@@ -107,7 +107,7 @@
     \end{split}
 \end{equation*}
 
-Мы задаём поведение этой функции в стиле индуктивного предиката. Такое определение удобно, потому что оставляет некоторую свободу в выборе результата, когда функция применяется к двум переменным -- можно выбрать любую из них. В случаях, когда никакое из правил не подходит, полагается значение $\bot$.
+Мы задаём поведение этой функции в стиле индуктивного предиката. Такое определение удобно, потому что оставляет некоторую свободу в выборе результата, когда функция применяется к двум переменным~--- можно выбрать любую из них. В случаях, когда никакое из правил не подходит, полагается значение $\bot$.
 
 
 \subsection{Алгоритм}
@@ -124,17 +124,17 @@
             \State \Return $\xi$
         \EndIf
         \If{$x \gets t_1 \in \V$}
-            \State $(e, \_) \gets \walk(\xi, x)$
-            \If{$\rhs(e) = \bot$}
-                \State \Return $\xi, \lhs(e) \equiv t_2$
+            \State $(e, \_) \gets \walk (\xi, x)$
+            \If{$\rhs\,(e) = \bot$}
+                \State \Return $\xi, \lhs\,(e) \equiv t_2$
             \EndIf
-            \State $t \gets \commonpart(\rhs(e), t_2)$
+            \State $t \gets \commonpart(\rhs\,(e), t_2)$
             \If{$t = \bot$}
                 \State {\bf failure}
             \EndIf
-            \State $\xi \gets \xi, \lhs(e) \equiv t$
-            \Comment{упрощение правой стороны уравнения}
-            \State \Return \Call{RationalUnify}{$\xi, \rhs(e), t_2$}
+            \State $\xi \gets \xi, \lhs\,(e) \equiv t$
+            \Comment{упрощение правой части уравнения}
+            \State \Return \Call{RationalUnify}{$\xi, \rhs\,(e), t_2$}
         \EndIf
         \If{$y \gets t_2 \in \V$}
             \State \Return \Call{RationalUnify}{$\xi, y, t_1$}
